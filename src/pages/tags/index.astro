@@ -1,0 +1,43 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getAllTags } from '../../lib/content';
+
+const tags = await getAllTags();
+const sortedTags = Array.from(tags.entries());
+const maxCount = Math.max(...sortedTags.map(([, count]) => count));
+---
+
+<BaseLayout title="Tags" description="Browse all tags">
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold flex items-center gap-2 mb-2">
+      <span class="text-terminal-accent-green">></span>
+      <span>Tags</span>
+    </h1>
+    <p class="text-terminal-muted text-sm">
+      <span class="text-terminal-accent-green">$</span> ls ~/tags/
+    </p>
+  </div>
+
+  <div class="flex flex-wrap gap-3">
+    {sortedTags.map(([tag, count]) => {
+      // Scale font size based on count (0.875rem to 1.5rem)
+      const scale = count / maxCount;
+      const fontSize = 0.875 + scale * 0.625;
+      return (
+        <a
+          href={`/tags/${tag}/`}
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-terminal-surface border border-terminal-border rounded-full hover:border-terminal-accent-cyan hover:text-terminal-accent-cyan transition-colors"
+          style={`font-size: ${fontSize}rem`}
+        >
+          <span class="text-terminal-accent-cyan">#</span>
+          <span>{tag}</span>
+          <span class="text-terminal-muted text-xs">({count})</span>
+        </a>
+      );
+    })}
+  </div>
+
+  {sortedTags.length === 0 && (
+    <p class="text-terminal-muted text-center py-8">No tags found.</p>
+  )}
+</BaseLayout>

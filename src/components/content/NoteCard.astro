@@ -1,0 +1,45 @@
+---
+import { render } from 'astro:content';
+import type { NoteItem } from '../../lib/types';
+import { getItemUrl } from '../../lib/content';
+import TagList from './TagList.astro';
+
+interface Props {
+  note: NoteItem;
+}
+
+const { note } = Astro.props;
+const url = getItemUrl({ type: 'note', item: note });
+const { Content } = await render(note);
+---
+
+<article class="group">
+  <div class="flex items-start gap-2">
+    <span class="text-terminal-muted shrink-0 mt-0.5">○</span>
+    <div class="flex-1 min-w-0">
+      {note.data.title && (
+        <h3 class="text-base font-medium text-terminal-text mb-1">
+          <a href={url} class="hover:text-terminal-accent-cyan transition-colors">
+            {note.data.title}
+          </a>
+        </h3>
+      )}
+      <div class="text-terminal-text text-sm prose prose-sm max-w-none">
+        <Content />
+      </div>
+      <div class="mt-2 flex items-center gap-3 text-xs text-terminal-muted">
+        <a href={url} class="hover:text-terminal-accent-cyan transition-colors">
+          <time datetime={note.data.created.toISOString()}>
+            {note.data.created.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+          </time>
+        </a>
+        {note.data.tags.length > 0 && (
+          <>
+            <span class="text-terminal-border">•</span>
+            <TagList tags={note.data.tags} />
+          </>
+        )}
+      </div>
+    </div>
+  </div>
+</article>

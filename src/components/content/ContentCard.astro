@@ -1,0 +1,18 @@
+---
+import type { ContentItem } from '../../lib/types';
+import EntryCard from './EntryCard.astro';
+import BlogmarkCard from './BlogmarkCard.astro';
+import QuotationCard from './QuotationCard.astro';
+import NoteCard from './NoteCard.astro';
+
+interface Props {
+  item: ContentItem;
+}
+
+const { item } = Astro.props;
+---
+
+{item.type === 'entry' && <EntryCard entry={item.item} />}
+{item.type === 'blogmark' && <BlogmarkCard blogmark={item.item} />}
+{item.type === 'quotation' && <QuotationCard quotation={item.item} />}
+{item.type === 'note' && <NoteCard note={item.item} />}

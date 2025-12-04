@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import DayGroup from '../components/content/DayGroup.astro';
+import { getAllContent, groupByDay } from '../lib/content';
+
+const allContent = await getAllContent();
+const recent = allContent.slice(0, 30);
+const dayGroups = groupByDay(recent);
+---
+
+<BaseLayout title="Home" description="A personal microblog with notes, links, quotes, and articles.">
+  <div class="mb-8">
+    <h1 class="sr-only">Recent Posts</h1>
+    <p class="text-terminal-muted text-sm mb-6">
+      <span class="text-terminal-accent-green">$</span> cat ~/recent.log | head -30
+    </p>
+  </div>
+
+  {dayGroups.map((group) => (
+    <DayGroup group={group} />
+  ))}
+
+  {allContent.length > 30 && (
+    <div class="mt-8 text-center">
+      <a
+        href={`/${new Date().getFullYear()}/`}
+        class="inline-flex items-center gap-2 text-terminal-muted hover:text-terminal-accent-cyan transition-colors"
+      >
+        <span>View archives</span>
+        <span>→</span>
+      </a>
+    </div>
+  )}
+</BaseLayout>

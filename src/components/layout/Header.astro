@@ -1,0 +1,37 @@
+---
+const navLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/tags/', label: 'Tags' },
+  { href: '/search/', label: 'Search' },
+  { href: '/about/', label: 'About' },
+];
+---
+
+<header class="border-b border-terminal-border bg-terminal-surface">
+  <div class="max-w-4xl mx-auto px-4 py-4">
+    <div class="flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2 text-terminal-text hover:text-terminal-accent-green transition-colors">
+        <span class="text-terminal-accent-green">></span>
+        <span class="font-bold text-xl">microblog</span>
+      </a>
+
+      <nav class="flex items-center gap-6">
+        {navLinks.map((link) => (
+          <a
+            href={link.href}
+            class="text-terminal-muted hover:text-terminal-accent-cyan transition-colors text-sm"
+          >
+            {link.label}
+          </a>
+        ))}
+        <a
+          href="/atom/everything.xml"
+          class="text-terminal-muted hover:text-terminal-accent-cyan transition-colors text-sm"
+          title="RSS Feed"
+        >
+          RSS
+        </a>
+      </nav>
+    </div>
+  </div>
+</header>

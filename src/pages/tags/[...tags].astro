@@ -1,0 +1,94 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import DayGroup from '../../components/content/DayGroup.astro';
+import { getAllTags, getContentByTags, groupByDay } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const tags = await getAllTags();
+  const tagNames = Array.from(tags.keys());
+
+  // Generate paths for single tags
+  const singleTagPaths = tagNames.map((tag) => ({
+    params: { tags: tag },
+  }));
+
+  // Generate paths for common two-tag combinations
+  // (we could expand this, but for now keep it simple)
+  const multiTagPaths: { params: { tags: string } }[] = [];
+  for (let i = 0; i < tagNames.length; i++) {
+    for (let j = i + 1; j < tagNames.length; j++) {
+      multiTagPaths.push({
+        params: { tags: `${tagNames[i]}+${tagNames[j]}` },
+      });
+    }
+  }
+
+  return [...singleTagPaths, ...multiTagPaths];
+}
+
+const { tags: tagParam } = Astro.params;
+const tags = tagParam.split('+');
+const content = await getContentByTags(tags);
+const dayGroups = groupByDay(content);
+const allTags = await getAllTags();
+
+const isMultiTag = tags.length > 1;
+const title = isMultiTag ? `${tags.join(' + ')}` : `#${tags[0]}`;
+---
+
+<BaseLayout title={title} description={`Posts tagged with ${tags.join(' and ')}`}>
+  <div class="mb-8">
+    <div class="text-sm text-terminal-muted mb-2">
+      <a href="/tags/" class="hover:text-terminal-accent-cyan">tags</a>
+      <span class="mx-2">/</span>
+      {tags.map((tag, i) => (
+        <>
+          {i > 0 && <span class="mx-1">+</span>}
+          <a href={`/tags/${tag}/`} class="text-terminal-accent-cyan hover:text-terminal-accent-green">
+            #{tag}
+          </a>
+        </>
+      ))}
+    </div>
+    <h1 class="text-2xl font-bold flex items-center gap-2">
+      <span class="text-terminal-accent-green">></span>
+      <span>{title}</span>
+    </h1>
+    <p class="text-terminal-muted text-sm mt-2">
+      {content.length} post{content.length !== 1 ? 's' : ''}
+    </p>
+  </div>
+
+  {dayGroups.map((group) => (
+    <DayGroup group={group} />
+  ))}
+
+  {content.length === 0 && (
+    <p class="text-terminal-muted text-center py-8">No posts found with these tags.</p>
+  )}
+
+  {!isMultiTag && (
+    <aside class="mt-12 pt-8 border-t border-terminal-border">
+      <h2 class="text-sm text-terminal-muted mb-4">Combine with another tag:</h2>
+      <div class="flex flex-wrap gap-2">
+        {Array.from(allTags.keys())
+          .filter((t) => t !== tags[0])
+          .slice(0, 15)
+          .map((tag) => (
+            <a
+              href={`/tags/${tags[0]}+${tag}/`}
+              class="text-sm text-terminal-muted hover:text-terminal-accent-cyan transition-colors"
+            >
+              +{tag}
+            </a>
+          ))}
+      </div>
+    </aside>
+  )}
+
+  <nav class="mt-8 pt-8 border-t border-terminal-border">
+    <a href="/tags/" class="text-terminal-muted hover:text-terminal-accent-cyan">
+      ← All tags
+    </a>
+  </nav>
+</BaseLayout>

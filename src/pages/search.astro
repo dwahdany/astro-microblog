@@ -1,0 +1,85 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Search" description="Search all posts">
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold flex items-center gap-2 mb-2">
+      <span class="text-terminal-accent-green">></span>
+      <span>Search</span>
+    </h1>
+    <p class="text-terminal-muted text-sm">
+      <span class="text-terminal-accent-green">$</span> grep -r "query" ~/posts/
+    </p>
+  </div>
+
+  <div id="search" class="pagefind-search"></div>
+</BaseLayout>
+
+<style is:global>
+  .pagefind-ui {
+    --pagefind-ui-scale: 1;
+    --pagefind-ui-primary: #06b6d4;
+    --pagefind-ui-text: #e2e8f0;
+    --pagefind-ui-background: #1e293b;
+    --pagefind-ui-border: #334155;
+    --pagefind-ui-tag: #0f172a;
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: 8px;
+    --pagefind-ui-font: 'Roboto Mono', ui-monospace, monospace;
+  }
+
+  .pagefind-ui__search-input {
+    background: var(--pagefind-ui-background) !important;
+    border-color: var(--pagefind-ui-border) !important;
+    color: var(--pagefind-ui-text) !important;
+  }
+
+  .pagefind-ui__search-input:focus {
+    border-color: var(--pagefind-ui-primary) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2) !important;
+  }
+
+  .pagefind-ui__result {
+    background: var(--pagefind-ui-background) !important;
+    border-color: var(--pagefind-ui-border) !important;
+    padding: 1rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .pagefind-ui__result:hover {
+    border-color: var(--pagefind-ui-primary) !important;
+  }
+
+  .pagefind-ui__result-link {
+    color: var(--pagefind-ui-primary) !important;
+  }
+
+  .pagefind-ui__result-excerpt {
+    color: var(--pagefind-ui-text) !important;
+    opacity: 0.8;
+  }
+
+  .pagefind-ui__message {
+    color: var(--pagefind-ui-text) !important;
+    opacity: 0.6;
+  }
+
+  .pagefind-ui mark {
+    background: rgba(34, 197, 94, 0.3) !important;
+    color: inherit !important;
+  }
+</style>
+
+<script>
+  import { PagefindUI } from '@pagefind/default-ui';
+
+  window.addEventListener('DOMContentLoaded', () => {
+    new PagefindUI({
+      element: '#search',
+      showSubResults: true,
+      showImages: false,
+    });
+  });
+</script>

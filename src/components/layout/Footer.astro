@@ -1,0 +1,30 @@
+---
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="border-t border-terminal-border bg-terminal-surface mt-auto">
+  <div class="max-w-4xl mx-auto px-4 py-6">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-terminal-muted">
+      <div class="flex items-center gap-2">
+        <span class="text-terminal-accent-green">$</span>
+        <span>© {currentYear} • Built with Astro</span>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <a href="/atom/everything.xml" class="hover:text-terminal-accent-cyan transition-colors">
+          RSS
+        </a>
+        <span class="text-terminal-border">|</span>
+        <a href="/atom/entries.xml" class="hover:text-terminal-accent-cyan transition-colors">
+          Entries
+        </a>
+        <a href="/atom/blogmarks.xml" class="hover:text-terminal-accent-cyan transition-colors">
+          Links
+        </a>
+        <a href="/atom/notes.xml" class="hover:text-terminal-accent-cyan transition-colors">
+          Notes
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>

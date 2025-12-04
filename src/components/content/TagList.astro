@@ -1,0 +1,23 @@
+---
+interface Props {
+  tags: string[];
+  size?: 'sm' | 'base';
+}
+
+const { tags, size = 'sm' } = Astro.props;
+const textSize = size === 'sm' ? 'text-xs' : 'text-sm';
+---
+
+<div class="flex flex-wrap gap-1.5">
+  {tags.map((tag) => (
+    <a
+      href={`/tags/${tag}/`}
+      class:list={[
+        textSize,
+        'text-terminal-accent-cyan hover:text-terminal-accent-green transition-colors',
+      ]}
+    >
+      #{tag}
+    </a>
+  ))}
+</div>

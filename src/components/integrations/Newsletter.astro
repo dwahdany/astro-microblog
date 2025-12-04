@@ -1,0 +1,44 @@
+---
+interface Props {
+  /** Buttondown username or newsletter ID */
+  newsletter?: string;
+}
+
+const { newsletter = 'your-newsletter' } = Astro.props;
+const actionUrl = `https://buttondown.com/api/emails/embed-subscribe/${newsletter}`;
+---
+
+<section class="newsletter mt-8 p-6 bg-terminal-surface border border-terminal-border rounded-lg">
+  <h2 class="text-lg font-semibold text-terminal-text mb-2 flex items-center gap-2">
+    <span class="text-terminal-accent-green">></span>
+    <span>Newsletter</span>
+  </h2>
+  <p class="text-terminal-muted text-sm mb-4">
+    Get new posts delivered to your inbox. No spam, unsubscribe anytime.
+  </p>
+
+  <form
+    action={actionUrl}
+    method="post"
+    target="popupwindow"
+    class="flex flex-col sm:flex-row gap-3"
+  >
+    <input
+      type="email"
+      name="email"
+      placeholder="you@example.com"
+      required
+      class="flex-1 px-4 py-2 bg-terminal-bg border border-terminal-border rounded-lg text-terminal-text placeholder-terminal-muted focus:border-terminal-accent-cyan focus:outline-none focus:ring-1 focus:ring-terminal-accent-cyan/50"
+    />
+    <button
+      type="submit"
+      class="px-6 py-2 bg-terminal-accent-green text-terminal-bg font-medium rounded-lg hover:bg-terminal-accent-green/90 transition-colors"
+    >
+      Subscribe
+    </button>
+  </form>
+
+  <p class="text-xs text-terminal-muted mt-3">
+    Powered by <a href="https://buttondown.com" class="text-terminal-accent-cyan hover:text-terminal-accent-green" target="_blank" rel="noopener noreferrer">Buttondown</a>
+  </p>
+</section>

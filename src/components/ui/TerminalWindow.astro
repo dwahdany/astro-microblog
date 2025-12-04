@@ -1,0 +1,22 @@
+---
+interface Props {
+  title?: string;
+  class?: string;
+}
+
+const { title = '', class: className = '' } = Astro.props;
+---
+
+<div class:list={['terminal-window', className]}>
+  <div class="terminal-titlebar">
+    <div class="flex gap-1.5">
+      <div class="terminal-dot terminal-dot-red"></div>
+      <div class="terminal-dot terminal-dot-yellow"></div>
+      <div class="terminal-dot terminal-dot-green"></div>
+    </div>
+    {title && <span class="text-xs text-terminal-muted ml-4">{title}</span>}
+  </div>
+  <div class="p-4">
+    <slot />
+  </div>
+</div>

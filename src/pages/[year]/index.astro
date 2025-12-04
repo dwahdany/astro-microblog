@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getYearsWithContent, getMonthsWithContent } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const years = await getYearsWithContent();
+  return years.map((year) => ({ params: { year: String(year) } }));
+}
+
+const { year } = Astro.params;
+const yearNum = parseInt(year);
+const months = await getMonthsWithContent(yearNum);
+const years = await getYearsWithContent();
+---
+
+<BaseLayout title={`Archive: ${year}`} description={`Posts from ${year}`}>
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold flex items-center gap-2 mb-2">
+      <span class="text-terminal-accent-green">></span>
+      <span>Archive: {year}</span>
+    </h1>
+    <p class="text-terminal-muted text-sm">
+      <span class="text-terminal-accent-green">$</span> ls -la ~/{year}/
+    </p>
+  </div>
+
+  <div class="grid gap-4">
+    {months.map(({ month, name, count }) => (
+      <a
+        href={`/${year}/${name}/`}
+        class="block p-4 bg-terminal-surface border border-terminal-border rounded-lg hover:border-terminal-accent-cyan transition-colors"
+      >
+        <div class="flex items-center justify-between">
+          <span class="text-terminal-text font-medium">{name}</span>
+          <span class="text-terminal-muted text-sm">{count} post{count !== 1 ? 's' : ''}</span>
+        </div>
+      </a>
+    ))}
+  </div>
+
+  {months.length === 0 && (
+    <p class="text-terminal-muted text-center py-8">No posts found for {year}.</p>
+  )}
+
+  <nav class="mt-12 pt-8 border-t border-terminal-border">
+    <h2 class="text-sm text-terminal-muted mb-4">Other years:</h2>
+    <div class="flex flex-wrap gap-3">
+      {years.map((y) => (
+        <a
+          href={`/${y}/`}
+          class:list={[
+            'px-3 py-1 rounded text-sm transition-colors',
+            y === yearNum
+              ? 'bg-terminal-accent-green text-terminal-bg'
+              : 'bg-terminal-surface text-terminal-muted hover:text-terminal-accent-cyan',
+          ]}
+        >
+          {y}
+        </a>
+      ))}
+    </div>
+  </nav>
+</BaseLayout>

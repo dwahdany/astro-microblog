@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import DayGroup from '../../../components/content/DayGroup.astro';
+import { getContentByDate, groupByDay, getYearsWithContent, getMonthsWithContent } from '../../../lib/content';
+import { MONTHS_3, MONTHS_3_REVERSE } from '../../../lib/types';
+
+export async function getStaticPaths() {
+  const years = await getYearsWithContent();
+  const paths = [];
+
+  for (const year of years) {
+    const months = await getMonthsWithContent(year);
+    for (const { name } of months) {
+      paths.push({ params: { year: String(year), month: name } });
+    }
+  }
+
+  return paths;
+}
+
+const { year, month } = Astro.params;
+const yearNum = parseInt(year);
+const monthNum = MONTHS_3_REVERSE[month];
+
+const content = await getContentByDate(yearNum, monthNum);
+const dayGroups = groupByDay(content);
+
+const monthNames: Record<string, string> = {
+  Jan: 'January', Feb: 'February', Mar: 'March', Apr: 'April',
+  May: 'May', Jun: 'June', Jul: 'July', Aug: 'August',
+  Sep: 'September', Oct: 'October', Nov: 'November', Dec: 'December',
+};
+---
+
+<BaseLayout title={`${monthNames[month]} ${year}`} description={`Posts from ${monthNames[month]} ${year}`}>
+  <div class="mb-8">
+    <div class="text-sm text-terminal-muted mb-2">
+      <a href={`/${year}/`} class="hover:text-terminal-accent-cyan">{year}</a>
+      <span class="mx-2">/</span>
+      <span>{month}</span>
+    </div>
+    <h1 class="text-2xl font-bold flex items-center gap-2">
+      <span class="text-terminal-accent-green">></span>
+      <span>{monthNames[month]} {year}</span>
+    </h1>
+    <p class="text-terminal-muted text-sm mt-2">
+      {content.length} post{content.length !== 1 ? 's' : ''}
+    </p>
+  </div>
+
+  {dayGroups.map((group) => (
+    <DayGroup group={group} />
+  ))}
+
+  {content.length === 0 && (
+    <p class="text-terminal-muted text-center py-8">No posts found for {monthNames[month]} {year}.</p>
+  )}
+
+  <nav class="mt-8 pt-8 border-t border-terminal-border">
+    <a href={`/${year}/`} class="text-terminal-muted hover:text-terminal-accent-cyan">
+      ← Back to {year}
+    </a>
+  </nav>
+</BaseLayout>

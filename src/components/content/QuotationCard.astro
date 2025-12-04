@@ -1,0 +1,58 @@
+---
+import { render } from 'astro:content';
+import type { QuotationItem } from '../../lib/types';
+import { getItemUrl } from '../../lib/content';
+import TagList from './TagList.astro';
+
+interface Props {
+  quotation: QuotationItem;
+}
+
+const { quotation } = Astro.props;
+const url = getItemUrl({ type: 'quotation', item: quotation });
+const { Content } = await render(quotation);
+---
+
+<article class="group">
+  <div class="flex items-start gap-2">
+    <span class="text-terminal-accent-cyan shrink-0 mt-0.5">"</span>
+    <div class="flex-1 min-w-0">
+      <blockquote class="border-l-2 border-terminal-accent-green pl-4 italic text-terminal-text">
+        <div class="prose prose-sm max-w-none">
+          <Content />
+        </div>
+      </blockquote>
+      <div class="mt-2 text-sm text-terminal-muted">
+        —{' '}
+        {quotation.data.source_url ? (
+          <a
+            href={quotation.data.source_url}
+            class="hover:text-terminal-accent-cyan transition-colors"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {quotation.data.source}
+          </a>
+        ) : (
+          <span>{quotation.data.source}</span>
+        )}
+        {quotation.data.context && (
+          <span class="text-terminal-muted/70">, {quotation.data.context}</span>
+        )}
+      </div>
+      <div class="mt-2 flex items-center gap-3 text-xs text-terminal-muted">
+        <a href={url} class="hover:text-terminal-accent-cyan transition-colors">
+          <time datetime={quotation.data.created.toISOString()}>
+            {quotation.data.created.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+          </time>
+        </a>
+        {quotation.data.tags.length > 0 && (
+          <>
+            <span class="text-terminal-border">•</span>
+            <TagList tags={quotation.data.tags} />
+          </>
+        )}
+      </div>
+    </div>
+  </div>
+</article>

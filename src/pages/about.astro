@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TerminalWindow from '../components/ui/TerminalWindow.astro';
+---
+
+<BaseLayout title="About" description="About this microblog and its author.">
+  <h1 class="text-2xl font-bold mb-6 flex items-center gap-2">
+    <span class="text-terminal-accent-green">></span>
+    <span>About</span>
+  </h1>
+
+  <TerminalWindow title="about.txt">
+    <div class="prose prose-sm max-w-none">
+      <p>
+        Welcome to my microblog! This is where I share thoughts, links, quotes, and longer articles.
+      </p>
+
+      <h2>Content Types</h2>
+      <ul>
+        <li><strong>Entries</strong> - Long-form articles and tutorials</li>
+        <li><strong>Blogmarks</strong> - Interesting links with commentary</li>
+        <li><strong>Quotations</strong> - Memorable quotes I want to remember</li>
+        <li><strong>Notes</strong> - Short thoughts and micro-posts</li>
+      </ul>
+
+      <h2>Subscribe</h2>
+      <p>
+        You can follow this blog via RSS:
+      </p>
+      <ul>
+        <li><a href="/atom/everything.xml">Everything</a> - All content types</li>
+        <li><a href="/atom/entries.xml">Entries only</a> - Just articles</li>
+        <li><a href="/atom/blogmarks.xml">Blogmarks only</a> - Just links</li>
+        <li><a href="/atom/notes.xml">Notes only</a> - Just micro-posts</li>
+      </ul>
+
+      <h2>Built With</h2>
+      <p>
+        This site is built with <a href="https://astro.build">Astro</a>, styled with
+        <a href="https://tailwindcss.com">Tailwind CSS</a>, and hosted on
+        <a href="https://pages.cloudflare.com">Cloudflare Pages</a>.
+      </p>
+    </div>
+  </TerminalWindow>
+</BaseLayout>

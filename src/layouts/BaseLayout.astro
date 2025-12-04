@@ -1,0 +1,53 @@
+---
+import '../styles/global.css';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import PostHog from '../components/integrations/PostHog.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const { title, description = 'A personal microblog', ogImage } = Astro.props;
+const siteTitle = 'Microblog';
+const fullTitle = title === 'Home' ? siteTitle : `${title} | ${siteTitle}`;
+
+// Get PostHog API key from environment variable
+const posthogKey = import.meta.env.PUBLIC_POSTHOG_KEY;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/atom/everything.xml" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
+
+    <title>{fullTitle}</title>
+
+    {posthogKey && <PostHog apiKey={posthogKey} />}
+  </head>
+  <body class="flex flex-col min-h-screen">
+    <Header />
+    <main class="flex-1 max-w-4xl mx-auto w-full px-4 py-8">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

@@ -1,0 +1,151 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import TagList from '../../../../components/content/TagList.astro';
+import Giscus from '../../../../components/integrations/Giscus.astro';
+import { MONTHS_3, MONTHS_3_REVERSE } from '../../../../lib/types';
+import { getItemTitle, getItemUrl, formatDisplayDate } from '../../../../lib/content';
+import type { ContentItem } from '../../../../lib/types';
+
+// Get Giscus config from environment
+const giscusRepo = import.meta.env.PUBLIC_GISCUS_REPO;
+const giscusRepoId = import.meta.env.PUBLIC_GISCUS_REPO_ID;
+const giscusCategory = import.meta.env.PUBLIC_GISCUS_CATEGORY;
+const giscusCategoryId = import.meta.env.PUBLIC_GISCUS_CATEGORY_ID;
+
+export async function getStaticPaths() {
+  const [entries, blogmarks, quotations, notes] = await Promise.all([
+    getCollection('entries', ({ data }) => !data.is_draft),
+    getCollection('blogmarks', ({ data }) => !data.is_draft),
+    getCollection('quotations', ({ data }) => !data.is_draft),
+    getCollection('notes', ({ data }) => !data.is_draft),
+  ]);
+
+  const allItems = [
+    ...entries.map((item) => ({ type: 'entry' as const, item })),
+    ...blogmarks.map((item) => ({ type: 'blogmark' as const, item })),
+    ...quotations.map((item) => ({ type: 'quotation' as const, item })),
+    ...notes.map((item) => ({ type: 'note' as const, item })),
+  ];
+
+  return allItems.map((contentItem) => {
+    const date = new Date(contentItem.item.data.created);
+    return {
+      params: {
+        year: String(date.getFullYear()),
+        month: MONTHS_3[date.getMonth() + 1],
+        day: String(date.getDate()),
+        slug: contentItem.item.data.slug,
+      },
+      props: { contentItem },
+    };
+  });
+}
+
+interface Props {
+  contentItem: ContentItem;
+}
+
+const { contentItem } = Astro.props;
+const { year, month, day, slug } = Astro.params;
+
+const { Content } = await render(contentItem.item);
+const title = getItemTitle(contentItem);
+const date = new Date(contentItem.item.data.created);
+const tags = contentItem.item.data.tags;
+
+// Get type-specific data
+const isEntry = contentItem.type === 'entry';
+const isBlogmark = contentItem.type === 'blogmark';
+const isQuotation = contentItem.type === 'quotation';
+const isNote = contentItem.type === 'note';
+---
+
+<BaseLayout title={title} description={title}>
+  <article class="max-w-2xl mx-auto" data-pagefind-body>
+    <header class="mb-8">
+      <div class="flex items-center gap-2 text-sm text-terminal-muted mb-4">
+        <a href={`/${year}/`} class="hover:text-terminal-accent-cyan">{year}</a>
+        <span>/</span>
+        <a href={`/${year}/${month}/`} class="hover:text-terminal-accent-cyan">{month}</a>
+        <span>/</span>
+        <a href={`/${year}/${month}/${day}/`} class="hover:text-terminal-accent-cyan">{day}</a>
+      </div>
+
+      <h1 class="text-2xl md:text-3xl font-bold text-terminal-text mb-4">
+        {isEntry && title}
+        {isBlogmark && (
+          <a
+            href={(contentItem.item as any).data.link_url}
+            class="text-terminal-accent-blue hover:text-terminal-accent-cyan"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {title}
+          </a>
+        )}
+        {isQuotation && `Quoting ${(contentItem.item as any).data.source}`}
+        {isNote && (contentItem.item.data as any).title || 'Note'}
+      </h1>
+
+      <div class="flex flex-wrap items-center gap-4 text-sm text-terminal-muted">
+        <time datetime={date.toISOString()}>
+          {formatDisplayDate(date)}
+        </time>
+        {tags.length > 0 && (
+          <>
+            <span class="text-terminal-border">•</span>
+            <TagList tags={tags} size="base" />
+          </>
+        )}
+      </div>
+
+      {isBlogmark && (contentItem.item as any).data.via_url && (
+        <p class="mt-2 text-sm text-terminal-muted">
+          via{' '}
+          <a
+            href={(contentItem.item as any).data.via_url}
+            class="text-terminal-accent-cyan hover:text-terminal-accent-green"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {(contentItem.item as any).data.via_title || 'link'}
+          </a>
+        </p>
+      )}
+    </header>
+
+    <div class="prose prose-lg max-w-none">
+      {isQuotation && (
+        <blockquote class="border-l-4 border-terminal-accent-green pl-4 italic text-xl mb-6">
+          <Content />
+        </blockquote>
+      )}
+      {!isQuotation && <Content />}
+    </div>
+
+    {isQuotation && (contentItem.item as any).data.context && (
+      <p class="mt-4 text-terminal-muted italic">
+        {(contentItem.item as any).data.context}
+      </p>
+    )}
+
+    {giscusRepo && giscusRepoId && (
+      <Giscus
+        repo={giscusRepo}
+        repoId={giscusRepoId}
+        category={giscusCategory}
+        categoryId={giscusCategoryId}
+      />
+    )}
+
+    <footer class="mt-12 pt-8 border-t border-terminal-border">
+      <div class="flex items-center justify-between text-sm text-terminal-muted">
+        <a href="/" class="hover:text-terminal-accent-cyan">← Back to home</a>
+        <a href={`/${year}/${month}/${day}/`} class="hover:text-terminal-accent-cyan">
+          More from this day →
+        </a>
+      </div>
+    </footer>
+  </article>
+</BaseLayout>

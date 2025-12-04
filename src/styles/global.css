@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply bg-terminal-bg text-terminal-text font-mono;
+  }
+
+  body {
+    @apply min-h-screen antialiased;
+  }
+
+  a {
+    @apply text-terminal-accent-blue hover:text-terminal-accent-cyan transition-colors;
+  }
+
+  ::selection {
+    @apply bg-terminal-accent-green/30;
+  }
+}
+
+@layer components {
+  .terminal-prompt {
+    @apply text-terminal-accent-green;
+  }
+
+  .terminal-prompt::before {
+    content: '> ';
+  }
+
+  .terminal-window {
+    @apply bg-terminal-surface border border-terminal-border rounded-lg overflow-hidden;
+  }
+
+  .terminal-titlebar {
+    @apply bg-terminal-bg px-4 py-2 flex items-center gap-2 border-b border-terminal-border;
+  }
+
+  .terminal-dot {
+    @apply w-3 h-3 rounded-full;
+  }
+
+  .terminal-dot-red {
+    @apply bg-red-500;
+  }
+
+  .terminal-dot-yellow {
+    @apply bg-yellow-500;
+  }
+
+  .terminal-dot-green {
+    @apply bg-green-500;
+  }
+}
+
+/* Prose customization for dark theme */
+.prose {
+  @apply text-terminal-text;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  @apply text-terminal-text font-mono;
+}
+
+.prose a {
+  @apply text-terminal-accent-blue hover:text-terminal-accent-cyan;
+}
+
+.prose code {
+  @apply bg-terminal-bg text-terminal-accent-cyan px-1 py-0.5 rounded;
+}
+
+.prose pre {
+  @apply bg-terminal-bg border border-terminal-border;
+}
+
+.prose blockquote {
+  @apply border-l-terminal-accent-green text-terminal-muted;
+}
+
+.prose strong {
+  @apply text-terminal-text;
+}
+
+.prose ul > li::marker {
+  @apply text-terminal-accent-green;
+}
+
+.prose ol > li::marker {
+  @apply text-terminal-accent-green;
+}

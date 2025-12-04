@@ -1,0 +1,221 @@
+backend:
+  name: github
+  repo: your-username/your-repo  # Update with your GitHub username/repo
+  branch: main
+  base_url: https://your-oauth-server.com  # Optional: for self-hosted OAuth
+
+# For local development, you can use the test-repo backend:
+# backend:
+#   name: test-repo
+
+media_folder: public/images
+public_folder: /images
+
+slug:
+  encoding: ascii
+  clean_accents: true
+
+collections:
+  - name: entries
+    label: "Entries"
+    label_singular: "Entry"
+    folder: "src/content/entries"
+    create: true
+    slug: "{{year}}/{{slug}}"
+    preview_path: "{{year}}/{{month}}/{{day}}/{{slug}}"
+    sortable_fields: ['created', 'title']
+    view_filters:
+      - label: Drafts
+        field: is_draft
+        pattern: true
+      - label: Published
+        field: is_draft
+        pattern: false
+    fields:
+      - label: "Slug"
+        name: "slug"
+        widget: "string"
+        pattern: ['^[a-z0-9]+(?:-[a-z0-9]+)*$', "Lowercase letters, numbers, and hyphens only"]
+      - label: "Title"
+        name: "title"
+        widget: "string"
+      - label: "Created"
+        name: "created"
+        widget: "datetime"
+        date_format: "YYYY-MM-DD"
+        time_format: "HH:mm:ss"
+        format: "YYYY-MM-DDTHH:mm:ssZ"
+      - label: "Tags"
+        name: "tags"
+        widget: "list"
+        allow_add: true
+        default: []
+      - label: "Draft"
+        name: "is_draft"
+        widget: "boolean"
+        default: false
+      - label: "Series"
+        name: "series"
+        widget: "string"
+        required: false
+      - label: "Card Image"
+        name: "card_image"
+        widget: "image"
+        required: false
+      - label: "Body"
+        name: "body"
+        widget: "markdown"
+
+  - name: blogmarks
+    label: "Blogmarks"
+    label_singular: "Blogmark"
+    folder: "src/content/blogmarks"
+    create: true
+    slug: "{{year}}/{{slug}}"
+    sortable_fields: ['created', 'link_title']
+    fields:
+      - label: "Slug"
+        name: "slug"
+        widget: "string"
+        pattern: ['^[a-z0-9]+(?:-[a-z0-9]+)*$', "Lowercase letters, numbers, and hyphens only"]
+      - label: "Link URL"
+        name: "link_url"
+        widget: "string"
+      - label: "Link Title"
+        name: "link_title"
+        widget: "string"
+      - label: "Title Override"
+        name: "title"
+        widget: "string"
+        required: false
+        hint: "Optional title override for the page"
+      - label: "Created"
+        name: "created"
+        widget: "datetime"
+        date_format: "YYYY-MM-DD"
+        time_format: "HH:mm:ss"
+        format: "YYYY-MM-DDTHH:mm:ssZ"
+      - label: "Tags"
+        name: "tags"
+        widget: "list"
+        allow_add: true
+        default: []
+      - label: "Via URL"
+        name: "via_url"
+        widget: "string"
+        required: false
+      - label: "Via Title"
+        name: "via_title"
+        widget: "string"
+        required: false
+      - label: "Draft"
+        name: "is_draft"
+        widget: "boolean"
+        default: false
+      - label: "Commentary"
+        name: "body"
+        widget: "markdown"
+
+  - name: quotations
+    label: "Quotations"
+    label_singular: "Quotation"
+    folder: "src/content/quotations"
+    create: true
+    slug: "{{year}}/{{slug}}"
+    sortable_fields: ['created', 'source']
+    fields:
+      - label: "Slug"
+        name: "slug"
+        widget: "string"
+        pattern: ['^[a-z0-9]+(?:-[a-z0-9]+)*$', "Lowercase letters, numbers, and hyphens only"]
+      - label: "Source"
+        name: "source"
+        widget: "string"
+        hint: "Who said or wrote this?"
+      - label: "Source URL"
+        name: "source_url"
+        widget: "string"
+        required: false
+      - label: "Context"
+        name: "context"
+        widget: "string"
+        required: false
+        hint: "Optional context about when/where this was said"
+      - label: "Created"
+        name: "created"
+        widget: "datetime"
+        date_format: "YYYY-MM-DD"
+        time_format: "HH:mm:ss"
+        format: "YYYY-MM-DDTHH:mm:ssZ"
+      - label: "Tags"
+        name: "tags"
+        widget: "list"
+        allow_add: true
+        default: []
+      - label: "Draft"
+        name: "is_draft"
+        widget: "boolean"
+        default: false
+      - label: "Quote Text"
+        name: "body"
+        widget: "markdown"
+
+  - name: notes
+    label: "Notes"
+    label_singular: "Note"
+    folder: "src/content/notes"
+    create: true
+    slug: "{{year}}/{{slug}}"
+    sortable_fields: ['created', 'title']
+    fields:
+      - label: "Slug"
+        name: "slug"
+        widget: "string"
+        pattern: ['^[a-z0-9]+(?:-[a-z0-9]+)*$', "Lowercase letters, numbers, and hyphens only"]
+      - label: "Title"
+        name: "title"
+        widget: "string"
+        required: false
+        hint: "Optional title for the note"
+      - label: "Created"
+        name: "created"
+        widget: "datetime"
+        date_format: "YYYY-MM-DD"
+        time_format: "HH:mm:ss"
+        format: "YYYY-MM-DDTHH:mm:ssZ"
+      - label: "Tags"
+        name: "tags"
+        widget: "list"
+        allow_add: true
+        default: []
+      - label: "Draft"
+        name: "is_draft"
+        widget: "boolean"
+        default: false
+      - label: "Body"
+        name: "body"
+        widget: "markdown"
+
+  - name: series
+    label: "Series"
+    label_singular: "Series"
+    folder: "src/content/series"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - label: "Slug"
+        name: "slug"
+        widget: "string"
+        pattern: ['^[a-z0-9]+(?:-[a-z0-9]+)*$', "Lowercase letters, numbers, and hyphens only"]
+      - label: "Title"
+        name: "title"
+        widget: "string"
+      - label: "Summary"
+        name: "summary"
+        widget: "text"
+      - label: "Created"
+        name: "created"
+        widget: "datetime"
+        date_format: "YYYY-MM-DD"
+        time_format: "HH:mm:ss"
+        format: "YYYY-MM-DDTHH:mm:ssZ"

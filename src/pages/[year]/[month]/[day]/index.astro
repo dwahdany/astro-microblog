@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import ContentCard from '../../../../components/content/ContentCard.astro';
+import { getContentByDate, formatDisplayDate, getYearsWithContent, getMonthsWithContent, getAllContent } from '../../../../lib/content';
+import { MONTHS_3, MONTHS_3_REVERSE } from '../../../../lib/types';
+
+export async function getStaticPaths() {
+  const allContent = await getAllContent();
+  const daysSet = new Set<string>();
+
+  for (const item of allContent) {
+    const date = new Date(item.item.data.created);
+    const year = date.getFullYear();
+    const month = MONTHS_3[date.getMonth() + 1];
+    const day = date.getDate();
+    daysSet.add(`${year}/${month}/${day}`);
+  }
+
+  return Array.from(daysSet).map((dayPath) => {
+    const [year, month, day] = dayPath.split('/');
+    return { params: { year, month, day } };
+  });
+}
+
+const { year, month, day } = Astro.params;
+const yearNum = parseInt(year);
+const monthNum = MONTHS_3_REVERSE[month];
+const dayNum = parseInt(day);
+
+const content = await getContentByDate(yearNum, monthNum, dayNum);
+const dateObj = new Date(yearNum, monthNum - 1, dayNum);
+const displayDate = formatDisplayDate(dateObj);
+---
+
+<BaseLayout title={displayDate} description={`Posts from ${displayDate}`}>
+  <div class="mb-8">
+    <div class="text-sm text-terminal-muted mb-2">
+      <a href={`/${year}/`} class="hover:text-terminal-accent-cyan">{year}</a>
+      <span class="mx-2">/</span>
+      <a href={`/${year}/${month}/`} class="hover:text-terminal-accent-cyan">{month}</a>
+      <span class="mx-2">/</span>
+      <span>{day}</span>
+    </div>
+    <h1 class="text-2xl font-bold flex items-center gap-2">
+      <span class="text-terminal-accent-green">></span>
+      <span>{displayDate}</span>
+    </h1>
+    <p class="text-terminal-muted text-sm mt-2">
+      {content.length} post{content.length !== 1 ? 's' : ''}
+    </p>
+  </div>
+
+  <div class="space-y-6">
+    {content.map((item) => (
+      <ContentCard item={item} />
+    ))}
+  </div>
+
+  {content.length === 0 && (
+    <p class="text-terminal-muted text-center py-8">No posts found for this day.</p>
+  )}
+
+  <nav class="mt-8 pt-8 border-t border-terminal-border">
+    <a href={`/${year}/${month}/`} class="text-terminal-muted hover:text-terminal-accent-cyan">
+      ← Back to {month} {year}
+    </a>
+  </nav>
+</BaseLayout>
