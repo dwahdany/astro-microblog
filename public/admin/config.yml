@@ -1,8 +1,7 @@
 backend:
   name: github
-  repo: your-username/your-repo  # Update with your GitHub username/repo
+  repo: dwahdany/astro-microblog
   branch: main
-  base_url: https://your-oauth-server.com  # Optional: for self-hosted OAuth
 
 # For local development, you can use the test-repo backend:
 # backend:
