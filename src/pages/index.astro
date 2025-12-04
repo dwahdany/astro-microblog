@@ -11,9 +11,6 @@ const dayGroups = groupByDay(recent);
 <BaseLayout title="Home" description="A personal microblog with notes, links, quotes, and articles.">
   <div class="mb-8">
     <h1 class="sr-only">Recent Posts</h1>
-    <p class="text-terminal-muted text-sm mb-6">
-      <span class="text-terminal-accent-green">$</span> cat ~/recent.log | head -30
-    </p>
   </div>
 
   {dayGroups.map((group) => (

@@ -9,13 +9,10 @@ const maxCount = Math.max(...sortedTags.map(([, count]) => count));
 
 <BaseLayout title="Tags" description="Browse all tags">
   <div class="mb-8">
-    <h1 class="text-2xl font-bold flex items-center gap-2 mb-2">
+    <h1 class="text-2xl font-bold flex items-center gap-2">
       <span class="text-terminal-accent-green">></span>
       <span>Tags</span>
     </h1>
-    <p class="text-terminal-muted text-sm">
-      <span class="text-terminal-accent-green">$</span> ls ~/tags/
-    </p>
   </div>
 
   <div class="flex flex-wrap gap-3">

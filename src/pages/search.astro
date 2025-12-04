@@ -4,13 +4,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout title="Search" description="Search all posts">
   <div class="mb-8">
-    <h1 class="text-2xl font-bold flex items-center gap-2 mb-2">
+    <h1 class="text-2xl font-bold flex items-center gap-2">
       <span class="text-terminal-accent-green">></span>
       <span>Search</span>
     </h1>
-    <p class="text-terminal-muted text-sm">
-      <span class="text-terminal-accent-green">$</span> grep -r "query" ~/posts/
-    </p>
   </div>
 
   <div id="search" class="pagefind-search"></div>
