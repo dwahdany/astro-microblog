@@ -2,6 +2,7 @@ backend:
   name: github
   repo: dwahdany/astro-microblog
   branch: main
+  base_url: https://sveltia-cms-auth.dariush-5fc.workers.dev
 
 # For local development, you can use the test-repo backend:
 # backend:
