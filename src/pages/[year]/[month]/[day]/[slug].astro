@@ -7,12 +7,6 @@ import { MONTHS_3, MONTHS_3_REVERSE } from '../../../../lib/types';
 import { getItemTitle, getItemUrl, formatDisplayDate } from '../../../../lib/content';
 import type { ContentItem } from '../../../../lib/types';
 
-// Get Giscus config from environment
-const giscusRepo = import.meta.env.PUBLIC_GISCUS_REPO;
-const giscusRepoId = import.meta.env.PUBLIC_GISCUS_REPO_ID;
-const giscusCategory = import.meta.env.PUBLIC_GISCUS_CATEGORY;
-const giscusCategoryId = import.meta.env.PUBLIC_GISCUS_CATEGORY_ID;
-
 export async function getStaticPaths() {
   const [entries, blogmarks, quotations, notes] = await Promise.all([
     getCollection('entries', ({ data }) => !data.is_draft),
@@ -130,14 +124,7 @@ const isNote = contentItem.type === 'note';
       </p>
     )}
 
-    {giscusRepo && giscusRepoId && (
-      <Giscus
-        repo={giscusRepo}
-        repoId={giscusRepoId}
-        category={giscusCategory}
-        categoryId={giscusCategoryId}
-      />
-    )}
+    <Giscus />
 
     <footer class="mt-12 pt-8 border-t border-terminal-border">
       <div class="flex items-center justify-between text-sm text-terminal-muted">
