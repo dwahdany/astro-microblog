@@ -1,8 +1,9 @@
 ---
 slug: im-too-lazy-to-blog-properly-2
-title: "I'm too lazy to blog “properly”"
+title: I'm too lazy to blog “properly”
 created: 2025-01-24T13:53:15+00:00
-tags: [meta]
+tags:
+  - blog
 is_draft: false
 ---
 
