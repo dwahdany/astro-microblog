@@ -4,9 +4,8 @@ title: "Bubbles"
 created: 2025-10-06T16:05:27+00:00
 tags: [ai, social, academia]
 is_draft: false
+card_image: /images/ghost/2025-10-Pasted-image-20250828113725-2.png
 ---
-
-![](/images/ghost/2025-10-Pasted-image-20250828113725-2.png)
 
 Pamela Samuelson put up this lovely graphic on slide three of her invited talk at ICML 2025. (a talk I didn't skip, despite [my proclamation that I usually do](/2025/Jul/14/academic-conferences/)). Like every human, she is many things, but for the sake of this post, let's reduce her to a mere internationally known copyright lawyer and influential legal scholar. She told ICML attendants that people out there don't actually all like generative AI. There are lawsuits, creatives are figuratively climbing the barricades, outrage. I liked the point she made, but I thought *surely everyone knows this already, right?* Turns out, no. Not everyone is aware of this! Bubbles are real and a lot harder to burst than their pathetic name suggests.
 

@@ -53,6 +53,7 @@ const isEntry = contentItem.type === 'entry';
 const isBlogmark = contentItem.type === 'blogmark';
 const isQuotation = contentItem.type === 'quotation';
 const isNote = contentItem.type === 'note';
+const cardImage = contentItem.item.data.card_image;
 ---
 
 <BaseLayout title={title} description={title}>
@@ -108,6 +109,14 @@ const isNote = contentItem.type === 'note';
         </p>
       )}
     </header>
+
+    {cardImage && (
+      <img
+        src={cardImage}
+        alt={title}
+        class="w-full rounded-lg mb-8"
+      />
+    )}
 
     <div class="prose prose-lg max-w-none">
       {isQuotation && (
