@@ -4,6 +4,7 @@ title: "Bubbles"
 created: 2025-10-06T16:05:27+00:00
 tags: [ai, social, academia]
 is_draft: false
+excerpt: "1. The days of human intellectual contribution are numbered due to AI. 2. AI labs claiming to have solved software engineering are still hiring software engineers. Who is right here? Can both of these facts be true at the same time?"
 card_image: /images/ghost/2025-10-Pasted-image-20250828113725-2.png
 ---
 

@@ -4,6 +4,7 @@ title: "Academic Conferences"
 created: 2025-07-14T16:41:38+00:00
 tags: [academia, social]
 is_draft: false
+excerpt: "\"I'll be on Whova before the conference starts and cold-message random people like a cringy salesperson about why they have sushi in their interests. And that usually turns into a great conversation\""
 ---
 
 I am continuing my tradition of going to ICML without presenting anything!

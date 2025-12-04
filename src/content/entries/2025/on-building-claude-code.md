@@ -4,6 +4,7 @@ title: "On Building Claude Code"
 created: 2025-09-02T18:09:27+00:00
 tags: [software-engineering, ai]
 is_draft: false
+excerpt: "Using Claude Code intensively to work on improving Claude Code ... is that the AI self-acceleration singularity twitter folk have been talking about?"
 ---
 
 There are three things from how they build Claude Code that make it really good in my opinion:

@@ -4,6 +4,7 @@ title: "AI Everything"
 created: 2025-04-03T19:33:14+00:00
 tags: [ai]
 is_draft: false
+excerpt: "MCP, a vision for human and AI working together"
 ---
 
 We are leaping at lightspeed towards connecting *everything* to AI. Large language models (LLMs), are no longer limited to text-focused tasks. **Today**, we can send AI agents off to browse the internet, reverse-engineer binaries, compose music, create 3D models and much more. This is happening right now and the process of connecting evermore things to AI is only speeding up.

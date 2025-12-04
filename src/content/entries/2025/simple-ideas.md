@@ -4,6 +4,7 @@ title: "Simple Ideas"
 created: 2025-02-25T17:15:16+00:00
 tags: [research, academia]
 is_draft: false
+excerpt: "That's high-school level math, but it's really the whole secret. Just do this and it will get you a nobel prize in chemistry."
 ---
 
 > This is the whole secret of AlphaFold 2. That you use the internal frame, so it's invariant to the global frame you choose. That's high-school level math, but it's really the whole secret. Just do this and it will get you a nobel prize in chemistry.

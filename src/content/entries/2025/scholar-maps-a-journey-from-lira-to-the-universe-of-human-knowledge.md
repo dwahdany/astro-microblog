@@ -4,6 +4,7 @@ title: "Scholar Maps: a journey from LiRA to the universe of human knowledge"
 created: 2025-08-18T20:00:27+00:00
 tags: [research, academia]
 is_draft: false
+excerpt: "Visualizing all of research."
 ---
 
 There is an incredible new tool out there, called [Scholar Maps](https://scholar-inbox.com/scholar-maps). It's from the people behind [Scholar Inbox](https://scholar-inbox.com/), a trainable individualized recommender algorithm, that supplies you with daily digests of new arxiv papers.

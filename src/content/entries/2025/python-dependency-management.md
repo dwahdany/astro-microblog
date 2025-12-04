@@ -4,6 +4,7 @@ title: "Python Dependency Management"
 created: 2025-03-29T20:35:02+00:00
 tags: [research, software-engineering, academia]
 is_draft: false
+excerpt: "Proper dependency management can prevent software engineering problems that could result in scientific problems"
 ---
 
 Dependency management can make or break your progress. You need a good workflow for

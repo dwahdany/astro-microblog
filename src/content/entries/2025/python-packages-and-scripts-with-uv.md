@@ -4,6 +4,7 @@ title: "Python Packages and Scripts with uv"
 created: 2025-08-05T18:24:57+00:00
 tags: [software-engineering]
 is_draft: false
+excerpt: "uv: there is more it can do!"
 ---
 
 (skip to the next heading for the actual advice)

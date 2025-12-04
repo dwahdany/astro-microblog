@@ -4,6 +4,7 @@ title: "Never set up again: Nix on Mac"
 created: 2025-08-12T17:00:09+00:00
 tags: [software-engineering]
 is_draft: false
+excerpt: "Imagine setting up your brand-new laptop in the exact way you like it with a single command. Nix."
 ---
 
 Imagine setting up your brand-new laptop in the exact way you like it with a single command. Now read the rest of this article because with Nix it literally is (except for logging back into everything 😩)
