@@ -21,7 +21,12 @@ collections:
     label_singular: "Entry"
     folder: "src/content/entries"
     create: true
-    slug: "{{year}}/{{slug}}"
+    extension: md
+    format: frontmatter
+    nested:
+      depth: 100
+    slug: "{{slug}}"
+    path: "{{year}}/{{slug}}"
     preview_path: "{{year}}/{{month}}/{{day}}/{{slug}}"
     sortable_fields: ['created', 'title']
     view_filters:
