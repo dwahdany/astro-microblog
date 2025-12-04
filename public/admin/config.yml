@@ -3,7 +3,6 @@ backend:
   repo: dwahdany/astro-microblog
   branch: main
   base_url: https://sveltia-cms-auth.dariush-5fc.workers.dev
-  site_domain: blog.wahdany.eu
 
 # For local development, you can use the test-repo backend:
 # backend:

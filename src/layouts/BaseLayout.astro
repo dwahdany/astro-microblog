@@ -11,7 +11,7 @@ interface Props {
 }
 
 const { title, description = 'A personal microblog', ogImage } = Astro.props;
-const siteTitle = 'Microblog';
+const siteTitle = 'blog.wahdany.eu';
 const fullTitle = title === 'Home' ? siteTitle : `${title} | ${siteTitle}`;
 
 // Get PostHog API key from environment variable
