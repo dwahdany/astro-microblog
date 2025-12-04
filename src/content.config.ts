@@ -8,6 +8,7 @@ const baseSchema = {
   tags: z.array(z.string()).default([]),
   is_draft: z.boolean().default(false),
   card_image: z.string().optional(),
+  excerpt: z.string().optional(),
 };
 
 // Entry - Long-form articles

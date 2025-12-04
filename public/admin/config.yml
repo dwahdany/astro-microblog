@@ -67,6 +67,11 @@ collections:
         name: "card_image"
         widget: "image"
         required: false
+      - label: "Excerpt"
+        name: "excerpt"
+        widget: "text"
+        required: false
+        hint: "Optional preview text for listings. If empty, content is auto-truncated."
       - label: "Body"
         name: "body"
         widget: "markdown"

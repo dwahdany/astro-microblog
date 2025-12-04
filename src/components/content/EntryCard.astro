@@ -25,7 +25,11 @@ const { Content } = await render(entry);
       </h3>
       {showExcerpt && (
         <div class="mt-2 text-terminal-muted text-sm prose prose-sm max-w-none line-clamp-3">
-          <Content />
+          {entry.data.excerpt ? (
+            <p>{entry.data.excerpt}</p>
+          ) : (
+            <Content />
+          )}
         </div>
       )}
       <div class="mt-2 flex items-center gap-3 text-xs text-terminal-muted">
