@@ -203,7 +203,7 @@ collections:
       depth: 100
     path: "{{year}}/{{slug}}"
     slug: "{{slug}}"
-    summary: "{{title}}"
+    summary: "{{slug}} {{title}}"
     identifier_field: slug
     sortable_fields: ['created', 'title']
     fields:
