@@ -9,9 +9,7 @@ const dayGroups = groupByDay(recent);
 ---
 
 <BaseLayout title="Home" description="A personal microblog with notes, links, quotes, and articles.">
-  <div class="mb-8">
-    <h1 class="sr-only">Recent Posts</h1>
-  </div>
+  <h1 class="sr-only">Recent Posts</h1>
 
   {dayGroups.map((group) => (
     <DayGroup group={group} />
