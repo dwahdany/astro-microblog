@@ -9,13 +9,13 @@ const navLinks = [
 
 <header class="border-b border-terminal-border bg-terminal-surface">
   <div class="max-w-4xl mx-auto px-4 py-4">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
       <a href="/" class="flex items-center gap-2 text-terminal-text hover:text-terminal-accent-green transition-colors">
         <span class="text-terminal-accent-green">></span>
         <span class="font-bold text-xl">blog.wahdany.eu</span>
       </a>
 
-      <nav class="flex items-center gap-6">
+      <nav class="flex items-center flex-wrap justify-center gap-4 sm:gap-6">
         {navLinks.map((link) => (
           <a
             href={link.href}
