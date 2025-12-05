@@ -48,6 +48,7 @@ collections:
         date_format: "YYYY-MM-DD"
         time_format: "HH:mm:ss"
         format: "YYYY-MM-DDTHH:mm:ssZ"
+        default: "{{now}}"
       - label: "Tags"
         name: "tags"
         widget: "list"
@@ -109,6 +110,7 @@ collections:
         date_format: "YYYY-MM-DD"
         time_format: "HH:mm:ss"
         format: "YYYY-MM-DDTHH:mm:ssZ"
+        default: "{{now}}"
       - label: "Tags"
         name: "tags"
         widget: "list"
@@ -167,6 +169,7 @@ collections:
         date_format: "YYYY-MM-DD"
         time_format: "HH:mm:ss"
         format: "YYYY-MM-DDTHH:mm:ssZ"
+        default: "{{now}}"
       - label: "Tags"
         name: "tags"
         widget: "list"
@@ -209,6 +212,7 @@ collections:
         date_format: "YYYY-MM-DD"
         time_format: "HH:mm:ss"
         format: "YYYY-MM-DDTHH:mm:ssZ"
+        default: "{{now}}"
       - label: "Tags"
         name: "tags"
         widget: "list"
@@ -248,6 +252,7 @@ collections:
         date_format: "YYYY-MM-DD"
         time_format: "HH:mm:ss"
         format: "YYYY-MM-DDTHH:mm:ssZ"
+        default: "{{now}}"
 `;
 
 export const GET: APIRoute = () => {
