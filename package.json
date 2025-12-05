@@ -9,6 +9,7 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^12.6.12",
     "@astrojs/rss": "^4.0.14",
     "@astrojs/tailwind": "^6.0.2",
     "@pagefind/default-ui": "^1.4.0",

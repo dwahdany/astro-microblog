@@ -11,5 +11,55 @@
 </head>
 <body>
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  <script>
+    // Auto-fill blogmark title and slug from URL
+    let lastFetchedUrl = '';
+
+    async function fetchAndFillMeta(url) {
+      if (!url || url === lastFetchedUrl) return;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) return;
+
+      lastFetchedUrl = url;
+
+      try {
+        const response = await fetch(`/api/fetch-meta?url=${encodeURIComponent(url)}`);
+        const data = await response.json();
+
+        if (data.title) {
+          // Find and fill the link_title field
+          const titleInput = document.querySelector('input[id*="link_title"]');
+          if (titleInput && !titleInput.value) {
+            titleInput.value = data.title;
+            titleInput.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        }
+
+        if (data.slug) {
+          // Find and fill the slug field
+          const allInputs = document.querySelectorAll('input');
+          const slugInput = Array.from(allInputs).find(input =>
+            input.id && input.id.includes('slug') && !input.id.includes('link')
+          );
+          if (slugInput && !slugInput.value) {
+            slugInput.value = data.slug;
+            slugInput.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        }
+      } catch (e) {
+        console.error('Failed to fetch metadata:', e);
+      }
+    }
+
+    // Watch for URL input changes
+    document.addEventListener('input', (e) => {
+      if (e.target.id && e.target.id.includes('link_url')) {
+        // Debounce the fetch
+        clearTimeout(window.metaFetchTimeout);
+        window.metaFetchTimeout = setTimeout(() => {
+          fetchAndFillMeta(e.target.value);
+        }, 500);
+      }
+    });
+  </script>
 </body>
 </html>
