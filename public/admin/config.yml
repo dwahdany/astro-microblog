@@ -4,8 +4,8 @@ backend:
   branch: main
   base_url: https://sveltia-cms-auth.dariush-5fc.workers.dev
 
-media_folder: public/images
-public_folder: /images
+media_folder: src/assets
+public_folder: /src/assets
 
 slug:
   encoding: ascii
@@ -16,6 +16,8 @@ collections:
     label: "Entries"
     label_singular: "Entry"
     folder: "src/content/entries"
+    media_folder: ""
+    public_folder: ""
     create: true
     extension: md
     format: frontmatter
@@ -78,6 +80,8 @@ collections:
     label: "Blogmarks"
     label_singular: "Blogmark"
     folder: "src/content/blogmarks"
+    media_folder: ""
+    public_folder: ""
     create: true
     extension: md
     format: frontmatter
@@ -136,6 +140,8 @@ collections:
     label: "Quotations"
     label_singular: "Quotation"
     folder: "src/content/quotations"
+    media_folder: ""
+    public_folder: ""
     create: true
     extension: md
     format: frontmatter
@@ -188,6 +194,8 @@ collections:
     label: "Notes"
     label_singular: "Note"
     folder: "src/content/notes"
+    media_folder: ""
+    public_folder: ""
     create: true
     extension: md
     format: frontmatter
