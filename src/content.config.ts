@@ -1,6 +1,11 @@
 import { defineCollection, z, reference } from 'astro:content';
 import { glob } from 'astro/loaders';
 
+// Helper: treat empty strings as undefined (CMS outputs '' for empty optional fields)
+const emptyToUndefined = (val: unknown) => (val === '' ? undefined : val);
+const optionalString = () => z.preprocess(emptyToUndefined, z.string().optional());
+const optionalUrl = () => z.preprocess(emptyToUndefined, z.string().url().optional());
+
 // Helper to create base schema with image support
 const createBaseSchema = (image: any) => ({
   slug: z.string(),
@@ -29,9 +34,9 @@ const blogmarks = defineCollection({
     ...createBaseSchema(image),
     link_url: z.string().url(),
     link_title: z.string(),
-    title: z.string().optional(), // Optional page title override
-    via_url: z.string().url().optional(),
-    via_title: z.string().optional(),
+    title: optionalString(),
+    via_url: optionalUrl(),
+    via_title: optionalString(),
   }),
 });
 
@@ -41,8 +46,8 @@ const quotations = defineCollection({
   schema: ({ image }) => z.object({
     ...createBaseSchema(image),
     source: z.string(),
-    source_url: z.string().url().optional(),
-    context: z.string().optional(),
+    source_url: optionalUrl(),
+    context: optionalString(),
   }),
 });
 
@@ -51,7 +56,7 @@ const notes = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/notes' }),
   schema: ({ image }) => z.object({
     ...createBaseSchema(image),
-    title: z.string().optional(),
+    title: optionalString(),
   }),
 });
 
