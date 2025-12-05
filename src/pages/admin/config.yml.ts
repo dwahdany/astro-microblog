@@ -25,7 +25,7 @@ collections:
       depth: 100
     slug: "{{slug}}"
     path: "{{year}}/{{slug}}"
-    preview_path: "{{year}}/{{month}}/{{day}}/{{slug}}"
+    identifier_field: slug
     sortable_fields: ['created', 'title']
     view_filters:
       - label: Drafts
@@ -79,7 +79,12 @@ collections:
     label_singular: "Blogmark"
     folder: "src/content/blogmarks"
     create: true
-    slug: "{{year}}/{{slug}}"
+    extension: md
+    format: frontmatter
+    nested:
+      depth: 100
+    slug: "{{slug}}"
+    path: "{{year}}/{{slug}}"
     identifier_field: slug
     sortable_fields: ['created', 'link_title']
     fields:
@@ -130,7 +135,12 @@ collections:
     label_singular: "Quotation"
     folder: "src/content/quotations"
     create: true
-    slug: "{{year}}/{{slug}}"
+    extension: md
+    format: frontmatter
+    nested:
+      depth: 100
+    slug: "{{slug}}"
+    path: "{{year}}/{{slug}}"
     identifier_field: slug
     sortable_fields: ['created', 'source']
     fields:
@@ -175,7 +185,12 @@ collections:
     label_singular: "Note"
     folder: "src/content/notes"
     create: true
-    slug: "{{year}}/{{slug}}"
+    extension: md
+    format: frontmatter
+    nested:
+      depth: 100
+    slug: "{{slug}}"
+    path: "{{year}}/{{slug}}"
     identifier_field: slug
     sortable_fields: ['created', 'title']
     fields:
@@ -212,7 +227,10 @@ collections:
     label_singular: "Series"
     folder: "src/content/series"
     create: true
+    extension: md
+    format: frontmatter
     slug: "{{slug}}"
+    identifier_field: slug
     fields:
       - label: "Slug"
         name: "slug"
