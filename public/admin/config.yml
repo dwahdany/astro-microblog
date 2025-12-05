@@ -23,7 +23,8 @@ collections:
     format: frontmatter
     nested:
       depth: 100
-    slug: "{{year}}/{{slug}}"
+    path: "{{year}}/{{slug}}"
+    slug: "{{slug}}"
     summary: "{{title}}"
     identifier_field: slug
     sortable_fields: ['created', 'title']
@@ -84,7 +85,8 @@ collections:
     format: frontmatter
     nested:
       depth: 100
-    slug: "{{year}}/{{slug}}"
+    path: "{{year}}/{{slug}}"
+    slug: "{{slug}}"
     summary: "{{link_title}}"
     identifier_field: slug
     sortable_fields: ['created', 'link_title']
@@ -141,7 +143,8 @@ collections:
     format: frontmatter
     nested:
       depth: 100
-    slug: "{{year}}/{{slug}}"
+    path: "{{year}}/{{slug}}"
+    slug: "{{slug}}"
     summary: "{{source}}"
     identifier_field: slug
     sortable_fields: ['created', 'source']
@@ -192,7 +195,8 @@ collections:
     format: frontmatter
     nested:
       depth: 100
-    slug: "{{year}}/{{slug}}"
+    path: "{{year}}/{{slug}}"
+    slug: "{{slug}}"
     summary: "{{title}}"
     identifier_field: slug
     sortable_fields: ['created', 'title']

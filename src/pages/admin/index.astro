@@ -1,6 +1,6 @@
 ---
 export const prerender = true;
-// DecapCMS admin page - no layout needed
+// Sveltia CMS admin page - no layout needed
 ---
 <!DOCTYPE html>
 <html>
@@ -11,7 +11,7 @@ export const prerender = true;
   <title>Content Manager</title>
 </head>
 <body>
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  <script type="module" src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
   <script>
     // Auto-fill blogmark title and slug from URL
     let lastFetchedUrl = '';
