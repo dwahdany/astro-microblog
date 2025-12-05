@@ -1,7 +1,3 @@
----
-export const prerender = true;
-// Sveltia CMS admin page - no layout needed
----
 <!DOCTYPE html>
 <html>
 <head>
@@ -16,6 +12,20 @@ export const prerender = true;
     // Auto-fill blogmark title and slug from URL
     let lastFetchedUrl = '';
 
+    function getFieldInput(keyPath) {
+      const section = document.querySelector(`section[data-key-path="${keyPath}"]`);
+      return section?.querySelector('input');
+    }
+
+    function fillField(keyPath, value) {
+      const input = getFieldInput(keyPath);
+      if (input && !input.value.trim()) {
+        const nativeSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+        nativeSetter.call(input, value);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }
+
     async function fetchAndFillMeta(url) {
       if (!url || url === lastFetchedUrl) return;
       if (!url.startsWith('http://') && !url.startsWith('https://')) return;
@@ -26,26 +36,13 @@ export const prerender = true;
         const response = await fetch(`/api/fetch-meta?url=${encodeURIComponent(url)}`);
         const data = await response.json();
 
-        if (data.title) {
-          // Find and fill the link_title field
-          const titleInput = document.querySelector('input[id*="link_title"]');
-          if (titleInput && !titleInput.value) {
-            titleInput.value = data.title;
-            titleInput.dispatchEvent(new Event('input', { bubbles: true }));
-          }
-        }
-
-        if (data.slug) {
-          // Find and fill the slug field
-          const allInputs = document.querySelectorAll('input');
-          const slugInput = Array.from(allInputs).find(input =>
-            input.id && input.id.includes('slug') && !input.id.includes('link')
-          );
-          if (slugInput && !slugInput.value) {
-            slugInput.value = data.slug;
-            slugInput.dispatchEvent(new Event('input', { bubbles: true }));
-          }
-        }
+        // Use setTimeout to escape current Svelte update cycle
+        setTimeout(() => {
+          if (data.slug) fillField('slug', data.slug);
+          setTimeout(() => {
+            if (data.title) fillField('link_title', data.title);
+          }, 0);
+        }, 0);
       } catch (e) {
         console.error('Failed to fetch metadata:', e);
       }
@@ -53,8 +50,8 @@ export const prerender = true;
 
     // Watch for URL input changes
     document.addEventListener('input', (e) => {
-      if (e.target.id && e.target.id.includes('link_url')) {
-        // Debounce the fetch
+      const section = e.target.closest('section[data-key-path]');
+      if (section?.dataset.keyPath === 'link_url') {
         clearTimeout(window.metaFetchTimeout);
         window.metaFetchTimeout = setTimeout(() => {
           fetchAndFillMeta(e.target.value);
