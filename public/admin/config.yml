@@ -82,6 +82,7 @@ collections:
     folder: "src/content/blogmarks"
     create: true
     slug: "{{year}}/{{slug}}"
+    identifier_field: slug
     sortable_fields: ['created', 'link_title']
     fields:
       - label: "Slug"
@@ -132,6 +133,7 @@ collections:
     folder: "src/content/quotations"
     create: true
     slug: "{{year}}/{{slug}}"
+    identifier_field: slug
     sortable_fields: ['created', 'source']
     fields:
       - label: "Slug"
@@ -176,6 +178,7 @@ collections:
     folder: "src/content/notes"
     create: true
     slug: "{{year}}/{{slug}}"
+    identifier_field: slug
     sortable_fields: ['created', 'title']
     fields:
       - label: "Slug"
