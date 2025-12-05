@@ -1,12 +1,10 @@
-backend:
+import type { APIRoute } from 'astro';
+
+const config = `backend:
   name: github
   repo: dwahdany/astro-microblog
   branch: main
   base_url: https://sveltia-cms-auth.dariush-5fc.workers.dev
-
-# For local development, you can use the test-repo backend:
-# backend:
-#   name: test-repo
 
 media_folder: public/images
 public_folder: /images
@@ -232,3 +230,15 @@ collections:
         date_format: "YYYY-MM-DD"
         time_format: "HH:mm:ss"
         format: "YYYY-MM-DDTHH:mm:ssZ"
+`;
+
+export const GET: APIRoute = () => {
+  const isDev = import.meta.env.DEV;
+  const body = isDev ? `local_backend: true\n\n${config}` : config;
+
+  return new Response(body, {
+    headers: {
+      'Content-Type': 'text/yaml',
+    },
+  });
+};
