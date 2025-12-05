@@ -17,7 +17,7 @@ const { Content } = await render(quotation);
   <div class="flex items-start gap-2">
     <span class="text-terminal-accent-cyan shrink-0 mt-0.5">"</span>
     <div class="flex-1 min-w-0">
-      <blockquote class="border-l-2 border-terminal-accent-green pl-4 italic text-terminal-text">
+      <blockquote class="border-l-2 border-terminal-accent-cyan pl-4 italic text-terminal-text">
         <div class="prose prose-sm max-w-none">
           <Content />
         </div>
@@ -27,7 +27,7 @@ const { Content } = await render(quotation);
         {quotation.data.source_url ? (
           <a
             href={quotation.data.source_url}
-            class="hover:text-terminal-accent-cyan transition-colors"
+            class="text-terminal-accent-cyan hover:text-terminal-text transition-colors"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -41,7 +41,7 @@ const { Content } = await render(quotation);
         )}
       </div>
       <div class="mt-2 flex items-center gap-3 text-xs text-terminal-muted">
-        <a href={url} class="hover:text-terminal-accent-cyan transition-colors">
+        <a href={url} class="text-terminal-muted hover:text-terminal-accent-cyan transition-colors">
           <time datetime={quotation.data.created.toISOString()}>
             {quotation.data.created.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
           </time>

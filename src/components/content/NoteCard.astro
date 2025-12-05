@@ -19,7 +19,7 @@ const { Content } = await render(note);
     <div class="flex-1 min-w-0">
       {note.data.title && (
         <h3 class="text-base font-medium text-terminal-text mb-1">
-          <a href={url} class="hover:text-terminal-accent-cyan transition-colors">
+          <a href={url} class="text-terminal-text hover:text-terminal-accent-cyan transition-colors">
             {note.data.title}
           </a>
         </h3>
@@ -28,7 +28,7 @@ const { Content } = await render(note);
         <Content />
       </div>
       <div class="mt-2 flex items-center gap-3 text-xs text-terminal-muted">
-        <a href={url} class="hover:text-terminal-accent-cyan transition-colors">
+        <a href={url} class="text-terminal-muted hover:text-terminal-accent-cyan transition-colors">
           <time datetime={note.data.created.toISOString()}>
             {note.data.created.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
           </time>

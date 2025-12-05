@@ -19,7 +19,7 @@ const { Content } = await render(entry);
     <span class="text-terminal-accent-green shrink-0 mt-0.5">▸</span>
     <div class="flex-1 min-w-0">
       <h3 class="text-lg font-semibold">
-        <a href={url} class="text-terminal-text hover:text-terminal-accent-cyan transition-colors">
+        <a href={url} class="text-terminal-accent-green hover:text-terminal-accent-cyan transition-colors">
           {entry.data.title}
         </a>
       </h3>
@@ -33,9 +33,11 @@ const { Content } = await render(entry);
         </div>
       )}
       <div class="mt-2 flex items-center gap-3 text-xs text-terminal-muted">
-        <time datetime={entry.data.created.toISOString()}>
-          {entry.data.created.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-        </time>
+        <a href={url} class="text-terminal-muted hover:text-terminal-accent-cyan transition-colors">
+          <time datetime={entry.data.created.toISOString()}>
+            {entry.data.created.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+          </time>
+        </a>
         {entry.data.tags.length > 0 && (
           <>
             <span class="text-terminal-border">•</span>
