@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import cloudflare from '@astrojs/cloudflare';
+import { rehypeImageSize } from './src/plugins/rehype-image-size';
 
 // https://astro.build/config
 export default defineConfig({
@@ -13,5 +14,8 @@ export default defineConfig({
   output: 'server',
   build: {
     format: 'directory',
+  },
+  markdown: {
+    rehypePlugins: [rehypeImageSize],
   },
 });

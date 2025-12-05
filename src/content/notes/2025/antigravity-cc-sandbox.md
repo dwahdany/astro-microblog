@@ -12,4 +12,4 @@ So [Antigravity](https://antigravity.google) by Google will let the agent "auto-
 
 Just running an `npm run build` will trigger a sandbox request if a telemetry request is being made. `git commit` needs to use the non-sandbox fallback, because it uses my key for signing the commit, which is not available from within the sandbox. They always offer a sensible "always allow" because they are acutely aware of _Approval Fatigue_. It's a good approach and makes me feel a lot safer.
 
-![](SCR-20251205-uano.png)
+![|small](SCR-20251205-uano.png)

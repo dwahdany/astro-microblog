@@ -9,6 +9,6 @@ tags:
   - evals
 is_draft: false
 ---
-An agentic eval that compares agents by how well they can build a Counter-Strike clone. 
+An agentic eval that compares agents by how well they can build a Counter-Strike clone.
 
-![](scr-20251205-jvmv.png)
+![|medium](scr-20251205-jvmv.png)

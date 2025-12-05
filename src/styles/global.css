@@ -92,3 +92,19 @@
 .prose ol > li::marker {
   @apply text-terminal-accent-green;
 }
+
+/* Image size utilities - syntax: ![alt|small](image.png) */
+.prose img[alt$="|small"],
+.prose img[alt="|small"] {
+  @apply max-w-sm mx-auto block;
+}
+
+.prose img[alt$="|medium"],
+.prose img[alt="|medium"] {
+  @apply max-w-xl mx-auto block;
+}
+
+.prose img[alt$="|full"],
+.prose img[alt="|full"] {
+  @apply w-screen max-w-none relative left-1/2 -translate-x-1/2;
+}
