@@ -5,7 +5,7 @@ created: 2025-10-06T16:05:27+00:00
 tags: [ai, social, academia]
 is_draft: false
 excerpt: "1. The days of human intellectual contribution are numbered due to AI. 2. AI labs claiming to have solved software engineering are still hiring software engineers. Who is right here? Can both of these facts be true at the same time?"
-card_image: /images/ghost/2025-10-Pasted-image-20250828113725-2.png
+card_image: /images/2025-10-Pasted-image-20250828113725-2.png
 ---
 
 Pamela Samuelson put up this lovely graphic on slide three of her invited talk at ICML 2025. (a talk I didn't skip, despite [my proclamation that I usually do](/2025/Jul/14/academic-conferences/)). Like every human, she is many things, but for the sake of this post, let's reduce her to a mere internationally known copyright lawyer and influential legal scholar. She told ICML attendants that people out there don't actually all like generative AI. There are lawsuits, creatives are figuratively climbing the barricades, outrage. I liked the point she made, but I thought *surely everyone knows this already, right?* Turns out, no. Not everyone is aware of this! Bubbles are real and a lot harder to burst than their pathetic name suggests.
@@ -16,7 +16,7 @@ So what? Success is generally a recipe along the lines of **agency** to take **a
 
 **Empathy**: I don't disregard easily what other people say. Sure, I often come to the conclusion that they are misinformed, misguided, acting in bad faith, or whatever. But I try to take a moment to empathize with them: where are they coming from? What experiences might have shaped their feelings? What are they actually trying to say? The latter has some overlap with nonviolent communication, where you, as the recipient of communication, can [try to translate in your head](https://www.youtube.com/watch?v=1HHKkcSEV1c) what the other person might *actually mean* (which is regularly not what they *literally say*).
 
-![](/images/ghost/2025-10-grafik.png)
+![](2025-10-grafik.png)
 
 The time window of human intellectual contribution is ending. [Source](https://x.com/jaschasd/status/1972360405885637021/photo/1)
 

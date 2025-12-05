@@ -18,7 +18,7 @@ must have amounted (globally) to dozens of millions of Euros if not more. It has
 
 [Charlie Marsh](https://www.crmarsh.com/), the founder of Astral, the company behind uv and other extremely fast dev tools, has recently shared results from the 2025 Stack Overflow developer survey, and **uv is the most admired technology**. Now, to be honest, I don't know how to interpret that specific statement in any meaningful way. But what I get from this is that many developers know and like uv!
 
-![](/images/ghost/2025-08-Pasted-image-20250802153840.png)
+![](2025-08-Pasted-image-20250802153840.png)
 
 Results of the StackOverflow Developer Survey
 
@@ -49,7 +49,7 @@ pprint([(k, v["title"]) for k, v in data.items()][:10])
 
 Then run `uv run example.py` and it will take care of running with the desired python version and requirements!
 
-![](/images/ghost/2025-08-grafik.png)
+![](2025-08-grafik.png)
 
 # Packages
 

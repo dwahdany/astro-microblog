@@ -36,7 +36,7 @@ Goals without actions are a weird kind of misery, so I'll have to turn my goals 
 
 **First, I skip most if not all presentations**. Obviously there are great presentations and people put a lot of effort into them. I don't want to deprive them of their audience, it's not fun to present in an empty room. That said, they are often not worth the time to me. They are the least interactive/social part of a conference and you can just watch them online later! Unless you really want a selfie with the speaker, like this crowd around Andrew Ng (bonus challenge: try to find him lol). In that case, you need to attend I guess ...
 
-![](/images/ghost/2025-07-AAAI_D3_2025_052.jpg)
+![](2025-07-AAAI_D3_2025_052.jpg)
 
 You should decide on a case-by-case basis, but given the option to either attend all presentations or skip all of them (and instead, say, meet with people), the latter has the higher expected value for me.
 

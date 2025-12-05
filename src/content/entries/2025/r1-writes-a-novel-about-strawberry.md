@@ -10,11 +10,11 @@ I was setting up OpenRouter to benchmark a bunch of different LLMs on some speci
 
 I noticed there's an option to chat with various models and it even comes with some demos. Naturally, I clicked on the Strawberry Test.
 
-![](/images/ghost/2025-01-image.png)
+![](2025-01-image.png)
 
 A new chat window. It has a text field, send button. Above there are three demo options "9.9 vs 9.11. Which one is larger?", "Strawberry Test. How many r's are in the word" and "Poem Riddle. Compose a 12-line poem".
 
-![](/images/ghost/2025-01-image-1.png)
+![](2025-01-image-1.png)
 
 In the chat the question "How many r's are in the word strawberry" has been sent. The model has reasoned for 58.1s and responds, mentioning there are 3 instances of the letter "r".
 
@@ -79,6 +79,6 @@ Did you read it all? It seems a bit repetitive at first glance, right? But then 
 
 In totally unrelated news, our benchmark for the business task we want to solve, shows that in terms of utility we don't really care too much about which model we actually use. The outliers are due to API issues, which makes the results all the more realistic, I'd say. So while AGI or whatever would sure be nice, I think most business tasks look something like this.
 
-![](/images/ghost/2025-01-benchmark_plot_value_accuracy.png)
+![](2025-01-benchmark_plot_value_accuracy.png)
 
 Benchmark showing very similar performance for around 15 different models. There are some outliers.

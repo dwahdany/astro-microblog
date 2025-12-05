@@ -7,3 +7,5 @@ tags:
 is_draft: false
 ---
 I have a new blog built on Astro! Migrating from Ghost was quite easy. The json export allowed claude to important all my posts. It then wrote python tools to download the images from my existing blog and import them here.
+
+![](IMG_6328.jpeg)

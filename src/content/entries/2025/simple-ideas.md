@@ -15,7 +15,7 @@ There are probably more eloquent ways this has been formulated, but this is how 
 
 We already know that incredible genius ideas often seem obvious in hindsight. They are (often) not some immensely convoluted process, but rather a *key insight* that unlocks something. In the case of AlphaFold 2 that was to use a variant of attention invariant to the global frame. Now I'm not saying it's a trivial feat, the formula can still look intimidating, but the idea is really that simple.
 
-![](/images/ghost/2025-02-image.png)
+![](2025-02-image.png)
 
 Algorithm 22 from the AlphaFold paper. <https://www.nature.com/articles/s41586-021-03819-2>
 

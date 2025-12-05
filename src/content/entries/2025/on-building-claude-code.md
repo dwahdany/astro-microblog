@@ -27,19 +27,19 @@ And obviously they have a larger vision of letting other companies build on thei
 
 Anthropic [doesn't care too much about benchmarks](https://www.anthropic.com/research/evaluating-ai-systems). At least it's how I interpret their behavior. The fact that they don't offer some crazy expensive test-time scaling method to run on the benchmarks to claim a slightly higher spot is maybe a decent argument for this. If you look at the benchmarks, their 'extended thinking' doesn't even use half the reasoning tokens that GPT-5 (high) (which OpenAI's benchmark claims are based on) uses. Their frontier model uses just over half of GPT-5 (medium).
 
-![](/images/ghost/2025-09-Output-Tokens-Used-to-Run-Artificial-Analysis-Intelligence-Index--30-Aug--25--.png)
+![](2025-09-Output-Tokens-Used-to-Run-Artificial-Analysis-Intelligence-Index--30-Aug--25--.png)
 
 Number of tokens used to solve the Artificial Analysis benchmark for various models. Claude Opus thinking uses 26M tokens in total, far less than GPT-5 medium (43M), GPT-5 high (82M) or Grok 4 (110M)
 
 If you check out the [TerminalBench](https://www.tbench.ai/leaderboard) leaderboard, an agentic benchmark on Terminal tasks, you will see that there are SWE agents outperforming Claude Code *using the same models*. Claude Code with Sonnet has 35.5%, with Opus 43.2%. Engine Labs beats that at 44.8% *using Sonnet*. So their agentic framework beats Claude Code, *despite* Claude Code using the much stronger Opus model! So maybe Claude Code is not the absolute most effective agent, but something makes it really nice to use. And perhaps that makes the human-AI combination of me and claude code more effective overall.
 
-![](/images/ghost/2025-09-grafik.png)
+![](2025-09-grafik.png)
 
 tbench leaderboard as of 2nd September 2025
 
 I wouldn't put *too much faith* in these numbers. The terminal bench evaluation set is [publicly available](https://github.com/laude-institute/terminal-bench) and still under active development (paper and curated 'final' v1 benchmark out soon!). But that doesn't prevent warp.dev from advertising with their number one spot using GPT-5, though. Also, companies have every incentive to maximize their numbers. I'm not saying they are cheating or anything, but maybe they are using (for everyday use) unreasonably high reasoning settings or other test-time scaling methods.
 
-![](/images/ghost/2025-09-Pasted-image-20250822123205.png)
+![](2025-09-Pasted-image-20250822123205.png)
 
 warp.dev prominently advertising their Terminal-Bench spot number one on their website
 
