@@ -15,13 +15,11 @@ const { Content } = await render(note);
 
 <article class="group">
   <div class="flex items-start gap-2">
-    <span class="text-terminal-muted shrink-0 mt-0.5">○</span>
+    <span class="text-terminal-muted shrink-0 -mt-0.5">○</span>
     <div class="flex-1 min-w-0">
       {note.data.title && (
         <h3 class="text-base font-medium text-terminal-text mb-1">
-          <a href={url} class="text-terminal-text hover:text-terminal-accent-cyan transition-colors">
-            {note.data.title}
-          </a>
+          {note.data.title}
         </h3>
       )}
       <div class="text-terminal-text text-sm prose prose-sm max-w-none">
