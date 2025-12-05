@@ -7,7 +7,9 @@ import cloudflare from '@astrojs/cloudflare';
 export default defineConfig({
   site: 'https://blog.example.com', // Update with your actual domain
   integrations: [tailwind()],
-  adapter: cloudflare(),
+  adapter: cloudflare({
+    imageService: 'compile',
+  }),
   output: 'server',
   build: {
     format: 'directory',
