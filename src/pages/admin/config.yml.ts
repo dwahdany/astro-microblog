@@ -1,5 +1,7 @@
 import type { APIRoute } from 'astro';
 
+export const prerender = false;
+
 const config = `backend:
   name: github
   repo: dwahdany/astro-microblog
