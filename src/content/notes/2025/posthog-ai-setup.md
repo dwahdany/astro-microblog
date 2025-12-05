@@ -7,6 +7,6 @@ tags:
   - agents
 is_draft: false
 ---
-If you want to set up PostHog on your website, you usually have to install a package, add the imports, etc. Posthog has fully integrated an AI agent into their install process, so you invoke an AI agent _as the installation step_. ![](grafik.png)
+If you want to [set up PostHog](https://posthog.com/docs/libraries/astro) on your website, you usually have to install a package, add the imports, etc. Posthog has fully integrated an AI agent into their install process, so you invoke an AI agent _as the installation step_. ![](/images/SCR-20251205-rjtl.png)
 
-![](grafik.png)
+![](/images/SCR-20251205-rjva.png)
