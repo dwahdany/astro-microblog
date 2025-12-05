@@ -1,8 +1,6 @@
-import type { APIRoute } from 'astro';
+local_backend: true
 
-export const prerender = false;
-
-const config = `backend:
+backend:
   name: github
   repo: dwahdany/astro-microblog
   branch: main
@@ -255,15 +253,3 @@ collections:
         time_format: "HH:mm:ss"
         format: "YYYY-MM-DDTHH:mm:ssZ"
         default: "{{now}}"
-`;
-
-export const GET: APIRoute = () => {
-  const isDev = import.meta.env.DEV;
-  const body = isDev ? `local_backend: true\n\n${config}` : config;
-
-  return new Response(body, {
-    headers: {
-      'Content-Type': 'text/yaml',
-    },
-  });
-};
