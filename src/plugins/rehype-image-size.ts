@@ -28,8 +28,9 @@ export function rehypeImageSize() {
       // Remove size suffix from alt text
       node.properties.alt = alt.replace(SIZE_PATTERN, '').trim();
 
-      // Add size class
-      const existingClass = node.properties.className;
+      // Add size class - use 'class' directly as Astro's image optimization
+      // copies properties literally without converting 'className' to 'class'
+      const existingClass = node.properties.class || node.properties.className;
       const classes: string[] = Array.isArray(existingClass)
         ? [...existingClass]
         : typeof existingClass === 'string'
@@ -37,7 +38,7 @@ export function rehypeImageSize() {
           : [];
 
       classes.push(sizeClasses[size]);
-      node.properties.className = classes;
+      node.properties.class = classes.join(' ');
     });
   };
 }
