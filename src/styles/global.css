@@ -77,6 +77,10 @@
   @apply bg-terminal-bg border border-terminal-border;
 }
 
+.prose pre code {
+  @apply bg-transparent p-0;
+}
+
 .prose blockquote {
   @apply border-l-terminal-accent-green text-terminal-muted;
 }
