@@ -26,11 +26,11 @@ Someone once told me AI would turn me from a PhD student working in the trenches
 
 But I'm not naively optimistic (I hope?). I listed what would be horrible: AI deciding over humans, mass surveillance, social scoring, and delegating thinking to AI.
 
-> "I delegate things I understand. [...] Delegating thinking would mean having AI come up with some formula or math or function, which you have no intellectual way to grasp. You rely on the AI to be correct. You don't learn. You don't think."
+> I delegate things I understand. [...] Delegating thinking would mean having AI come up with some formula or math or function, which you have no intellectual way to grasp. You rely on the AI to be correct. You don't learn. You don't think.
 
 There are two ways to tackle a problem with AI:
 
-> 1. You give the task to AI, it manages to solve it (because AGI) and you have a solution. 2. You look at the task, you don't understand something, you ask the AI to help you understand. [...] In the latter, man has grown and become stronger, learned something new and useful. [...] In the former, we become weaker, our thinking atrophies.
+> 1 . You give the task to AI, it manages to solve it (because AGI) and you have a solution. 2. You look at the task, you don't understand something, you ask the AI to help you understand. [...] In the latter, man has grown and become stronger, learned something new and useful. [...] In the former, we become weaker, our thinking atrophies.
 
 I also raised fears about surveillance in particular:
 
