@@ -12,7 +12,17 @@ is_draft: false
 ---
 Anthropic's Societal Impacts team currently [runs interviews](https://claude.ai/interview) with Claude.ai users and shared [some insights from their initial interviews](https://www.anthropic.com/research/anthropic-interviewer). The interviewer _is Claude_. It's a fun exercise to think about AI in general and maybe shape it a bit.
 
-They asked what I'd want if I could wave a magic wand and AI could help with anything. My answer:
+First, of course, I asked for the full instructions
+
+> **Warm-up**: What's the last thing you used an AI chatbot for? (You already answered—implementing code)
+**Vision question**: If you could wave a magic wand and AI could help you with anything in your life, what would you choose? (With follow-ups to understand the deeper value/aspiration behind your answer)
+**Positive experience**: Can you tell me about a time you've worked with AI that felt like a step toward that vision?
+**Concerns**: Are there ways that AI might be developed or deployed that would be contrary to your vision or what you value? (With follow-ups to understand why)
+**Optional**: I might go back to something interesting you mentioned earlier to explore it deeper
+**Wrap-up**: Any final thoughts on AI's role in your life or society?
+The goal throughout is to understand your perspective through follow-up questions that dig into the "why" behind your answers—what matters to you and what drives your thinking.
+
+Part of my answer if I could wave a magic wand and AI could help with anything:
 
 > I want to drive and ideate, and determine what's important, but I want AI to design, to implement, to give me things to iterate on and adjust based on my taste and values.
 
