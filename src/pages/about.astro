@@ -19,11 +19,23 @@ import TerminalWindow from '../components/ui/TerminalWindow.astro';
       </p>
 
       <h2>Content Types</h2>
-      <ul>
-        <li><strong>Entries</strong> - Long-form articles and tutorials</li>
-        <li><strong>Blogmarks</strong> - Interesting links with commentary</li>
-        <li><strong>Quotations</strong> - Memorable quotes I want to remember</li>
-        <li><strong>Notes</strong> - Short thoughts and micro-posts</li>
+      <ul class="list-none pl-0 space-y-2">
+        <li class="flex items-center gap-2">
+          <span class="text-terminal-accent-green">▸</span>
+          <span><strong>Entries</strong> - Long-form articles and tutorials</span>
+        </li>
+        <li class="flex items-center gap-2">
+          <span class="text-terminal-accent-blue">⊕</span>
+          <span><strong>Blogmarks</strong> - Interesting links with commentary</span>
+        </li>
+        <li class="flex items-center gap-2">
+          <span class="text-terminal-accent-cyan">"</span>
+          <span><strong>Quotations</strong> - Memorable quotes I want to remember</span>
+        </li>
+        <li class="flex items-center gap-2">
+          <span class="text-terminal-muted">○</span>
+          <span><strong>Notes</strong> - Short thoughts and micro-posts</span>
+        </li>
       </ul>
 
       <h2>Subscribe</h2>
