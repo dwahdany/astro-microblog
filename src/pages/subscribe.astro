@@ -1,0 +1,61 @@
+---
+export const prerender = true;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TerminalWindow from '../components/ui/TerminalWindow.astro';
+---
+
+<BaseLayout title="Subscribe" description="Subscribe to this blog via RSS feeds.">
+  <h1 class="text-2xl font-bold mb-6 flex items-center gap-2">
+    <span class="text-terminal-accent-green">></span>
+    <span>Subscribe</span>
+  </h1>
+
+  <TerminalWindow title="feeds.txt">
+    <div class="prose prose-sm max-w-none">
+      <p>
+        Subscribe to this blog using your favorite RSS reader. Choose a feed based on what content you want to follow:
+      </p>
+
+      <h2>All Content</h2>
+      <ul class="list-none pl-0 space-y-2">
+        <li class="flex items-center gap-2">
+          <span class="text-terminal-accent-yellow">*</span>
+          <a href="/atom/everything.xml"><strong>Everything</strong></a>
+          <span class="text-terminal-muted">- All content types combined (last 30 items)</span>
+        </li>
+      </ul>
+
+      <h2>By Content Type</h2>
+      <ul class="list-none pl-0 space-y-2">
+        <li class="flex items-center gap-2">
+          <span class="text-terminal-accent-green">▸</span>
+          <a href="/atom/entries.xml"><strong>Entries</strong></a>
+          <span class="text-terminal-muted">- Long-form articles and tutorials</span>
+        </li>
+        <li class="flex items-center gap-2">
+          <span class="text-terminal-accent-blue">⊕</span>
+          <a href="/atom/blogmarks.xml"><strong>Blogmarks</strong></a>
+          <span class="text-terminal-muted">- Interesting links with commentary</span>
+        </li>
+        <li class="flex items-center gap-2">
+          <span class="text-terminal-accent-cyan">"</span>
+          <a href="/atom/quotations.xml"><strong>Quotations</strong></a>
+          <span class="text-terminal-muted">- Memorable quotes and excerpts</span>
+        </li>
+        <li class="flex items-center gap-2">
+          <span class="text-terminal-muted">○</span>
+          <a href="/atom/notes.xml"><strong>Notes</strong></a>
+          <span class="text-terminal-muted">- Short thoughts and micro-posts</span>
+        </li>
+      </ul>
+
+      <h2>What is RSS?</h2>
+      <p>
+        RSS (Really Simple Syndication) lets you follow websites without visiting them directly.
+        Use an RSS reader like <a href="https://feedly.com">Feedly</a>, <a href="https://netnewswire.com">NetNewsWire</a>,
+        or <a href="https://newsblur.com">NewsBlur</a> to subscribe.
+      </p>
+    </div>
+  </TerminalWindow>
+</BaseLayout>
