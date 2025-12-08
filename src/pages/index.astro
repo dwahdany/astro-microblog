@@ -11,6 +11,18 @@ const dayGroups = groupByDay(recent);
 ---
 
 <BaseLayout title="Home" description="A personal microblog with notes, links, quotes, and articles.">
+  <form action="/search" method="get" class="mb-8">
+    <div class="relative">
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-terminal-accent-green">></span>
+      <input
+        type="search"
+        name="q"
+        placeholder="Search posts..."
+        class="w-full pl-8 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-terminal-accent-cyan focus:ring-1 focus:ring-terminal-accent-cyan/20 font-mono"
+      />
+    </div>
+  </form>
+
   <h1 class="sr-only">Recent Posts</h1>
 
   {dayGroups.map((group) => (
