@@ -1,6 +1,6 @@
 ---
 slug: claude-ad-stacktraces
-title: ''
+title: Claude Ads on Stack Trace Searches
 created: 2025-12-08T13:44:00Z
 tags:
   - advertisement
