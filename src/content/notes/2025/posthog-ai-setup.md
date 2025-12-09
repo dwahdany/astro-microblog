@@ -1,6 +1,6 @@
 ---
 slug: posthog-ai-setup
-title: ''
+title: PostHog AI Setup
 created: 2025-12-05T18:55:00Z
 tags:
   - ai
