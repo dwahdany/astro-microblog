@@ -13,4 +13,4 @@ To replace the battery of this Apple Watch I used an [ATTEN ST-862D ](https://ww
 
 ![|medium](IMG_7143.jpeg)
 
-It's probably economically not viable to do this yourself or to replace the battery at all. This watch is like five years old, it has little value. Apple would charge 100 € to replace the battery, more than the whole watch costs. But the battery itself costs just 20 €, and with the right tools, it took me about 20 minutes. But it's fun, and it seems dumb to throw away perfectly fine electronics over a weakening battery.
+It's probably economically not viable to do this yourself or to replace the battery at all. This watch is like five years old, it has little value. Apple would charge 100 € to replace the battery, more than the whole watch costs. But the battery itself costs just 20 €, and with the right tools, it took me about 20 minutes. And it seems dumb to throw away perfectly fine electronics over a weakening battery.
