@@ -97,6 +97,10 @@
   @apply text-terminal-accent-green;
 }
 
+.prose img {
+  @apply max-w-full h-auto;
+}
+
 /* Image size utilities - syntax: ![alt|small](image.png) */
 .prose img.img-small {
   @apply max-w-sm mx-auto block;
