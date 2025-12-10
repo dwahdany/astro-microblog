@@ -103,11 +103,13 @@
 
 /* Image size utilities - syntax: ![alt|small](image.png) */
 .prose img.img-small {
-  @apply max-w-sm mx-auto block;
+  @apply mx-auto block;
+  max-width: min(24rem, 100%);
 }
 
 .prose img.img-medium {
-  @apply max-w-xl mx-auto block;
+  @apply mx-auto block;
+  max-width: min(36rem, 100%);
 }
 
 .prose img.img-full {
