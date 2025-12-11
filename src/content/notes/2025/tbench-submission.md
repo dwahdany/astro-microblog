@@ -20,4 +20,4 @@ I have two thoughts on this:
 
 ![|small](20251211-172019.png)
 
-2. Tbench measures _autonomous _solving of the task. Claude Code performs rather poorly, despite many people liking to use it. I think it's because we rarely use Claude Code completely hands off, but rather with human feedback in the loop, for which it seems to work well.
+2. Tbench measures _autonomous_ solving of the task. Claude Code performs rather poorly, despite many people liking to use it. I think it's because we rarely use Claude Code completely hands off, but rather with human feedback in the loop, for which it seems to work well.
