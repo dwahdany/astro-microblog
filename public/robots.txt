@@ -1,0 +1,12 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Don't index admin interface
+Disallow: /admin/
+
+# Don't index API endpoints
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://blog.wahdany.eu/sitemap-index.xml
