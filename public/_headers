@@ -1,0 +1,27 @@
+# API endpoints - no caching (dynamic SSR routes)
+/api/*
+  Cache-Control: no-cache
+
+# Hashed assets - aggressive caching (Astro build output with content hashes)
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Static assets from public/ - long cache
+/favicon.svg
+  Cache-Control: public, max-age=31536000, immutable
+
+# Admin CMS - moderate cache (static files, but may update)
+/admin/*
+  Cache-Control: public, max-age=3600, must-revalidate
+
+# RSS/Atom feeds - moderate cache (pre-rendered but should refresh)
+/atom/*.xml
+  Cache-Control: public, max-age=3600, must-revalidate
+
+# All HTML pages - moderate cache with revalidation
+*.html
+  Cache-Control: public, max-age=3600, must-revalidate
+
+# Root path
+/
+  Cache-Control: public, max-age=3600, must-revalidate
