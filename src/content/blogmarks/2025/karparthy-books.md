@@ -6,6 +6,7 @@ title: ''
 created: 2025-12-29T13:22:00+01:00
 tags:
   - books
+  - karparthy
 via_url: ''
 via_title: ''
 is_draft: false
