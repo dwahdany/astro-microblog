@@ -1,7 +1,7 @@
 ---
 slug: ai-ramp-theory
 title: ''
-created: 2026-01-05T15:48:00+00:00
+created: 2026-01-05T16:15:00+00:00
 tags:
   - ai
   - agi
