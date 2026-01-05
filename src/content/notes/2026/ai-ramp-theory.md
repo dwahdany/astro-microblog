@@ -1,6 +1,6 @@
 ---
 slug: ai-ramp-theory
-title: ''
+title: AI Ramp Theory
 created: 2026-01-05T16:15:00+00:00
 tags:
   - ai
