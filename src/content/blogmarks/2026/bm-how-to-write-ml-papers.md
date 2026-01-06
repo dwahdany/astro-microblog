@@ -12,7 +12,7 @@ via_url: ''
 via_title: ''
 is_draft: false
 ---
-Supreme advice on how to write papers for submission in ML conferences. It covers not just the writing, but also what to look for before writing and when/how to start writing.
+Supreme advice on how to write papers for submission to ML conferences. It covers not just the writing, but also what to look for before writing and when/how to start writing.
 
 It also covers some less nice parts of modern academia, like the randomness of review processes (see the table below for how two groups of reviewers rate the same papers) and that peer review does not maximize truth-seeking.
 
