@@ -14,6 +14,6 @@ There are two theories as to how the Egyptians managed to build pyramids: a. the
 
 > On the path towards human-level intelligence, an LLM is basically an off-ramp, a distraction, a dead end.
 
-[Yann LeCunn says](https://thenextweb.com/news/meta-yann-lecun-ai-behind-human-intelligence). This quote was funny to me because the talks about _ramps_. Because for AI there are also two imaginable scenarios (if you believe AGI will happen):
+[Yann LeCunn says](https://thenextweb.com/news/meta-yann-lecun-ai-behind-human-intelligence). This quote was funny to me because it talks about _ramps_. For AI there are also two imaginable scenarios (if you believe AGI will happen):
 
-First, current AI is an internal ramp, and if we scale it up, expand it, and build the required harnesses (e.g., memory) around them, we get our AGI pyramid. But if you don't believe this, pursuing and improving what we currently have is still worthwhile. It might not be the magnificent AGI pyramid you are after, but the current tools are undoubtedly immensely useful. And they can speed up our path towards that other real path to AGI. So in that sense we might still be building the external ramp, which seems fine.
+First, current AI is an internal ramp, and if we scale it up, expand it, and build the required harnesses (e.g., memory, tools) around them, we get our AGI pyramid. But if you don't believe this, pursuing and improving what we currently have is still worthwhile. It might not be the magnificent AGI pyramid you are after, but the current tools are undoubtedly immensely useful. And they can speed up our path towards that other real path to AGI. So in that sense we might still be building the external ramp, which seems fine.
