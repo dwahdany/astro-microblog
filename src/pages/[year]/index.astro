@@ -2,7 +2,8 @@
 export const prerender = true;
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getYearsWithContent, getMonthsWithContent } from '../../lib/content';
+import DayGroup from '../../components/content/DayGroup.astro';
+import { getYearsWithContent, getMonthsWithContent, getContentByDate, groupByDay } from '../../lib/content';
 
 export async function getStaticPaths() {
   const years = await getYearsWithContent();
@@ -13,6 +14,22 @@ const { year } = Astro.params;
 const yearNum = parseInt(year);
 const months = await getMonthsWithContent(yearNum);
 const years = await getYearsWithContent();
+
+// Fetch content for each month and group by day
+const monthsWithContent = await Promise.all(
+  months.map(async ({ month, name, count }) => {
+    const content = await getContentByDate(yearNum, month);
+    const dayGroups = groupByDay(content);
+    return { month, name, count, dayGroups };
+  })
+);
+
+// Full month names for display
+const MONTHS_FULL: Record<number, string> = {
+  1: 'January', 2: 'February', 3: 'March', 4: 'April',
+  5: 'May', 6: 'June', 7: 'July', 8: 'August',
+  9: 'September', 10: 'October', 11: 'November', 12: 'December'
+};
 ---
 
 <BaseLayout title={`Archive: ${year}`} description={`Posts from ${year}`}>
@@ -26,17 +43,22 @@ const years = await getYearsWithContent();
     </p>
   </div>
 
-  <div class="grid gap-4">
-    {months.map(({ month, name, count }) => (
-      <a
-        href={`/${year}/${name}/`}
-        class="block p-4 bg-terminal-surface border border-terminal-border rounded-lg hover:border-terminal-accent-cyan transition-colors"
-      >
-        <div class="flex items-center justify-between">
-          <span class="text-terminal-text font-medium">{name}</span>
-          <span class="text-terminal-muted text-sm">{count} post{count !== 1 ? 's' : ''}</span>
+  <div class="space-y-4">
+    {monthsWithContent.map(({ month, name, count, dayGroups }) => (
+      <details class="group bg-terminal-surface border border-terminal-border rounded-lg">
+        <summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-terminal-border/30 transition-colors list-none">
+          <span class="text-terminal-text font-medium">{MONTHS_FULL[month]}</span>
+          <div class="flex items-center gap-3">
+            <span class="text-terminal-muted text-sm">{count} post{count !== 1 ? 's' : ''}</span>
+            <span class="text-terminal-muted transition-transform group-open:rotate-90">▶</span>
+          </div>
+        </summary>
+        <div class="px-4 pb-4 pt-2 border-t border-terminal-border">
+          {dayGroups.map((group) => (
+            <DayGroup group={group} />
+          ))}
         </div>
-      </a>
+      </details>
     ))}
   </div>
 
