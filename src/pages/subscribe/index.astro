@@ -58,7 +58,7 @@ const actionUrl = `https://buttondown.com/api/emails/embed-subscribe/${newslette
                 <span class="hidden peer-checked:block text-terminal-bg text-xs">&#10003;</span>
               </span>
               <span class="text-terminal-accent-green">&#9656;</span>
-              <span class="text-terminal-text group-hover:text-terminal-accent-cyan transition-colors">Entries</span>
+              <span class="text-terminal-accent-green group-hover:text-terminal-accent-cyan transition-colors">Entries</span>
               <span class="text-terminal-muted text-sm">- Articles and tutorials</span>
             </label>
             <label class="flex items-center gap-3 cursor-pointer group">
@@ -66,8 +66,8 @@ const actionUrl = `https://buttondown.com/api/emails/embed-subscribe/${newslette
               <span class="w-5 h-5 border border-terminal-border rounded flex items-center justify-center peer-checked:bg-terminal-accent-green peer-checked:border-terminal-accent-green transition-colors">
                 <span class="hidden peer-checked:block text-terminal-bg text-xs">&#10003;</span>
               </span>
-              <span class="text-terminal-accent-blue">&#8853;</span>
-              <span class="text-terminal-text group-hover:text-terminal-accent-cyan transition-colors">Blogmarks</span>
+              <span class="text-terminal-accent-blue">@</span>
+              <span class="text-terminal-accent-blue group-hover:text-terminal-accent-cyan transition-colors">Blogmarks</span>
               <span class="text-terminal-muted text-sm">- Links with commentary</span>
             </label>
             <label class="flex items-center gap-3 cursor-pointer group">
@@ -76,7 +76,7 @@ const actionUrl = `https://buttondown.com/api/emails/embed-subscribe/${newslette
                 <span class="hidden peer-checked:block text-terminal-bg text-xs">&#10003;</span>
               </span>
               <span class="text-terminal-accent-cyan">"</span>
-              <span class="text-terminal-text group-hover:text-terminal-accent-cyan transition-colors">Quotations</span>
+              <span class="text-terminal-accent-cyan group-hover:text-terminal-accent-cyan transition-colors">Quotations</span>
               <span class="text-terminal-muted text-sm">- Memorable quotes</span>
             </label>
             <label class="flex items-center gap-3 cursor-pointer group">
@@ -136,17 +136,17 @@ const actionUrl = `https://buttondown.com/api/emails/embed-subscribe/${newslette
       <ul class="list-none pl-0 space-y-2">
         <li class="flex items-center gap-2">
           <span class="text-terminal-accent-green">▸</span>
-          <a href="/atom/entries.xml"><strong>Entries</strong></a>
+          <a href="/atom/entries.xml"><strong class="!text-terminal-accent-green">Entries</strong></a>
           <span class="text-terminal-muted">- Long-form articles and tutorials</span>
         </li>
         <li class="flex items-center gap-2">
-          <span class="text-terminal-accent-blue">⊕</span>
-          <a href="/atom/blogmarks.xml"><strong>Blogmarks</strong></a>
+          <span class="text-terminal-accent-blue">@</span>
+          <a href="/atom/blogmarks.xml"><strong class="!text-terminal-accent-blue">Blogmarks</strong></a>
           <span class="text-terminal-muted">- Interesting links with commentary</span>
         </li>
         <li class="flex items-center gap-2">
           <span class="text-terminal-accent-cyan">"</span>
-          <a href="/atom/quotations.xml"><strong>Quotations</strong></a>
+          <a href="/atom/quotations.xml"><strong class="!text-terminal-accent-cyan">Quotations</strong></a>
           <span class="text-terminal-muted">- Memorable quotes and excerpts</span>
         </li>
         <li class="flex items-center gap-2">
