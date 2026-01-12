@@ -12,7 +12,7 @@ is_draft: false
 ---
 Anthropic's Societal Impacts team currently [runs interviews](https://claude.ai/interview) with Claude.ai users and shared [some insights from their initial interviews](https://www.anthropic.com/research/anthropic-interviewer). The interviewer _is Claude_. It's a fun exercise to think about AI in general and maybe shape it a bit.
 
-First, of course, I asked for the full instructions
+First, of course, I asked Claude for what it has been prompted to do:
 
 > **Warm-up**: What's the last thing you used an AI chatbot for? (You already answered—implementing code)
 > **Vision question**: If you could wave a magic wand and AI could help you with anything in your life, what would you choose? (With follow-ups to understand the deeper value/aspiration behind your answer)
