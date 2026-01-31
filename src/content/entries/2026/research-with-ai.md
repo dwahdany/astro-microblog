@@ -11,7 +11,7 @@ tags:
 is_draft: false
 series: ''
 card_image: ''
-excerpt: ''
+excerpt: You have a real-life cheat code. If there were any doubts that there were no speed limits before, they are definitely gone now.
 ---
 
 We've produced a meaningful research paper for submission at a top-tier conference in record time, and it would not have been possible without AI assistance. I want to recap what (with the current models and harnesses) went well and what didn't.
