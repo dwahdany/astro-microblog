@@ -4,6 +4,7 @@ import tailwind from '@astrojs/tailwind';
 import cloudflare from '@astrojs/cloudflare';
 import sitemap from '@astrojs/sitemap';
 import { rehypeImageSize } from './src/plugins/rehype-image-size';
+import { rehypeInternalLinkPreview } from './src/plugins/rehype-internal-link-preview';
 
 // https://astro.build/config
 export default defineConfig({
@@ -17,6 +18,6 @@ export default defineConfig({
     format: 'directory',
   },
   markdown: {
-    rehypePlugins: [rehypeImageSize],
+    rehypePlugins: [rehypeImageSize, rehypeInternalLinkPreview],
   },
 });
