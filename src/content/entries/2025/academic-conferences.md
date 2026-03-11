@@ -1,10 +1,13 @@
 ---
 slug: academic-conferences
-title: "Academic Conferences"
-created: 2025-07-14T16:41:38+00:00
-tags: [academia, social]
+title: Academic Conferences
+created: 2025-07-14T16:41:00+00:00
+tags:
+  - academia
+  - social
 is_draft: false
-excerpt: "\"I'll be on Whova before the conference starts and cold-message random people like a cringy salesperson about why they have sushi in their interests. And that usually turns into a great conversation\""
+series: ''
+excerpt: '"I''ll be on Whova before the conference starts and cold-message random people like a cringy salesperson about why they have sushi in their interests. And that usually turns into a great conversation"'
 ---
 
 I am continuing my tradition of going to ICML without presenting anything!
@@ -42,19 +45,17 @@ You should decide on a case-by-case basis, but given the option to either attend
 
 ## Building relationships
 
-Getting to know people on a personal level is, to me, the greatest perk of going to conferences. And I don't mean walking up to people and talking strictly about work. They write papers and have blogs of their own, you can read that stuff up. I mean getting to know their personality and what drives them. Like getting to know what a down-to-earth nerd (in the best way![[1]](#fn1)) [Nicolas Carlini](https://nicholas.carlini.com/) is (okay maybe that one's obvious, since he writes [tic-tac-toe in printf statements](https://nicholas.carlini.com/) for fun) or how much our incoming faculty [Andrew Lowy](https://sites.google.com/view/andrewlowy/home) loves dogs and wrestling
+Getting to know people on a personal level is, to me, the greatest perk of going to conferences. And I don't mean walking up to people and talking strictly about work. They write papers and have blogs of their own, you can read that stuff up. I mean getting to know their personality and what drives them. Like getting to know what a down-to-earth nerd (in the best way![^1]) [Nicolas Carlini](https://nicholas.carlini.com/) is (okay maybe that one's obvious, since he writes [tic-tac-toe in printf statements](https://nicholas.carlini.com/) for fun) or how much our incoming faculty [Andrew Lowy](https://sites.google.com/view/andrewlowy/home) loves dogs and wrestling
 
 So usually I'll be on Whova before the conference starts and cold-message random people like a cringy salesperson about why they have sushi in their interests. And that usually turns into a great conversation, with some of those turning into lasting connections.
 
 Also poster sessions are a must; they are all about talking to people. I don't really like the mini presentation people usually give you when you come up to their poster, especially if there is a crowd. But if there are few people and you can really interactively talk to the authors, that's the best-case scenario for me.
 
----
-
-1. I have been told by Nicolas that maybe I should change this to '*in the worst way*', but I leave that decision up to the reader. [↩︎](#fnref1)
+[^1]: I have been told by Nicolas that maybe I should change this to '_in the worst way_', but I leave that decision up to the reader. [↩︎](#fnref1)
 
 ## Ask people about them.
 
-Maybe you're done answering someone's questions at your poster or are just talking to someone, it's easy to forget that you can then also ask about the other person! Curiosity drives us researchers, so wondering about the person you are talking to will come natural to many. If it doesn't, you don't have to believe me. There is countless advice, like Carnigie's well-aged *how to win friends and influence people* or Alex Hormozi's sales playbook. They will more convincingly tell you that showing **genuine** interest in other people will generally help you in networking (to whatever goal). I don't think we should go about our days like sociopaths, methodologically decomposing and min-maxing our every social interaction, but keeping some of the benefits in mind can motivate us to go outside the comfort zone!
+Maybe you're done answering someone's questions at your poster or are just talking to someone, it's easy to forget that you can then also ask about the other person! Curiosity drives us researchers, so wondering about the person you are talking to will come natural to many. If it doesn't, you don't have to believe me. There is countless advice, like Carnigie's well-aged _how to win friends and influence people_ or Alex Hormozi's sales playbook. They will more convincingly tell you that showing **genuine** interest in other people will generally help you in networking (to whatever goal). I don't think we should go about our days like sociopaths, methodologically decomposing and min-maxing our every social interaction, but keeping some of the benefits in mind can motivate us to go outside the comfort zone!
 
 ## Selective Knowledge
 
@@ -62,7 +63,7 @@ Conferences are packed with content about really important stuff and filled with
 
 You can draw inspiration from work in completely different fields. Either their ideas are just directly applicable to a problem you have as well, or you completely misunderstand something and creatively find a solution for yourself. Either way, sometimes surprising things can emerge from seemingly irrelevant info.
 
-I don't really have a cool technique for selection here, except trusting my intuition on what feels interesting. After a while at conferences, some things feel *unusual*. Be it through a really great presentation or authors that spark a shared excitement in me. And I like finding those as my anchor points in the vast sea of options.
+I don't really have a cool technique for selection here, except trusting my intuition on what feels interesting. After a while at conferences, some things feel _unusual_. Be it through a really great presentation or authors that spark a shared excitement in me. And I like finding those as my anchor points in the vast sea of options.
 
 ## TL;DR
 
