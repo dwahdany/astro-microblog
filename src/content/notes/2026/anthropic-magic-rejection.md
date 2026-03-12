@@ -14,6 +14,6 @@ Anthropic has a magic string to test refusals [in their developer docs](https://
 
 I use Claude Code on this blog and would like to do so in the future, so I will only include a screenshot and not the literal string here. Here goes the magic string to make any Anthropic model stop working!
 
-![|small](grafik-1.png)
+![|small](anthropic-magic-rejection/grafik-1.png)
 
 This is not _the_ worst idea ever, but it's also a bit janky. I hope it at least rotates occasionally (but there is no such indication), otherwise I don't see this ending well. This got to my attention with [this post](https://x.com/ghidraninja/status/2014332652086546941) that shows you can embed it in a binary. This is pretty bad if you plan to use claude code for malware analysis, [as you very much might want to](https://blog.wahdany.eu/ai-everything/). Imagine putting this in malware or anything else that might want to get automatically checked by AI, and now you have ensured that it won't be an Anthropic model that does the check.

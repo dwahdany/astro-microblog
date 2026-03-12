@@ -16,4 +16,4 @@ Supreme advice on how to write papers for submission to ML conferences. It cover
 
 It also covers some less nice parts of modern academia, like the randomness of review processes (see the table below for how two groups of reviewers rate the same papers) and that peer review does not maximize truth-seeking.
 
-![A table showing that reviewer decisions do not agree. |small](grafik.png)
+![A table showing that reviewer decisions do not agree. |small](bm-how-to-write-ml-papers/grafik.png)

@@ -13,4 +13,4 @@ Intent-based advertising means capturing and converting a user based on somethin
 
 So if someone searches for a stack trace with no results, they are served a Claude ad (which is, admittedly, very good at solving those!). It's a genius way of indirect intent-based ads. Those ads are probably very cheap as well (for now), because the price is determined by your competition on those keywords (it's a bidding process, albeit with one entity simulatenously owning the marketplace and supply).
 
-![r/Anthropic - Incredibly Creative Move by Anthropic to sponsor Claude ads on stacktraces that get no results](incredibly-creative-move-by-anthropic-to-sponsor-claude-ads-v0-r5i2tlfo7g5g1.jpeg)
+![r/Anthropic - Incredibly Creative Move by Anthropic to sponsor Claude ads on stacktraces that get no results](claude-ad-stacktraces/incredibly-creative-move-by-anthropic-to-sponsor-claude-ads-v0-r5i2tlfo7g5g1.jpeg)

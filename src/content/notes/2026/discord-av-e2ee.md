@@ -12,7 +12,7 @@ is_draft: false
 
 Apparently [discord is now end-to-end encrypting all calls](https://piunikaweb.com/2026/03/03/discord-enforcing-end-to-end-encryption-voice-video-calls/)? Anyways, the reason I looked into it a bizarre loading screen tip I've been getting recently. You know these loading screen tips that tell you something supposedly useful for the 1 second the app starts up?
 
-![|small](grafik-1.png)
+![|small](discord-av-e2ee/grafik-1.png)
 
 They dropped a new loading screen tip, and I had to screenshot it to even make sense of what it was trying to say, but it says
 

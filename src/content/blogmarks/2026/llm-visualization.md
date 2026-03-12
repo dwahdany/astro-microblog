@@ -15,4 +15,4 @@ is_draft: false
 
 This is like an interactive 3Blue1Brown visualization and explanation of complete GPT-style model inference running in your browser. Incredible!
 
-![|medium](grafik-1.png)
+![|medium](llm-visualization/grafik-1.png)

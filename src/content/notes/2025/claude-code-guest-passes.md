@@ -8,4 +8,4 @@ tags:
 is_draft: false
 ---
 Claude Code is now telling users that they have free one-week passes to hand out. Great marketing and nice ASCII art
-![|small](SCR-20251215-tpas.png)
+![|small](claude-code-guest-passes/SCR-20251215-tpas.png)

@@ -11,4 +11,4 @@ Claude Code has an auto-compact feature. If you run into the last 20% or so of t
 
 I don't know if this is intended or not, but disabling auto-compacting also seems to let you go over the context limit? As you can see I got up to 106%. It's possible that it's just cutting off the earliest context then, but at least it's good to know that you can keep going without compacting.
 
-![|small](20251207-171434.png)
+![|small](cc-auto-compact/20251207-171434.png)

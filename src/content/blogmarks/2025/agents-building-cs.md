@@ -11,4 +11,4 @@ is_draft: false
 ---
 An agentic eval that compares agents by how well they can build a Counter-Strike clone.
 
-![|medium](scr-20251205-jvmv.png)
+![|medium](agents-building-cs/scr-20251205-jvmv.png)

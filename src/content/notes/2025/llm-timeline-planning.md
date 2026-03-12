@@ -14,4 +14,4 @@ Today Claude asked me when I want to submit my work (because I said I want paper
 
 It doesn't take any real time to give your LLM infinite time.
 
-![](grafik.png)
+![](llm-timeline-planning/grafik.png)
