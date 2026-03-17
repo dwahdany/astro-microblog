@@ -16,7 +16,7 @@ collections:
     label: "Entries"
     label_singular: "Entry"
     folder: "src/content/entries"
-    media_folder: "{{slug}}"
+    media_folder: ""
     public_folder: "{{slug}}"
     create: true
     extension: md
@@ -80,7 +80,7 @@ collections:
     label: "Blogmarks"
     label_singular: "Blogmark"
     folder: "src/content/blogmarks"
-    media_folder: "{{slug}}"
+    media_folder: ""
     public_folder: "{{slug}}"
     create: true
     extension: md
@@ -140,7 +140,7 @@ collections:
     label: "Quotations"
     label_singular: "Quotation"
     folder: "src/content/quotations"
-    media_folder: "{{slug}}"
+    media_folder: ""
     public_folder: "{{slug}}"
     create: true
     extension: md
@@ -194,7 +194,7 @@ collections:
     label: "Notes"
     label_singular: "Note"
     folder: "src/content/notes"
-    media_folder: "{{slug}}"
+    media_folder: ""
     public_folder: "{{slug}}"
     create: true
     extension: md
