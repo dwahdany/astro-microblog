@@ -80,6 +80,6 @@ cat $HOME/.config/safehouse/profiles/nix.sb
 
 </details>
 
-![](claudia/grafik.png)
+![|medium](claudia/grafik.png)
 
 [^1]: I will link here why once responsible disclosure allows.
