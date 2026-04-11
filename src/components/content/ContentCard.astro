@@ -4,6 +4,7 @@ import EntryCard from './EntryCard.astro';
 import BlogmarkCard from './BlogmarkCard.astro';
 import QuotationCard from './QuotationCard.astro';
 import NoteCard from './NoteCard.astro';
+import PhotoCard from './PhotoCard.astro';
 
 interface Props {
   item: ContentItem;
@@ -16,3 +17,4 @@ const { item } = Astro.props;
 {item.type === 'blogmark' && <BlogmarkCard blogmark={item.item} />}
 {item.type === 'quotation' && <QuotationCard quotation={item.item} />}
 {item.type === 'note' && <NoteCard note={item.item} />}
+{item.type === 'photo' && <PhotoCard photo={item.item} />}

@@ -1,0 +1,69 @@
+---
+import { Image } from 'astro:assets';
+import type { PhotoItem } from '../../lib/types';
+import { getItemUrl } from '../../lib/content';
+import TagList from './TagList.astro';
+import PhotoCarousel from './PhotoCarousel.astro';
+
+interface Props {
+  photo: PhotoItem;
+}
+
+const { photo } = Astro.props;
+const url = getItemUrl({ type: 'photo', item: photo });
+const galleryCount = photo.data.gallery?.length ?? 0;
+const isCarousel = galleryCount > 0;
+---
+
+<article class="group">
+  <div class="flex items-start gap-2">
+    <a href={url} class="text-terminal-accent-yellow shrink-0 mt-0.5 hover:text-terminal-accent-cyan transition-colors">▣</a>
+    <div class="flex-1 min-w-0">
+      {photo.data.title && (
+        <h3 class="text-base font-medium text-terminal-text mb-2">
+          <a href={url} class="text-inherit hover:text-terminal-accent-cyan transition-colors">
+            {photo.data.title}
+          </a>
+        </h3>
+      )}
+      {isCarousel ? (
+        <PhotoCarousel photo={photo} variant="compact" />
+      ) : (
+        <a href={url} class="relative block overflow-hidden rounded-lg border border-terminal-border bg-terminal-surface">
+          <Image
+            src={photo.data.photo}
+            alt={photo.data.alt}
+            class="w-full h-auto max-h-[28rem] object-cover transition-transform duration-300 group-hover:scale-[1.01]"
+            widths={[480, 768, 1200]}
+            sizes="(min-width: 768px) 720px, 100vw"
+            loading="lazy"
+          />
+        </a>
+      )}
+      {!isCarousel && photo.data.caption && (
+        <p class="mt-2 text-sm text-terminal-muted italic">
+          {photo.data.caption}
+        </p>
+      )}
+      <div class="mt-2 flex items-center gap-3 text-xs text-terminal-muted flex-wrap">
+        <a href={url} class="text-terminal-muted hover:text-terminal-accent-cyan transition-colors">
+          <time datetime={photo.data.created.toISOString()}>
+            {photo.data.created.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+          </time>
+        </a>
+        {photo.data.location && (
+          <>
+            <span class="text-terminal-border">•</span>
+            <span>{photo.data.location}</span>
+          </>
+        )}
+        {photo.data.tags.length > 0 && (
+          <>
+            <span class="text-terminal-border">•</span>
+            <TagList tags={photo.data.tags} />
+          </>
+        )}
+      </div>
+    </div>
+  </div>
+</article>

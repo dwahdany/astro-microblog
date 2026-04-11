@@ -236,6 +236,114 @@ collections:
         name: "body"
         widget: "markdown"
 
+  - name: photos
+    label: "Photos"
+    label_singular: "Photo"
+    folder: "src/content/photos"
+    media_folder: ""
+    public_folder: "{{slug}}"
+    create: true
+    extension: md
+    format: frontmatter
+    nested:
+      depth: 100
+    path: "{{year}}/{{slug}}"
+    slug: "{{slug}}"
+    summary: "{{alt}}"
+    identifier_field: slug
+    sortable_fields: ['created', 'taken_at']
+    view_filters:
+      - label: Drafts
+        field: is_draft
+        pattern: true
+      - label: Published
+        field: is_draft
+        pattern: false
+    fields:
+      - label: "Slug"
+        name: "slug"
+        widget: "string"
+        pattern: ['^[a-z0-9]+(?:-[a-z0-9]+)*$', "Lowercase letters, numbers, and hyphens only"]
+      - label: "Photo (cover)"
+        name: "photo"
+        widget: "image"
+        hint: "The cover image. Uploaded into a per-photo folder alongside the markdown. Used as the thumbnail and as slide 1 of the carousel when a gallery is present."
+      - label: "Alt Text (cover)"
+        name: "alt"
+        widget: "string"
+        hint: "Required — describe the cover photo for screen readers and as a fallback."
+      - label: "Gallery"
+        name: "gallery"
+        widget: "list"
+        required: false
+        collapsed: true
+        summary: "{{fields.alt}}"
+        hint: "Optional — additional images shown as a carousel. Leave empty for a single-image post."
+        fields:
+          - { label: "Image",   name: "image",   widget: "image" }
+          - { label: "Alt",     name: "alt",     widget: "string" }
+          - { label: "Caption", name: "caption", widget: "string", required: false }
+      - label: "Title"
+        name: "title"
+        widget: "string"
+        required: false
+        hint: "Optional title shown above the photo."
+      - label: "Caption"
+        name: "caption"
+        widget: "text"
+        required: false
+        hint: "Optional caption shown below the photo."
+      - label: "Location"
+        name: "location"
+        widget: "string"
+        required: false
+      - label: "Taken At"
+        name: "taken_at"
+        widget: "datetime"
+        required: false
+        date_format: "YYYY-MM-DD"
+        time_format: "HH:mm:ss"
+        format: "YYYY-MM-DDTHH:mm:ssZ"
+      - label: "Created"
+        name: "created"
+        widget: "datetime"
+        date_format: "YYYY-MM-DD"
+        time_format: "HH:mm:ss"
+        format: "YYYY-MM-DDTHH:mm:ssZ"
+        default: "{{now}}"
+      - label: "Tags"
+        name: "tags"
+        widget: "list"
+        allow_add: true
+        default: []
+      - label: "Draft"
+        name: "is_draft"
+        widget: "boolean"
+        default: false
+      - label: "Card Image"
+        name: "card_image"
+        widget: "image"
+        required: false
+        hint: "Optional override for the listing thumbnail. Defaults to the photo itself."
+      - label: "EXIF"
+        name: "exif"
+        widget: "object"
+        required: false
+        collapsed: true
+        hint: "Usually populated by a build script — leave blank if you don't have it handy."
+        fields:
+          - { label: "Camera",       name: "camera",       widget: "string", required: false }
+          - { label: "Lens",         name: "lens",         widget: "string", required: false }
+          - { label: "Focal Length", name: "focal_length", widget: "string", required: false }
+          - { label: "Aperture",     name: "aperture",     widget: "string", required: false }
+          - { label: "Shutter",      name: "shutter",      widget: "string", required: false }
+          - { label: "ISO",          name: "iso",          widget: "number", required: false, value_type: "int" }
+      - label: "Body"
+        name: "body"
+        widget: "markdown"
+        required: false
+        hint: "Optional commentary shown below the photo."
+
   - name: series
     label: "Series"
     label_singular: "Series"

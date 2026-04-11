@@ -1,0 +1,71 @@
+---
+export const prerender = true;
+
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getItemUrl } from '../../lib/content';
+
+const photos = await getCollection('photos', ({ data }) => !data.is_draft);
+const sorted = photos.sort(
+  (a, b) => new Date(b.data.created).getTime() - new Date(a.data.created).getTime()
+);
+---
+
+<BaseLayout title="Photos" description="Photo posts from the microblog.">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold flex items-center gap-2">
+      <span class="text-terminal-accent-yellow">▣</span>
+      <span>Photos</span>
+    </h1>
+    <p class="text-terminal-muted text-sm mt-2">
+      {sorted.length} photo{sorted.length !== 1 ? 's' : ''}
+    </p>
+  </div>
+
+  {sorted.length === 0 ? (
+    <p class="text-terminal-muted text-center py-12">No photos yet.</p>
+  ) : (
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      {sorted.map((photo) => {
+        const url = getItemUrl({ type: 'photo', item: photo });
+        return (
+          <a
+            href={url}
+            class="group relative block aspect-square overflow-hidden rounded-lg border border-terminal-border bg-terminal-surface"
+            title={photo.data.title || photo.data.alt}
+          >
+            <Image
+              src={photo.data.photo}
+              alt={photo.data.alt}
+              class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              widths={[240, 480, 720]}
+              sizes="(min-width: 640px) 240px, 50vw"
+              loading="lazy"
+            />
+            {(photo.data.title || photo.data.location) && (
+              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                {photo.data.title && (
+                  <p class="text-xs text-white font-medium truncate">{photo.data.title}</p>
+                )}
+                {photo.data.location && (
+                  <p class="text-[10px] text-white/80 truncate">{photo.data.location}</p>
+                )}
+              </div>
+            )}
+          </a>
+        );
+      })}
+    </div>
+  )}
+
+  <div class="mt-8 text-center">
+    <a
+      href="/atom/photos.xml"
+      class="inline-flex items-center gap-2 text-terminal-muted hover:text-terminal-accent-cyan transition-colors text-sm"
+    >
+      <span>Subscribe via RSS</span>
+      <span>→</span>
+    </a>
+  </div>
+</BaseLayout>

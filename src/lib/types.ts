@@ -4,15 +4,17 @@ export type EntryItem = CollectionEntry<'entries'>;
 export type BlogmarkItem = CollectionEntry<'blogmarks'>;
 export type QuotationItem = CollectionEntry<'quotations'>;
 export type NoteItem = CollectionEntry<'notes'>;
+export type PhotoItem = CollectionEntry<'photos'>;
 export type SeriesItem = CollectionEntry<'series'>;
 
-export type ContentType = 'entry' | 'blogmark' | 'quotation' | 'note';
+export type ContentType = 'entry' | 'blogmark' | 'quotation' | 'note' | 'photo';
 
 export type ContentItem =
   | { type: 'entry'; item: EntryItem }
   | { type: 'blogmark'; item: BlogmarkItem }
   | { type: 'quotation'; item: QuotationItem }
-  | { type: 'note'; item: NoteItem };
+  | { type: 'note'; item: NoteItem }
+  | { type: 'photo'; item: PhotoItem };
 
 export type DayGroup = {
   date: string; // ISO date string YYYY-MM-DD
