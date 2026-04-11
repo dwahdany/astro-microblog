@@ -6,11 +6,12 @@ import { MONTHS_3 } from './types';
  * Fetches all non-draft content from all collections
  */
 export async function getAllContent(): Promise<ContentItem[]> {
-  const [entries, blogmarks, quotations, notes] = await Promise.all([
+  const [entries, blogmarks, quotations, notes, photos] = await Promise.all([
     getCollection('entries', ({ data }) => !data.is_draft),
     getCollection('blogmarks', ({ data }) => !data.is_draft),
     getCollection('quotations', ({ data }) => !data.is_draft),
     getCollection('notes', ({ data }) => !data.is_draft),
+    getCollection('photos', ({ data }) => !data.is_draft),
   ]);
 
   const all: ContentItem[] = [
@@ -18,6 +19,7 @@ export async function getAllContent(): Promise<ContentItem[]> {
     ...blogmarks.map((item) => ({ type: 'blogmark' as const, item })),
     ...quotations.map((item) => ({ type: 'quotation' as const, item })),
     ...notes.map((item) => ({ type: 'note' as const, item })),
+    ...photos.map((item) => ({ type: 'photo' as const, item })),
   ];
 
   return all.sort(
@@ -98,6 +100,8 @@ export function getItemTitle(item: ContentItem): string {
       return `Quoting ${item.item.data.source}`;
     case 'note':
       return item.item.data.title || `Note from ${formatShortDate(new Date(item.item.data.created))}`;
+    case 'photo':
+      return item.item.data.title || item.item.data.alt || `Photo from ${formatShortDate(new Date(item.item.data.created))}`;
   }
 }
 

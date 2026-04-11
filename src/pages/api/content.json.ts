@@ -57,6 +57,8 @@ function getExcerpt(item: { type: string; item: { data: any; body?: string } }):
     case 'note':
       // Notes may have body content
       return item.item.body?.slice(0, 200) || '';
+    case 'photo':
+      return item.item.data.caption || item.item.data.alt || '';
     default:
       return '';
   }

@@ -60,6 +60,29 @@ const notes = defineCollection({
   }),
 });
 
+// Photo - Single-image photo posts with optional caption and EXIF
+const photos = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/photos' }),
+  schema: ({ image }) => z.object({
+    ...createBaseSchema(image),
+    title: optionalString(),
+    photo: image(),
+    alt: z.string(),
+    caption: optionalString(),
+    location: optionalString(),
+    taken_at: z.coerce.date().optional(),
+    // EXIF block — typically populated by a build-time script, not the CMS
+    exif: z.object({
+      camera: optionalString(),
+      lens: optionalString(),
+      focal_length: optionalString(),
+      aperture: optionalString(),
+      shutter: optionalString(),
+      iso: z.preprocess(emptyToUndefined, z.number().optional()),
+    }).optional(),
+  }),
+});
+
 // Series - For grouping entries
 const series = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/series' }),
@@ -71,4 +94,4 @@ const series = defineCollection({
   }),
 });
 
-export const collections = { entries, blogmarks, quotations, notes, series };
+export const collections = { entries, blogmarks, quotations, notes, photos, series };

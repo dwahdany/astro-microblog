@@ -11,11 +11,12 @@ import { getItemTitle, getItemUrl, formatDisplayDate } from '../../../../lib/con
 import type { ContentItem } from '../../../../lib/types';
 
 export async function getStaticPaths() {
-  const [entries, blogmarks, quotations, notes] = await Promise.all([
+  const [entries, blogmarks, quotations, notes, photos] = await Promise.all([
     getCollection('entries', ({ data }) => !data.is_draft),
     getCollection('blogmarks', ({ data }) => !data.is_draft),
     getCollection('quotations', ({ data }) => !data.is_draft),
     getCollection('notes', ({ data }) => !data.is_draft),
+    getCollection('photos', ({ data }) => !data.is_draft),
   ]);
 
   const allItems = [
@@ -23,6 +24,7 @@ export async function getStaticPaths() {
     ...blogmarks.map((item) => ({ type: 'blogmark' as const, item })),
     ...quotations.map((item) => ({ type: 'quotation' as const, item })),
     ...notes.map((item) => ({ type: 'note' as const, item })),
+    ...photos.map((item) => ({ type: 'photo' as const, item })),
   ];
 
   return allItems.map((contentItem) => {
@@ -56,7 +58,9 @@ const isEntry = contentItem.type === 'entry';
 const isBlogmark = contentItem.type === 'blogmark';
 const isQuotation = contentItem.type === 'quotation';
 const isNote = contentItem.type === 'note';
+const isPhoto = contentItem.type === 'photo';
 const cardImage = contentItem.item.data.card_image;
+const photoData = isPhoto ? (contentItem.item.data as any) : null;
 ---
 
 <BaseLayout title={title} description={title}>
@@ -84,6 +88,7 @@ const cardImage = contentItem.item.data.card_image;
         )}
         {isQuotation && `Quoting ${(contentItem.item as any).data.source}`}
         {isNote && (contentItem.item.data as any).title || 'Note'}
+        {isPhoto && (photoData!.title || photoData!.alt || 'Photo')}
       </h1>
 
       <div class="flex flex-wrap items-center gap-4 text-sm text-terminal-muted">
@@ -113,7 +118,24 @@ const cardImage = contentItem.item.data.card_image;
       )}
     </header>
 
-    {cardImage && (
+    {isPhoto && (
+      <figure class="mb-8">
+        <Image
+          src={photoData!.photo}
+          alt={photoData!.alt}
+          class="w-full rounded-lg border border-terminal-border"
+          widths={[480, 768, 1200, 1600]}
+          sizes="(min-width: 768px) 720px, 100vw"
+        />
+        {photoData!.caption && (
+          <figcaption class="mt-3 text-sm text-terminal-muted italic text-center">
+            {photoData!.caption}
+          </figcaption>
+        )}
+      </figure>
+    )}
+
+    {!isPhoto && cardImage && (
       <Image
         src={cardImage}
         alt={title}
@@ -129,6 +151,45 @@ const cardImage = contentItem.item.data.card_image;
       )}
       {!isQuotation && <Content />}
     </div>
+
+    {isPhoto && (photoData!.location || photoData!.taken_at || photoData!.exif) && (
+      <dl class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm border-t border-terminal-border pt-4 text-terminal-muted">
+        {photoData!.location && (
+          <div class="flex gap-2">
+            <dt class="text-terminal-accent-cyan">Location</dt>
+            <dd>{photoData!.location}</dd>
+          </div>
+        )}
+        {photoData!.taken_at && (
+          <div class="flex gap-2">
+            <dt class="text-terminal-accent-cyan">Taken</dt>
+            <dd>
+              <time datetime={new Date(photoData!.taken_at).toISOString()}>
+                {new Date(photoData!.taken_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+              </time>
+            </dd>
+          </div>
+        )}
+        {photoData!.exif?.camera && (
+          <div class="flex gap-2"><dt class="text-terminal-accent-cyan">Camera</dt><dd>{photoData!.exif.camera}</dd></div>
+        )}
+        {photoData!.exif?.lens && (
+          <div class="flex gap-2"><dt class="text-terminal-accent-cyan">Lens</dt><dd>{photoData!.exif.lens}</dd></div>
+        )}
+        {photoData!.exif?.focal_length && (
+          <div class="flex gap-2"><dt class="text-terminal-accent-cyan">Focal length</dt><dd>{photoData!.exif.focal_length}</dd></div>
+        )}
+        {photoData!.exif?.aperture && (
+          <div class="flex gap-2"><dt class="text-terminal-accent-cyan">Aperture</dt><dd>{photoData!.exif.aperture}</dd></div>
+        )}
+        {photoData!.exif?.shutter && (
+          <div class="flex gap-2"><dt class="text-terminal-accent-cyan">Shutter</dt><dd>{photoData!.exif.shutter}</dd></div>
+        )}
+        {photoData!.exif?.iso && (
+          <div class="flex gap-2"><dt class="text-terminal-accent-cyan">ISO</dt><dd>{photoData!.exif.iso}</dd></div>
+        )}
+      </dl>
+    )}
 
     {isQuotation && (contentItem.item as any).data.context && (
       <p class="mt-4 text-terminal-muted italic">
