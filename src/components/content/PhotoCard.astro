@@ -10,6 +10,9 @@ interface Props {
 
 const { photo } = Astro.props;
 const url = getItemUrl({ type: 'photo', item: photo });
+const galleryCount = photo.data.gallery?.length ?? 0;
+const totalSlides = galleryCount + 1;
+const isCarousel = galleryCount > 0;
 ---
 
 <article class="group">
@@ -23,7 +26,7 @@ const url = getItemUrl({ type: 'photo', item: photo });
           </a>
         </h3>
       )}
-      <a href={url} class="block overflow-hidden rounded-lg border border-terminal-border bg-terminal-surface">
+      <a href={url} class="relative block overflow-hidden rounded-lg border border-terminal-border bg-terminal-surface">
         <Image
           src={photo.data.photo}
           alt={photo.data.alt}
@@ -32,6 +35,12 @@ const url = getItemUrl({ type: 'photo', item: photo });
           sizes="(min-width: 768px) 720px, 100vw"
           loading="lazy"
         />
+        {isCarousel && (
+          <span class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 text-white text-xs font-medium backdrop-blur-sm flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><rect x="7" y="7" width="18" height="18" rx="2" /></svg>
+            1/{totalSlides}
+          </span>
+        )}
       </a>
       {photo.data.caption && (
         <p class="mt-2 text-sm text-terminal-muted italic">

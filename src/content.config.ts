@@ -60,15 +60,24 @@ const notes = defineCollection({
   }),
 });
 
-// Photo - Single-image photo posts with optional caption and EXIF
+// Photo - Photo posts (single image or a gallery/carousel) with optional EXIF
 const photos = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/photos' }),
   schema: ({ image }) => z.object({
     ...createBaseSchema(image),
     title: optionalString(),
+    // Cover image — required, used for thumbnails, OG image, and as the
+    // first slide of the carousel when a `gallery` is present.
     photo: image(),
     alt: z.string(),
     caption: optionalString(),
+    // Optional additional images for a carousel post. The cover (`photo`)
+    // is always slide 1; these are appended in order.
+    gallery: z.array(z.object({
+      image: image(),
+      alt: z.string(),
+      caption: optionalString(),
+    })).default([]),
     location: optionalString(),
     taken_at: z.coerce.date().optional(),
     // EXIF block — typically populated by a build-time script, not the CMS

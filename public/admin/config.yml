@@ -264,14 +264,25 @@ collections:
         name: "slug"
         widget: "string"
         pattern: ['^[a-z0-9]+(?:-[a-z0-9]+)*$', "Lowercase letters, numbers, and hyphens only"]
-      - label: "Photo"
+      - label: "Photo (cover)"
         name: "photo"
         widget: "image"
-        hint: "The image file. Uploaded into a per-photo folder alongside the markdown."
-      - label: "Alt Text"
+        hint: "The cover image. Uploaded into a per-photo folder alongside the markdown. Used as the thumbnail and as slide 1 of the carousel when a gallery is present."
+      - label: "Alt Text (cover)"
         name: "alt"
         widget: "string"
-        hint: "Required — describe the photo for screen readers and as a fallback."
+        hint: "Required — describe the cover photo for screen readers and as a fallback."
+      - label: "Gallery"
+        name: "gallery"
+        widget: "list"
+        required: false
+        collapsed: true
+        summary: "{{fields.alt}}"
+        hint: "Optional — additional images shown as a carousel. Leave empty for a single-image post."
+        fields:
+          - { label: "Image",   name: "image",   widget: "image" }
+          - { label: "Alt",     name: "alt",     widget: "string" }
+          - { label: "Caption", name: "caption", widget: "string", required: false }
       - label: "Title"
         name: "title"
         widget: "string"

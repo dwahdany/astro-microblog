@@ -1,0 +1,196 @@
+---
+import { Image } from 'astro:assets';
+import type { PhotoItem } from '../../lib/types';
+
+interface Props {
+  photo: PhotoItem;
+}
+
+const { photo } = Astro.props;
+
+// Build a unified slide list: cover first, then any gallery items
+type Slide = {
+  src: PhotoItem['data']['photo'];
+  alt: string;
+  caption?: string;
+};
+
+const slides: Slide[] = [
+  {
+    src: photo.data.photo,
+    alt: photo.data.alt,
+    caption: photo.data.caption,
+  },
+  ...(photo.data.gallery ?? []).map((g) => ({
+    src: g.image,
+    alt: g.alt,
+    caption: g.caption,
+  })),
+];
+
+const total = slides.length;
+const carouselId = `carousel-${photo.data.slug}`;
+---
+
+<figure class="mb-8" data-carousel-id={carouselId}>
+  <div class="relative">
+    <div
+      class="carousel-track flex snap-x snap-mandatory overflow-x-auto scroll-smooth rounded-lg border border-terminal-border bg-terminal-surface"
+      role="region"
+      aria-roledescription="carousel"
+      aria-label={photo.data.title || photo.data.alt}
+    >
+      {slides.map((slide, i) => (
+        <div
+          class="carousel-slide snap-center shrink-0 w-full"
+          role="group"
+          aria-roledescription="slide"
+          aria-label={`${i + 1} of ${total}`}
+          data-index={i}
+        >
+          <Image
+            src={slide.src}
+            alt={slide.alt}
+            class="w-full h-auto max-h-[80vh] object-contain bg-black"
+            widths={[480, 768, 1200, 1600]}
+            sizes="(min-width: 768px) 720px, 100vw"
+            loading={i === 0 ? 'eager' : 'lazy'}
+          />
+        </div>
+      ))}
+    </div>
+
+    {total > 1 && (
+      <>
+        <button
+          type="button"
+          class="carousel-prev absolute left-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/60 text-white flex items-center justify-center backdrop-blur-sm hover:bg-black/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          aria-label="Previous slide"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button
+          type="button"
+          class="carousel-next absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/60 text-white flex items-center justify-center backdrop-blur-sm hover:bg-black/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          aria-label="Next slide"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+
+        <div class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 text-white text-xs font-medium backdrop-blur-sm">
+          <span class="carousel-counter">1</span>/{total}
+        </div>
+      </>
+    )}
+  </div>
+
+  {total > 1 && (
+    <div class="mt-3 flex justify-center gap-1.5" role="tablist" aria-label="Slide selector">
+      {slides.map((_, i) => (
+        <button
+          type="button"
+          class="carousel-dot h-2 w-2 rounded-full bg-terminal-border hover:bg-terminal-accent-cyan transition-colors"
+          data-index={i}
+          aria-label={`Go to slide ${i + 1}`}
+        ></button>
+      ))}
+    </div>
+  )}
+
+  <figcaption class="mt-3 text-sm text-terminal-muted italic text-center min-h-[1.25rem]">
+    {slides.map((slide, i) => (
+      <span class="carousel-caption" data-index={i} hidden={i !== 0}>
+        {slide.caption}
+      </span>
+    ))}
+  </figcaption>
+</figure>
+
+<script>
+  // Wire up each carousel on the page independently.
+  document.querySelectorAll<HTMLElement>('[data-carousel-id]').forEach((root) => {
+    const track = root.querySelector<HTMLElement>('.carousel-track');
+    if (!track) return;
+    const slides = Array.from(track.querySelectorAll<HTMLElement>('.carousel-slide'));
+    const prevBtn = root.querySelector<HTMLButtonElement>('.carousel-prev');
+    const nextBtn = root.querySelector<HTMLButtonElement>('.carousel-next');
+    const dots = Array.from(root.querySelectorAll<HTMLButtonElement>('.carousel-dot'));
+    const counter = root.querySelector<HTMLElement>('.carousel-counter');
+    const captions = Array.from(root.querySelectorAll<HTMLElement>('.carousel-caption'));
+    const total = slides.length;
+    if (total <= 1) return;
+
+    let activeIndex = 0;
+
+    const updateActive = (index: number) => {
+      activeIndex = index;
+      if (counter) counter.textContent = String(index + 1);
+      dots.forEach((dot, i) => {
+        const active = i === index;
+        dot.classList.toggle('bg-terminal-accent-cyan', active);
+        dot.classList.toggle('bg-terminal-border', !active);
+      });
+      captions.forEach((cap, i) => {
+        cap.hidden = i !== index;
+      });
+      if (prevBtn) prevBtn.disabled = index === 0;
+      if (nextBtn) nextBtn.disabled = index === total - 1;
+    };
+
+    const scrollToIndex = (index: number) => {
+      const target = slides[index];
+      if (!target) return;
+      track.scrollTo({ left: target.offsetLeft, behavior: 'smooth' });
+      updateActive(index);
+    };
+
+    prevBtn?.addEventListener('click', () => scrollToIndex(Math.max(0, activeIndex - 1)));
+    nextBtn?.addEventListener('click', () => scrollToIndex(Math.min(total - 1, activeIndex + 1)));
+    dots.forEach((dot, i) => dot.addEventListener('click', () => scrollToIndex(i)));
+
+    // Sync state when the user swipes/scrolls manually.
+    let scrollTimeout: number | undefined;
+    track.addEventListener('scroll', () => {
+      if (scrollTimeout) window.clearTimeout(scrollTimeout);
+      scrollTimeout = window.setTimeout(() => {
+        const trackRect = track.getBoundingClientRect();
+        const center = trackRect.left + trackRect.width / 2;
+        let closest = 0;
+        let closestDist = Infinity;
+        slides.forEach((slide, i) => {
+          const rect = slide.getBoundingClientRect();
+          const slideCenter = rect.left + rect.width / 2;
+          const dist = Math.abs(center - slideCenter);
+          if (dist < closestDist) {
+            closestDist = dist;
+            closest = i;
+          }
+        });
+        updateActive(closest);
+      }, 80);
+    });
+
+    // Keyboard navigation when the carousel is focused.
+    track.tabIndex = 0;
+    track.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        scrollToIndex(Math.max(0, activeIndex - 1));
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        scrollToIndex(Math.min(total - 1, activeIndex + 1));
+      }
+    });
+
+    updateActive(0);
+  });
+</script>
+
+<style>
+  .carousel-track {
+    scrollbar-width: none;
+  }
+  .carousel-track::-webkit-scrollbar {
+    display: none;
+  }
+</style>
