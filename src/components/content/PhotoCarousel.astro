@@ -4,9 +4,19 @@ import type { PhotoItem } from '../../lib/types';
 
 interface Props {
   photo: PhotoItem;
+  variant?: 'full' | 'compact';
 }
 
-const { photo } = Astro.props;
+const { photo, variant = 'full' } = Astro.props;
+const isCompact = variant === 'compact';
+
+const slideImageClass = isCompact
+  ? 'w-full h-[22rem] object-cover bg-black'
+  : 'w-full h-auto max-h-[80vh] object-contain bg-black';
+
+const buttonSizeClass = isCompact ? 'h-8 w-8' : 'h-10 w-10';
+const buttonIconSize = isCompact ? 16 : 20;
+const figureMarginClass = isCompact ? 'mb-0' : 'mb-8';
 
 // Build a unified slide list: cover first, then any gallery items
 type Slide = {
@@ -32,7 +42,7 @@ const total = slides.length;
 const carouselId = `carousel-${photo.data.slug}`;
 ---
 
-<figure class="mb-8" data-carousel-id={carouselId}>
+<figure class={figureMarginClass} data-carousel-id={carouselId}>
   <div class="relative">
     <div
       class="carousel-track flex snap-x snap-mandatory overflow-x-auto scroll-smooth rounded-lg border border-terminal-border bg-terminal-surface"
@@ -51,8 +61,8 @@ const carouselId = `carousel-${photo.data.slug}`;
           <Image
             src={slide.src}
             alt={slide.alt}
-            class="w-full h-auto max-h-[80vh] object-contain bg-black"
-            widths={[480, 768, 1200, 1600]}
+            class={slideImageClass}
+            widths={isCompact ? [480, 768, 1200] : [480, 768, 1200, 1600]}
             sizes="(min-width: 768px) 720px, 100vw"
             loading={i === 0 ? 'eager' : 'lazy'}
           />
@@ -64,17 +74,17 @@ const carouselId = `carousel-${photo.data.slug}`;
       <>
         <button
           type="button"
-          class="carousel-prev absolute left-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/60 text-white flex items-center justify-center backdrop-blur-sm hover:bg-black/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          class={`carousel-prev absolute left-2 top-1/2 -translate-y-1/2 ${buttonSizeClass} rounded-full bg-black/60 text-white flex items-center justify-center backdrop-blur-sm hover:bg-black/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed`}
           aria-label="Previous slide"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width={buttonIconSize} height={buttonIconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <button
           type="button"
-          class="carousel-next absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/60 text-white flex items-center justify-center backdrop-blur-sm hover:bg-black/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          class={`carousel-next absolute right-2 top-1/2 -translate-y-1/2 ${buttonSizeClass} rounded-full bg-black/60 text-white flex items-center justify-center backdrop-blur-sm hover:bg-black/80 transition-colors disabled:opacity-30 disabled:cursor-not-allowed`}
           aria-label="Next slide"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width={buttonIconSize} height={buttonIconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
 
         <div class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 text-white text-xs font-medium backdrop-blur-sm">
