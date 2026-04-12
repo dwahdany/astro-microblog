@@ -1,6 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import tailwind from '@astrojs/tailwind';
+import tailwindcss from '@tailwindcss/vite';
 import cloudflare from '@astrojs/cloudflare';
 import sitemap from '@astrojs/sitemap';
 import { rehypeImageSize } from './src/plugins/rehype-image-size';
@@ -9,7 +9,7 @@ import { rehypeInternalLinkPreview } from './src/plugins/rehype-internal-link-pr
 // https://astro.build/config
 export default defineConfig({
   site: 'https://blog.wahdany.eu',
-  integrations: [tailwind(), sitemap()],
+  integrations: [sitemap()],
   adapter: cloudflare({
     imageService: 'compile',
   }),
@@ -19,5 +19,8 @@ export default defineConfig({
   },
   markdown: {
     rehypePlugins: [rehypeImageSize, rehypeInternalLinkPreview],
+  },
+  vite: {
+    plugins: [tailwindcss()],
   },
 });

@@ -31,9 +31,20 @@
   src: url('/fonts/roboto-mono-700.woff2') format('woff2');
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --color-terminal-bg: #0f172a;
+  --color-terminal-surface: #1e293b;
+  --color-terminal-border: #334155;
+  --color-terminal-text: #e2e8f0;
+  --color-terminal-muted: #94a3b8;
+  --color-terminal-accent-green: #22c55e;
+  --color-terminal-accent-cyan: #06b6d4;
+  --color-terminal-accent-blue: #3b82f6;
+  --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, monospace;
+}
 
 @layer base {
   html {
