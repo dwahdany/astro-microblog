@@ -33,7 +33,7 @@ const sorted = photos.sort(
           <a
             href={url}
             class="group relative block aspect-square overflow-hidden rounded-lg border border-terminal-border bg-terminal-surface"
-            title={photo.data.title || photo.data.alt}
+            title={photo.data.title || undefined}
           >
             <Image
               src={photo.data.photo}

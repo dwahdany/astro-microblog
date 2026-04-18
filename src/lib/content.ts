@@ -101,7 +101,7 @@ export function getItemTitle(item: ContentItem): string {
     case 'note':
       return item.item.data.title || `Note from ${formatShortDate(new Date(item.item.data.created))}`;
     case 'photo':
-      return item.item.data.title || item.item.data.alt || `Photo from ${formatShortDate(new Date(item.item.data.created))}`;
+      return item.item.data.title || `Photo from ${formatShortDate(new Date(item.item.data.created))}`;
   }
 }
 

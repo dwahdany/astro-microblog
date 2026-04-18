@@ -20,7 +20,7 @@ export async function GET(context: APIContext) {
       const date = new Date(photo.data.created);
       const url = `/${date.getFullYear()}/${MONTHS_3[date.getMonth() + 1]}/${date.getDate()}/${photo.data.slug}/`;
       return {
-        title: photo.data.title || photo.data.alt || `Photo from ${formatShortDate(date)}`,
+        title: photo.data.title || `Photo from ${formatShortDate(date)}`,
         pubDate: photo.data.created,
         link: url,
         categories: photo.data.tags,

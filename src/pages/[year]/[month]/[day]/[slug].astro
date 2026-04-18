@@ -89,7 +89,7 @@ const photoData = isPhoto ? (contentItem.item.data as any) : null;
         )}
         {isQuotation && `Quoting ${(contentItem.item as any).data.source}`}
         {isNote && (contentItem.item.data as any).title || 'Note'}
-        {isPhoto && (photoData!.title || photoData!.alt || 'Photo')}
+        {isPhoto && (photoData!.title || 'Photo')}
       </h1>
 
       <div class="flex flex-wrap items-center gap-4 text-sm text-terminal-muted">
