@@ -13,6 +13,11 @@ const { photo } = Astro.props;
 const url = getItemUrl({ type: 'photo', item: photo });
 const galleryCount = photo.data.gallery?.length ?? 0;
 const isCarousel = galleryCount > 0;
+
+const cover = photo.data.photo;
+// Cap height at 70vh while preserving aspect: width can't exceed 100% of column
+// OR the width that would make the image exactly 70vh tall, whichever is smaller.
+const photoBoxStyle = `aspect-ratio: ${cover.width} / ${cover.height}; max-width: min(100%, calc(70vh * ${cover.width} / ${cover.height}));`;
 ---
 
 <article class="group">
@@ -29,11 +34,15 @@ const isCarousel = galleryCount > 0;
       {isCarousel ? (
         <PhotoCarousel photo={photo} variant="compact" />
       ) : (
-        <a href={url} class="relative block overflow-hidden rounded-lg border border-terminal-border">
+        <a
+          href={url}
+          class="relative block mx-auto overflow-hidden rounded-lg border border-terminal-border"
+          style={photoBoxStyle}
+        >
           <Image
             src={photo.data.photo}
             alt={photo.data.alt}
-            class="block w-full h-auto transition-transform duration-300 group-hover:scale-[1.01]"
+            class="block w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.01]"
             widths={[480, 768, 1200]}
             sizes="(min-width: 768px) 720px, 100vw"
             loading="lazy"

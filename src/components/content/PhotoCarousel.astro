@@ -10,8 +10,13 @@ interface Props {
 const { photo, variant = 'full' } = Astro.props;
 const isCompact = variant === 'compact';
 
+const cover = photo.data.photo;
+const coverAspect = `${cover.width} / ${cover.height}`;
+// Compact carousel: derive size from cover aspect and cap height at 70vh.
+const compactTrackStyle = `aspect-ratio: ${coverAspect}; max-width: min(100%, calc(70vh * ${cover.width} / ${cover.height})); margin-left: auto; margin-right: auto;`;
+
 const slideImageClass = isCompact
-  ? 'w-full h-[22rem] object-contain bg-black'
+  ? 'w-full h-full object-contain bg-black'
   : 'w-full h-auto max-h-[80vh] object-contain bg-black';
 
 const buttonSizeClass = isCompact ? 'h-8 w-8' : 'h-10 w-10';
@@ -46,6 +51,7 @@ const carouselId = `carousel-${photo.data.slug}`;
   <div class="relative">
     <div
       class="carousel-track flex snap-x snap-mandatory overflow-x-auto scroll-smooth rounded-lg border border-terminal-border bg-terminal-surface"
+      style={isCompact ? compactTrackStyle : undefined}
       role="region"
       aria-roledescription="carousel"
       aria-label={photo.data.title || photo.data.alt}
