@@ -1,0 +1,7 @@
+{
+	"name": "blog-wahdany-eu",
+	"compatibility_date": "2025-04-01",
+	"kv_namespaces": [
+		{ "binding": "SESSION", "id": "ad62717c76b44a0bbe0b96c74604d582" }
+	]
+}

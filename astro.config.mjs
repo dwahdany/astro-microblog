@@ -12,6 +12,7 @@ export default defineConfig({
   integrations: [sitemap()],
   adapter: cloudflare({
     imageService: 'compile',
+    configPath: './wrangler.jsonc',
   }),
   output: 'server',
   build: {

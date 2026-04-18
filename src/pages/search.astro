@@ -74,15 +74,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 <script>
   import { PagefindUI } from '@pagefind/default-ui';
 
-  window.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const query = urlParams.get('q');
-
-    new PagefindUI({
-      element: '#search',
-      showSubResults: true,
-      showImages: false,
-      defaultTerm: query || '',
-    });
+  const ui = new PagefindUI({
+    element: '#search',
+    showSubResults: true,
+    showImages: false,
   });
+
+  const query = new URLSearchParams(window.location.search).get('q');
+  if (query) ui.triggerSearch(query);
 </script>
