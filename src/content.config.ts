@@ -1,8 +1,8 @@
 import { defineCollection, z, reference } from 'astro:content';
 import { glob } from 'astro/loaders';
 
-// Helper: treat empty strings as undefined (CMS outputs '' for empty optional fields)
-const emptyToUndefined = (val: unknown) => (val === '' ? undefined : val);
+// Helper: treat empty strings and null as undefined (CMS outputs '' or null for empty optional fields)
+const emptyToUndefined = (val: unknown) => (val === '' || val === null ? undefined : val);
 const optionalString = () => z.preprocess(emptyToUndefined, z.string().optional());
 const optionalUrl = () => z.preprocess(emptyToUndefined, z.string().url().optional());
 
@@ -79,16 +79,16 @@ const photos = defineCollection({
       caption: optionalString(),
     })).default([]),
     location: optionalString(),
-    taken_at: z.coerce.date().optional(),
+    taken_at: z.preprocess(emptyToUndefined, z.coerce.date().optional()),
     // EXIF block — typically populated by a build-time script, not the CMS
-    exif: z.object({
+    exif: z.preprocess(emptyToUndefined, z.object({
       camera: optionalString(),
       lens: optionalString(),
       focal_length: optionalString(),
       aperture: optionalString(),
       shutter: optionalString(),
       iso: z.preprocess(emptyToUndefined, z.number().optional()),
-    }).optional(),
+    }).optional()),
   }),
 });
 
