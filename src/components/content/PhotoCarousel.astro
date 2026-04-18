@@ -11,7 +11,7 @@ const { photo, variant = 'full' } = Astro.props;
 const isCompact = variant === 'compact';
 
 const slideImageClass = isCompact
-  ? 'w-full h-[22rem] object-cover bg-black'
+  ? 'w-full h-[22rem] object-contain bg-black'
   : 'w-full h-auto max-h-[80vh] object-contain bg-black';
 
 const buttonSizeClass = isCompact ? 'h-8 w-8' : 'h-10 w-10';

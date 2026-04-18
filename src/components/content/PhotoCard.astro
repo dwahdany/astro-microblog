@@ -29,11 +29,11 @@ const isCarousel = galleryCount > 0;
       {isCarousel ? (
         <PhotoCarousel photo={photo} variant="compact" />
       ) : (
-        <a href={url} class="relative block overflow-hidden rounded-lg border border-terminal-border bg-terminal-surface">
+        <a href={url} class="relative block overflow-hidden rounded-lg border border-terminal-border">
           <Image
             src={photo.data.photo}
             alt={photo.data.alt}
-            class="w-full h-auto max-h-[28rem] object-cover transition-transform duration-300 group-hover:scale-[1.01]"
+            class="block w-full h-auto transition-transform duration-300 group-hover:scale-[1.01]"
             widths={[480, 768, 1200]}
             sizes="(min-width: 768px) 720px, 100vw"
             loading="lazy"
