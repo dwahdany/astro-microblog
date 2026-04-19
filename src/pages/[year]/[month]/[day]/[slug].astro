@@ -62,6 +62,8 @@ const isNote = contentItem.type === 'note';
 const isPhoto = contentItem.type === 'photo';
 const cardImage = contentItem.item.data.card_image;
 const photoData = isPhoto ? (contentItem.item.data as any) : null;
+const noteTitle = isNote ? (contentItem.item.data as any).title : null;
+const hasTitle = isEntry || isBlogmark || isQuotation || Boolean(noteTitle) || Boolean(photoData?.title);
 ---
 
 <BaseLayout title={title} description={title}>
@@ -75,22 +77,24 @@ const photoData = isPhoto ? (contentItem.item.data as any) : null;
         <a href={`/${year}/${month}/${day}/`} class="hover:text-terminal-accent-cyan">{day}</a>
       </div>
 
-      <h1 class="text-2xl md:text-3xl font-bold text-terminal-text mb-4">
-        {isEntry && title}
-        {isBlogmark && (
-          <a
-            href={(contentItem.item as any).data.link_url}
-            class="text-terminal-accent-blue hover:text-terminal-accent-cyan"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {title}
-          </a>
-        )}
-        {isQuotation && `Quoting ${(contentItem.item as any).data.source}`}
-        {isNote && (contentItem.item.data as any).title || 'Note'}
-        {isPhoto && (photoData!.title || 'Photo')}
-      </h1>
+      {hasTitle && (
+        <h1 class="text-2xl md:text-3xl font-bold text-terminal-text mb-4">
+          {isEntry && title}
+          {isBlogmark && (
+            <a
+              href={(contentItem.item as any).data.link_url}
+              class="text-terminal-accent-blue hover:text-terminal-accent-cyan"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {title}
+            </a>
+          )}
+          {isQuotation && `Quoting ${(contentItem.item as any).data.source}`}
+          {isNote && noteTitle}
+          {isPhoto && photoData!.title}
+        </h1>
+      )}
 
       <div class="flex flex-wrap items-center gap-4 text-sm text-terminal-muted">
         <time datetime={date.toISOString()}>
