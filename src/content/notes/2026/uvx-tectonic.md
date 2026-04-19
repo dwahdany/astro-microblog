@@ -5,6 +5,7 @@ created: 2026-04-18T15:31:00+00:00
 tags:
   - latex
   - software-engineering
+  - tools
 is_draft: false
 ---
 
