@@ -115,34 +115,32 @@ function findMarkdownFiles(dir: string): string[] {
 }
 
 function createPreviewCard(meta: PostMeta, originalUrl: string): Element {
-  // Type icons matching the blog's style
-  const typeIcons: Record<string, string> = {
-    entry: '▸',
-    blogmark: '@',
-    note: '○',
-    quotation: '"',
+  const typeLabels: Record<string, string> = {
+    entry: 'post',
+    blogmark: 'blogmark',
+    note: 'note',
+    quotation: 'quote',
   };
 
-  const typeColors: Record<string, string> = {
-    entry: 'preview-icon-entry',
-    blogmark: 'preview-icon-blogmark',
-    note: 'preview-icon-note',
-    quotation: 'preview-icon-quote',
-  };
-
-  // Format date
   const dateStr = meta.date.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
   });
 
-  // Build the card content
-  const contentChildren: ElementContent[] = [];
+  const labelText = `↩ Previously · ${typeLabels[meta.type] || 'post'} · ${dateStr}`;
 
-  // Title or excerpt as main text
+  const children: ElementContent[] = [
+    {
+      type: 'element',
+      tagName: 'span',
+      properties: { className: 'preview-label' },
+      children: [{ type: 'text', value: labelText }],
+    },
+  ];
+
   if (meta.title) {
-    contentChildren.push({
+    children.push({
       type: 'element',
       tagName: 'span',
       properties: { className: 'preview-title' },
@@ -150,7 +148,7 @@ function createPreviewCard(meta: PostMeta, originalUrl: string): Element {
     });
   }
   if (meta.excerpt) {
-    contentChildren.push({
+    children.push({
       type: 'element',
       tagName: 'span',
       properties: { className: meta.title ? 'preview-excerpt' : 'preview-title' },
@@ -158,39 +156,16 @@ function createPreviewCard(meta: PostMeta, originalUrl: string): Element {
     });
   }
 
-  // Date footer
-  contentChildren.push({
-    type: 'element',
-    tagName: 'span',
-    properties: { className: 'preview-date' },
-    children: [{ type: 'text', value: dateStr }],
-  });
-
   return {
     type: 'element',
     tagName: 'div',
-    properties: { className: 'internal-link-preview' },
+    properties: { className: `internal-link-preview preview-${meta.type}` },
     children: [
       {
         type: 'element',
         tagName: 'a',
         properties: { href: meta.url },
-        children: [
-          // Icon
-          {
-            type: 'element',
-            tagName: 'span',
-            properties: { className: `preview-icon ${typeColors[meta.type] || ''}` },
-            children: [{ type: 'text', value: typeIcons[meta.type] || '→' }],
-          },
-          // Content wrapper
-          {
-            type: 'element',
-            tagName: 'span',
-            properties: { className: 'preview-content' },
-            children: contentChildren,
-          },
-        ],
+        children,
       },
     ],
   };
