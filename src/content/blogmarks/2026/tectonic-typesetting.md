@@ -7,6 +7,7 @@ created: 2026-04-16T12:19:00+00:00
 tags:
   - latex
   - software-engineering
+  - tools
 via_url: ''
 via_title: ''
 is_draft: false
