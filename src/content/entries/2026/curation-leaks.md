@@ -24,7 +24,7 @@ The model never sees the private data. Surely that's private?
 
 **It isn't.** We run membership inference attacks against every step of this pipeline and show that each one leaks information about which samples are in $\mathcal{T}$.
 
-![Curation pipeline and attack surfaces](curation-leaks/hero.png)
+![Curation pipeline and attack surfaces|large](curation-leaks/hero.png)
 
 ## Three places private information leaks
 
@@ -48,15 +48,15 @@ Scores are the most information-rich surface. We run three attacks:
 - **LiRA** ([Carlini et al., 2022](https://arxiv.org/abs/2112.03570)). The standard likelihood-ratio membership inference test, adapted to curation scores via shadow curators.
 - **Voting scheme** (Image-based only). The Image-based curator picks the nearest target for each public point. If you can observe the score, you can reason backward: the winning target has distance exactly $s(x)$, and any target closer than that *cannot* be in $\mathcal{T}$. Votes across many public samples reconstruct the target set.
 
-  ![Voting scheme](curation-leaks/voting.png)
+  ![Voting scheme|medium](curation-leaks/voting.png)
 
 - **Least squares** (TRAK only). TRAK scores are linear in the target gradients, so we can solve $\hat{\mathbf{m}} = \arg\min \|\mathbf{A}\mathbf{m} - \mathbf{s}\|_2^2$ directly.
 
-  ![Least squares attack](curation-leaks/lstsq.png)
+  ![Least squares attack|medium](curation-leaks/lstsq.png)
 
 **Results.** Image-based scores leak strongly across all six datasets. TRAK scores are near-random (AUC ≈ 0.5), at least for large $|\mathcal T|$ of around $50,000$. Averaging over many targets dilutes any single target's signal, and the dimensionality reduction of the projection hides what's left.
 
-![Cross-dataset score-attack success](curation-leaks/cross_dataset_comparison_with_scores_log.png)
+![Cross-dataset score-attack success|medium](curation-leaks/cross_dataset_comparison_with_scores_log.png)
 
 **Why does Image-based leak so much?** Its mechanism is *deterministic and local*. Every target's presence either flips a public sample's nearest-neighbor assignment or it doesn't, and any flip is a membership bit.
 
@@ -90,12 +90,12 @@ and insert $\mathcal{F} = \{\arg\max_{f \in \mathcal{D}} \text{score}(f, t_i) \m
 
 **TRAK fingerprints.** TRAK is harder: it explicitly penalizes mislabeled samples via gradient alignment, so the "ratatouille" trick doesn't work. But it turns out that *appending* orthogonal information to a correct caption ("an image of an airplane *and ratatouille*") preserves TRAK scores while still imprinting a detectable signal. TRAK only cares about gradient projection onto task-relevant directions, and the orthogonal addition sits outside those directions.
 
-![A TRAK fingerprint: airplane image with an orthogonal caption addition](curation-leaks/fingerprint.png)
+![A TRAK fingerprint: airplane image with an orthogonal caption addition|small](curation-leaks/fingerprint.png)
 
 **Does 5 fingerprints in a million public samples even matter?** Yes. The signal is stable for pools of up to $10^6$ samples with as few as 5 fingerprints, a poisoning rate of 0.0005%.
 
-![End-to-end attack on Image-based, CIFAR-10](curation-leaks/img_e2e_cifar10_tpr.png)
-![End-to-end attack on TRAK, CIFAR-10](curation-leaks/trak_e2e_cifar10_tpr.png)
+![End-to-end attack on Image-based, CIFAR-10|medium](curation-leaks/img_e2e_cifar10_tpr.png)
+![End-to-end attack on TRAK, CIFAR-10|medium](curation-leaks/trak_e2e_cifar10_tpr.png)
 
 **Results.** Image-based leaks consistently across all target-set sizes (up to 21.4% TPR at 1% FPR on RESISC45 with $|\mathcal{T}|=100$). TRAK is size-dependent: strong leakage for small targets, largely protected once $|\mathcal{T}|$ is big enough for gradient averaging to wash out individual contributions. Unfortunately, "small targets" is *exactly* the setting curation is sold for in sensitive domains.
 
