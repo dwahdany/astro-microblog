@@ -3,6 +3,8 @@ import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import cloudflare from '@astrojs/cloudflare';
 import sitemap from '@astrojs/sitemap';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 import { rehypeImageSize } from './src/plugins/rehype-image-size';
 import { rehypeInternalLinkPreview } from './src/plugins/rehype-internal-link-preview';
 
@@ -19,7 +21,8 @@ export default defineConfig({
     format: 'directory',
   },
   markdown: {
-    rehypePlugins: [rehypeImageSize, rehypeInternalLinkPreview],
+    remarkPlugins: [remarkMath],
+    rehypePlugins: [rehypeImageSize, rehypeInternalLinkPreview, rehypeKatex],
   },
   vite: {
     plugins: [tailwindcss()],
