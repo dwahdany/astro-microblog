@@ -10,6 +10,7 @@ tags:
   - antigravity
 is_draft: false
 ---
+
 I noticed today that you can no longer let the agent in antigravity "auto-decide" which commands are safe to execute. There is just auto-accept and always-ask.
 
 ![Antigravity settings showing "Always Proceed" and "Request Review" options for "Terminal Command Auto Execution" |medium](antigravity-secure-mode/grafik.png)
@@ -18,4 +19,4 @@ I wrote in a [previous post](https://blog.wahdany.eu/2025/Dec/5/antigravity-cc-s
 
 ![It asks whether to run a command with only the options Reject and Accept.|small](antigravity-secure-mode/SCR-20260113-mtnk.png)
 
-I don't know why they can't just copy what Claude Code has. Anthropic has published a lot on this topic, and I don't think usable security should be a competitive differentiator.
+I don't know why they can't just copy what Claude Code has. Anthropic has published a lot on this topic, and I don't think usable security should be a competitive differentiator, but maybe [Google thinks differently](https://nicholas.carlini.com/writing/2025/career-update.html).
