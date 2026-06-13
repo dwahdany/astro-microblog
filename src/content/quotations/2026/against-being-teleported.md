@@ -11,11 +11,11 @@ is_draft: false
 ---
 
 If I'm going to be happy anywhere,  
-Or achieve greatness anywhere, 
-Or learn true secrets anywhere, 
-Or save the world anywhere, 
-Or feel strongly anywhere, 
-Or help people anywhere, 
-I may as well do it in reality. 
+Or achieve greatness anywhere,  
+Or learn true secrets anywhere,  
+Or save the world anywhere,  
+Or feel strongly anywhere,  
+Or help people anywhere,  
+I may as well do it in reality.  
 
 (originally from the book _Rationality: From AI to Zombies_)
