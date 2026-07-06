@@ -8,7 +8,7 @@ tags:
   - modal
   - compute
   - education
-  - large-language-models
+  - llm
   - ai
 via_url: ''
 via_title: ''
