@@ -1,0 +1,63 @@
+name: Refresh portfolio prices
+
+# The price feed rate-limits by IP. A GitHub runner gets a fresh one and fetches
+# ~10 symbols once a day, so it never sees a throttle — unlike a laptop that has
+# been poking the same endpoint all afternoon.
+on:
+  schedule:
+    # 22:30 UTC on weekdays: after the US close (20:00/21:00 UTC depending on DST)
+    # and long after the European close, so every series has the day's bar.
+    - cron: '30 22 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: 'Commit the refreshed cache back to the branch'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-prices-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Fetch prices
+        # The runner is not rate-limited, so there is no reason to crawl.
+        env:
+          PRICE_GAP_MS: '1500'
+        run: node scripts/fetch-prices.mjs --verbose
+
+      # Always publish the result as an artifact, so a run is useful even when
+      # the commit step is skipped or the branch is protected.
+      - name: Upload cache as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prices
+          path: src/data/prices.json
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Commit if changed
+        if: ${{ github.event_name == 'schedule' || inputs.commit }}
+        run: |
+          if git diff --quiet -- src/data/prices.json; then
+            echo "No change."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/prices.json
+          git commit -m "Refresh portfolio price cache"
+          git push

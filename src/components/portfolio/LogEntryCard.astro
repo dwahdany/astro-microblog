@@ -1,0 +1,133 @@
+---
+import { render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import type { DecisionOutcome, MoveKind } from '../../lib/portfolio/types';
+import { formatShortDate } from '../../lib/content';
+import MoveBadge from './MoveBadge.astro';
+import TagList from '../content/TagList.astro';
+
+interface Props {
+  entry: CollectionEntry<'portfolio'>;
+  move: MoveKind;
+  isDoubleDown: boolean;
+  href: string;
+  outcome?: DecisionOutcome;
+}
+
+const { entry, move, isDoubleDown, href, outcome } = Astro.props;
+const { Content } = await render(entry);
+
+// Gutter glyph: the same shape and colour the chart draws for this decision, so
+// a marker on the line and its entry in the log are recognisably one event.
+const GLYPHS: Record<MoveKind, { glyph: string; class: string }> = {
+  open: { glyph: '●', class: 'text-pf-mk-in' },
+  add: { glyph: '▲', class: 'text-pf-mk-in' },
+  trim: { glyph: '▼', class: 'text-pf-mk-out' },
+  exit: { glyph: '✕', class: 'text-pf-mk-out' },
+  rebalance: { glyph: '◇', class: 'text-pf-mk-neutral' },
+  note: { glyph: '○', class: 'text-pf-mk-neutral' },
+};
+const marker = GLYPHS[move] ?? GLYPHS.note;
+
+// Weights print as whole percents unless a half-point is actually there.
+const fmtW = (w: number) => {
+  const v = w * 100;
+  return `${Math.abs(v - Math.round(v)) < 0.05 ? Math.round(v) : v.toFixed(1)}%`;
+};
+const sign = (x: number) => (x > 0 ? '+' : x < 0 ? '−' : '');
+const signedPct = (x: number, dp = 1) => `${sign(x)}${Math.abs(x * 100).toFixed(dp)}%`;
+const tone = (x: number) =>
+  x > 0 ? 'text-terminal-accent-green' : x < 0 ? 'text-pf-loss' : 'text-terminal-muted';
+const arrow = (x: number) => (x > 0 ? '↑' : x < 0 ? '↓' : '·');
+
+interface LegLine {
+  ticker: string;
+  change: string;
+  since: { text: string; glyph: string; tone: string } | null;
+}
+
+// `outcome` carries the pre-trade weight, which the frontmatter cannot: a leg
+// only records what the weight BECAME. With it we can print "4% → 8%"; without
+// it we print what the entry itself declared.
+const legs: LegLine[] = outcome
+  ? outcome.legs.map((l) => ({
+      ticker: l.ticker,
+      change: `${fmtW(l.weightBefore)} → ${fmtW(l.weightAfter)}`,
+      since:
+        l.returnSince === null
+          ? null
+          : {
+              text: signedPct(l.returnSince),
+              glyph: arrow(l.returnSince),
+              tone: tone(l.returnSince),
+            },
+    }))
+  : entry.data.legs.map((l) => ({
+      ticker: l.ticker,
+      change:
+        l.weight !== undefined
+          ? `→ ${fmtW(l.weight)}`
+          : l.portion !== undefined
+            ? `sold ${fmtW(l.portion)}`
+            : l.scale !== undefined
+              ? `×${l.scale}`
+              : 'exited',
+      since: null,
+    }));
+
+const created = entry.data.created;
+---
+
+<article id={`pf-${entry.data.slug}`} class="group scroll-mt-8">
+  <div class="flex items-start gap-2">
+    <a
+      href={href}
+      class:list={[
+        marker.class,
+        'shrink-0 mt-0.5 hover:text-terminal-accent-cyan transition-colors',
+      ]}
+      aria-hidden="true"
+      tabindex="-1"
+    >
+      {marker.glyph}
+    </a>
+    <div class="flex-1 min-w-0">
+      <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-terminal-muted">
+        <time datetime={created.toISOString()}>{formatShortDate(created)}</time>
+        <MoveBadge kind={move} isDoubleDown={isDoubleDown} />
+      </div>
+
+      <h3 class="text-base font-medium text-terminal-text mt-2">
+        <a href={href} class="text-inherit hover:text-terminal-accent-cyan transition-colors">
+          {entry.data.title}
+        </a>
+      </h3>
+
+      {legs.length > 0 && (
+        <ul class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+          {legs.map((leg) => (
+            <li class="inline-flex items-baseline gap-1.5 whitespace-nowrap">
+              <span class="text-terminal-text font-medium">{leg.ticker}</span>
+              <span class="text-terminal-muted">{leg.change}</span>
+              {leg.since && (
+                <span class={leg.since.tone} title="Total return since this decision">
+                  <span aria-hidden="true">{leg.since.glyph}</span> {leg.since.text}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div class="mt-2 text-terminal-muted text-sm prose prose-sm max-w-none line-clamp-3">
+        {entry.data.excerpt ? <p>{entry.data.excerpt}</p> : <Content />}
+      </div>
+
+      {entry.data.tags.length > 0 && (
+        <div class="mt-2 flex items-center gap-3 text-xs text-terminal-muted">
+          <TagList tags={entry.data.tags} />
+        </div>
+      )}
+    </div>
+  </div>
+</article>

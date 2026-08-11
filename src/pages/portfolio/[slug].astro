@@ -1,0 +1,396 @@
+---
+export const prerender = true;
+
+import { getCollection, render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TagList from '../../components/content/TagList.astro';
+import MoveBadge from '../../components/portfolio/MoveBadge.astro';
+import Giscus from '../../components/integrations/Giscus.astro';
+import { buildPortfolio } from '../../lib/portfolio/engine';
+import { createPrices } from '../../lib/portfolio/prices';
+import { portfolioConfig } from '../../data/portfolio.config';
+import { CASH } from '../../lib/portfolio/types';
+import type {
+  DecisionOutcome,
+  IsoDate,
+  Leg,
+  LogEntry,
+  MoveKind,
+  PriceData,
+} from '../../lib/portfolio/types';
+import { formatDisplayDate, formatShortDate } from '../../lib/content';
+
+// NOTE: `getStaticPaths` is hoisted out of the component scope by the Astro
+// compiler, so everything it uses has to live inside it (or be an import).
+export async function getStaticPaths() {
+  // `enabled: false` keeps every decision page out of the build.
+  if (!portfolioConfig.enabled) return [];
+
+  const isoDay = (d: Date): IsoDate => d.toISOString().slice(0, 10);
+
+  const toLogEntry = (doc: CollectionEntry<'portfolio'>): LogEntry => {
+    const created = isoDay(new Date(doc.data.created));
+    return {
+      slug: doc.data.slug,
+      title: doc.data.title,
+      created,
+      move: doc.data.move,
+      conviction: doc.data.conviction,
+      // A leg with no date of its own happened on the day of the decision.
+      legs: doc.data.legs.map(
+        (leg): Leg => ({
+          ticker: leg.ticker,
+          name: leg.name,
+          action: leg.action,
+          date: leg.date ? isoDay(new Date(leg.date)) : created,
+          weight: leg.weight,
+          portion: leg.portion,
+          scale: leg.scale,
+        })
+      ),
+      costBps: doc.data.cost_bps,
+      href: `/portfolio/${doc.data.slug}/`,
+      tags: doc.data.tags,
+      excerpt: doc.data.excerpt,
+    };
+  };
+
+  /** Coarse move kind, used only when the engine could not classify it. */
+  const fallbackMove = (entry: LogEntry, seen: Set<string>): MoveKind => {
+    const legs = entry.legs.filter((l) => l.ticker !== CASH);
+    if (legs.length === 0) return 'note';
+    const isExit = (l: Leg) =>
+      l.weight === 0 ||
+      l.portion === 1 ||
+      (l.action === 'sell' &&
+        l.weight === undefined &&
+        l.portion === undefined &&
+        l.scale === undefined);
+    const exits = legs.filter(isExit);
+    const opens = legs.filter((l) => !isExit(l) && !seen.has(l.ticker));
+    for (const l of legs) (isExit(l) ? seen.delete(l.ticker) : seen.add(l.ticker));
+    if (exits.length === legs.length) return 'exit';
+    if (opens.length === legs.length) return 'open';
+    if (legs.length === 1) {
+      const [l] = legs;
+      return l.portion !== undefined || (l.scale !== undefined && l.scale < 1)
+        ? 'trim'
+        : 'add';
+    }
+    return 'rebalance';
+  };
+
+  const priceModules = import.meta.glob<{ default: PriceData }>('../../data/*.json', {
+    eager: true,
+  });
+  const priceEntry = Object.entries(priceModules).find(([path]) =>
+    path.endsWith('/prices.json')
+  );
+  const priceData: PriceData | null = priceEntry ? priceEntry[1].default : null;
+  const hasPriceData =
+    priceData !== null && Object.keys(priceData.series ?? {}).length > 0;
+
+  const docs = await getCollection('portfolio', ({ data }) => !data.is_draft);
+  const newestFirst = [...docs].sort(
+    (a, b) => new Date(b.data.created).getTime() - new Date(a.data.created).getTime()
+  );
+  const log = newestFirst.map(toLogEntry);
+  const chronological = [...log].reverse();
+
+  // Built once for the whole route: each page takes only its own outcome.
+  let outcomes: Record<string, DecisionOutcome> = {};
+  let asOf: IsoDate | null = null;
+  let benchmarkLabel: string | null = null;
+  if (hasPriceData) {
+    try {
+      const snapshot = buildPortfolio({
+        entries: chronological,
+        prices: createPrices(priceData, portfolioConfig.baseCurrency),
+        config: portfolioConfig,
+      });
+      outcomes = snapshot.outcomes;
+      asOf = snapshot.asOf;
+      const primary =
+        snapshot.benchmarks.find((b) => b.primary) ?? snapshot.benchmarks[0] ?? null;
+      benchmarkLabel = primary?.label ?? null;
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.warn(
+          `[portfolio] engine failed, decision pages render without outcomes: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
+    }
+  }
+
+  const seen = new Set<string>();
+  const fallbackKinds = new Map<string, MoveKind>();
+  for (const entry of chronological) {
+    fallbackKinds.set(entry.slug, entry.move ?? fallbackMove(entry, seen));
+  }
+
+  const link = (i: number) =>
+    newestFirst[i]
+      ? { title: newestFirst[i].data.title, href: `/portfolio/${newestFirst[i].data.slug}/` }
+      : null;
+
+  return newestFirst.map((doc, i) => ({
+    params: { slug: doc.data.slug },
+    props: {
+      doc,
+      entry: log[i],
+      outcome: outcomes[doc.data.slug] ?? null,
+      move: outcomes[doc.data.slug]?.kind ?? fallbackKinds.get(doc.data.slug) ?? 'note',
+      isDoubleDown: outcomes[doc.data.slug]?.isDoubleDown ?? false,
+      newer: link(i - 1),
+      older: link(i + 1),
+      asOf,
+      benchmarkLabel,
+    },
+  }));
+}
+
+interface Props {
+  doc: CollectionEntry<'portfolio'>;
+  entry: LogEntry;
+  outcome: DecisionOutcome | null;
+  move: MoveKind;
+  isDoubleDown: boolean;
+  newer: { title: string; href: string } | null;
+  older: { title: string; href: string } | null;
+  asOf: IsoDate | null;
+  benchmarkLabel: string | null;
+}
+
+const { doc, entry, outcome, move, isDoubleDown, newer, older, asOf, benchmarkLabel } =
+  Astro.props;
+
+/** Midday UTC so `toLocaleDateString` can never roll a date backwards. */
+const asDate = (d: IsoDate): Date => new Date(`${d}T12:00:00Z`);
+
+const { Content } = await render(doc);
+const date = asDate(entry.created);
+
+// Typographic minus and an explicit plus, matching the portfolio components.
+const pct = (x: number, digits = 1) =>
+  `${x >= 0 ? '+' : '−'}${Math.abs(x * 100).toFixed(digits)}%`;
+const weightPct = (w: number) => `${(w * 100).toFixed(1)}%`;
+const tone = (x: number | null | undefined) =>
+  x === null || x === undefined
+    ? 'text-terminal-muted'
+    : x > 0.0005
+      ? 'text-terminal-accent-green'
+      : x < -0.0005
+        ? 'text-red-400'
+        : 'text-terminal-muted';
+
+/** What a leg declared, when the engine could not supply before/after weights. */
+const declared = (leg: Leg) => {
+  if (leg.weight !== undefined) return leg.weight === 0 ? 'exited' : weightPct(leg.weight);
+  if (leg.portion !== undefined) return `sold ${weightPct(leg.portion)} of the position`;
+  if (leg.scale !== undefined) return `×${leg.scale}`;
+  return 'exited';
+};
+
+const legRows = outcome?.legs ?? [];
+const hasAged =
+  outcome !== null &&
+  (outcome.portfolioSince !== null ||
+    outcome.legs.some((l) => l.returnSince !== null));
+// Cash has no instrument return to age, so it stays out of the scoreboard.
+const agedRows = (outcome?.legs ?? []).filter((l) => l.ticker !== CASH);
+---
+
+<BaseLayout title={entry.title} description={entry.excerpt || portfolioConfig.description}>
+  <article class="max-w-2xl mx-auto" data-pagefind-body>
+    <header class="mb-8">
+      <div class="flex items-center gap-2 text-sm text-terminal-muted mb-4">
+        <a href="/portfolio/" class="hover:text-terminal-accent-cyan">portfolio</a>
+        <span>/</span>
+        <a href="/portfolio/#log" class="hover:text-terminal-accent-cyan">log</a>
+      </div>
+
+      <div class="mb-4">
+        <MoveBadge kind={move} isDoubleDown={isDoubleDown} />
+      </div>
+
+      <h1 class="text-2xl md:text-3xl font-bold text-terminal-text mb-4">
+        {entry.title}
+      </h1>
+
+      <div class="flex flex-wrap items-center gap-4 text-sm text-terminal-muted">
+        <time datetime={date.toISOString()}>{formatDisplayDate(date)}</time>
+        {entry.conviction && (
+          <>
+            <span class="text-terminal-border">•</span>
+            <span>conviction: {entry.conviction}</span>
+          </>
+        )}
+        {entry.tags.length > 0 && (
+          <>
+            <span class="text-terminal-border">•</span>
+            <TagList tags={entry.tags} size="base" />
+          </>
+        )}
+      </div>
+    </header>
+
+    {entry.legs.length > 0 && (
+      <section class="mb-8">
+        <h2 class="text-sm font-medium text-terminal-text mb-3 flex items-center gap-2">
+          <span class="text-terminal-accent-green">></span>
+          <span>What it did to the book</span>
+        </h2>
+        <div class="overflow-x-auto rounded-lg border border-terminal-border bg-terminal-surface">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-xs text-terminal-muted border-b border-terminal-border">
+                <th class="text-left font-normal px-3 py-2">Holding</th>
+                <th class="text-right font-normal px-3 py-2">Weight before</th>
+                <th class="text-right font-normal px-3 py-2">Weight after</th>
+              </tr>
+            </thead>
+            <tbody>
+              {legRows.length > 0
+                ? legRows.map((leg) => (
+                    <tr class="border-b border-terminal-border/50 last:border-0">
+                      <td class="px-3 py-2">
+                        <span class="text-terminal-text">
+                          {leg.ticker === CASH ? 'Cash' : leg.ticker}
+                        </span>
+                        {leg.ticker !== CASH && leg.name && leg.name !== leg.ticker && (
+                          <span class="text-terminal-muted"> · {leg.name}</span>
+                        )}
+                      </td>
+                      <td class="px-3 py-2 text-right text-terminal-muted tabular-nums">
+                        {leg.weightBefore > 0 ? weightPct(leg.weightBefore) : '—'}
+                      </td>
+                      <td
+                        class:list={[
+                          'px-3 py-2 text-right tabular-nums',
+                          tone(leg.weightAfter - leg.weightBefore),
+                        ]}
+                      >
+                        {leg.weightAfter > 0 ? weightPct(leg.weightAfter) : '—'}
+                      </td>
+                    </tr>
+                  ))
+                : entry.legs.map((leg) => (
+                    <tr class="border-b border-terminal-border/50 last:border-0">
+                      <td class="px-3 py-2">
+                        <span class="text-terminal-text">
+                          {leg.ticker === CASH ? 'Cash' : leg.ticker}
+                        </span>
+                        {leg.ticker !== CASH && leg.name && leg.name !== leg.ticker && (
+                          <span class="text-terminal-muted"> · {leg.name}</span>
+                        )}
+                      </td>
+                      <td class="px-3 py-2 text-right text-terminal-muted">—</td>
+                      <td class="px-3 py-2 text-right text-terminal-text tabular-nums">
+                        {declared(leg)}
+                      </td>
+                    </tr>
+                  ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="mt-2 text-xs text-terminal-muted">
+          Weights, not amounts — share counts and prices are deliberately absent.
+        </p>
+      </section>
+    )}
+
+    <div class="prose prose-lg max-w-none">
+      <Content />
+    </div>
+
+    {hasAged && outcome && (
+      <section class="mt-10">
+        <h2 class="text-sm font-medium text-terminal-text mb-1 flex items-center gap-2">
+          <span class="text-terminal-accent-green">></span>
+          <span>How this has aged</span>
+        </h2>
+        <p class="text-xs text-terminal-muted mb-3">
+          {asOf
+            ? `Total return from ${formatShortDate(asDate(outcome.date))} to ${formatShortDate(asDate(asOf))}.`
+            : `Total return since ${formatShortDate(asDate(outcome.date))}.`}
+          {' '}Computed from prices after the fact, not self-reported.
+        </p>
+
+        {agedRows.some((l) => l.returnSince !== null) && (
+          <div class="overflow-x-auto rounded-lg border border-terminal-border bg-terminal-surface">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-xs text-terminal-muted border-b border-terminal-border">
+                  <th class="text-left font-normal px-3 py-2">Holding</th>
+                  <th class="text-right font-normal px-3 py-2">Since</th>
+                  <th class="text-right font-normal px-3 py-2">
+                    {benchmarkLabel ?? 'Benchmark'}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {agedRows.map((leg) => (
+                  <tr class="border-b border-terminal-border/50 last:border-0">
+                    <td class="px-3 py-2 text-terminal-text">
+                      {leg.name || leg.ticker}
+                    </td>
+                    <td class:list={['px-3 py-2 text-right tabular-nums', tone(leg.returnSince)]}>
+                      {leg.returnSince === null ? '—' : pct(leg.returnSince)}
+                    </td>
+                    <td class="px-3 py-2 text-right text-terminal-muted tabular-nums">
+                      {leg.benchmarkSince === null ? '—' : pct(leg.benchmarkSince)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <dl class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm border-t border-terminal-border pt-4 text-terminal-muted">
+          <div class="flex gap-2">
+            <dt class="text-terminal-accent-cyan">Book since</dt>
+            <dd class:list={['tabular-nums', tone(outcome.portfolioSince)]}>
+              {outcome.portfolioSince === null ? '—' : pct(outcome.portfolioSince)}
+            </dd>
+          </div>
+          <div class="flex gap-2">
+            <dt class="text-terminal-accent-cyan">{benchmarkLabel ?? 'Benchmark'} since</dt>
+            <dd class="tabular-nums">
+              {outcome.benchmarkSince === null ? '—' : pct(outcome.benchmarkSince)}
+            </dd>
+          </div>
+        </dl>
+      </section>
+    )}
+
+    <Giscus />
+
+    <footer class="mt-12 pt-8 border-t border-terminal-border">
+      <div class="flex items-start justify-between gap-6 text-sm text-terminal-muted">
+        <div class="min-w-0">
+          {older && (
+            <a href={older.href} class="hover:text-terminal-accent-cyan">
+              ← {older.title}
+            </a>
+          )}
+        </div>
+        <div class="min-w-0 text-right">
+          {newer && (
+            <a href={newer.href} class="hover:text-terminal-accent-cyan">
+              {newer.title} →
+            </a>
+          )}
+        </div>
+      </div>
+      <div class="mt-6 flex items-center justify-center gap-3 text-sm text-terminal-muted">
+        <a href="/portfolio/" class="hover:text-terminal-accent-cyan">All decisions</a>
+        <span class="text-terminal-border">•</span>
+        <a href="/portfolio/methodology/" class="hover:text-terminal-accent-cyan">Methodology</a>
+      </div>
+    </footer>
+  </article>
+</BaseLayout>

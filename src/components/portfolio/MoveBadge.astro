@@ -1,0 +1,53 @@
+---
+import type { MoveKind } from '../../lib/portfolio/types';
+
+interface Props {
+  kind: MoveKind;
+  isDoubleDown?: boolean;
+}
+
+const { kind, isDoubleDown = false } = Astro.props;
+
+// Colours mirror the performance chart's decision markers, so a badge in the
+// log reads as the same event as the glyph on the line. Tokens come from
+// global.css (owned by the chart), which keeps the two in lockstep:
+//   exposure in  (open/add)       pf-mk-in       #22d3ee cyan
+//   exposure out (trim/exit)      pf-mk-out      #fbbf24 amber
+//   neutral      (rebalance/note) pf-mk-neutral  #64748b — a MARK colour; as
+//                                 text it only clears 3.1:1, so the label
+//                                 itself wears terminal-muted (5.7:1) and the
+//                                 neutral is kept for the chrome.
+//   doubled down                  pf-loss        #fb7185, the chart's
+//                                 "under water" ink — a double-down is by
+//                                 definition an add made while under water.
+// Full class strings are spelled out so Tailwind's scanner sees them.
+const KINDS: Record<MoveKind, { label: string; class: string }> = {
+  open: { label: 'OPENED', class: 'text-pf-mk-in border-pf-mk-in/40 bg-pf-mk-in/10' },
+  add: { label: 'ADDED', class: 'text-pf-mk-in border-pf-mk-in/40 bg-pf-mk-in/10' },
+  trim: { label: 'TRIMMED', class: 'text-pf-mk-out border-pf-mk-out/40 bg-pf-mk-out/10' },
+  exit: { label: 'EXITED', class: 'text-pf-mk-out border-pf-mk-out/40 bg-pf-mk-out/10' },
+  rebalance: {
+    label: 'REBALANCED',
+    class: 'text-terminal-muted border-pf-mk-neutral/50 bg-pf-mk-neutral/10',
+  },
+  note: {
+    label: 'NOTE',
+    class: 'text-terminal-muted border-pf-mk-neutral/50 bg-pf-mk-neutral/10',
+  },
+};
+
+const move = KINDS[kind] ?? KINDS.note;
+
+// The label text is the primary channel — colour never carries the kind alone.
+const chip =
+  'inline-flex items-center px-2 py-0.5 rounded-full border text-xs tracking-wider whitespace-nowrap';
+---
+
+<span class="inline-flex flex-wrap items-center gap-1.5">
+  <span class:list={[chip, move.class]}>{move.label}</span>
+  {isDoubleDown && (
+    <span class:list={[chip, 'text-pf-loss border-pf-loss/40 bg-pf-loss/10']}>
+      DOUBLED DOWN
+    </span>
+  )}
+</span>

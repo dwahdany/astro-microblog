@@ -92,6 +92,51 @@ const photos = defineCollection({
   }),
 });
 
+// Portfolio - Investment decision log. Each file is one decision: what it did
+// to the book (frontmatter) and the reasoning behind it (body).
+//
+// Sizes are WEIGHTS, never share counts or amounts — this repo is public, and a
+// weight path is all a time-weighted track record needs. See
+// src/lib/portfolio/types.ts for why.
+const portfolio = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/portfolio' }),
+  schema: ({ image }) => z.object({
+    ...createBaseSchema(image),
+    title: z.string(),
+    // Derived from `legs` when omitted; set explicitly to override the badge.
+    move: z.enum(['open', 'add', 'trim', 'exit', 'rebalance', 'note']).optional(),
+    conviction: z.enum(['low', 'medium', 'high']).optional(),
+    // Trading cost for this decision in basis points of turnover.
+    cost_bps: z.preprocess(emptyToUndefined, z.number().nonnegative().optional()),
+    legs: z.array(
+      z.object({
+        // Yahoo Finance symbol, or the reserved pseudo-ticker CASH.
+        ticker: z.string(),
+        name: optionalString(),
+        // Derived from the weight change when omitted.
+        action: z.preprocess(emptyToUndefined, z.enum(['buy', 'sell']).optional()),
+        // Defaults to the entry's `created` date.
+        date: z.preprocess(emptyToUndefined, z.coerce.date().optional()),
+        // Exactly one sizing field, or none for a full exit:
+        //   weight  - post-trade share of the book, 0..1
+        //   portion - fraction of the position sold, 0..1
+        //   scale   - multiplier on the existing weight (2 = doubled)
+        weight: z.preprocess(emptyToUndefined, z.number().min(0).max(1).optional()),
+        portion: z.preprocess(emptyToUndefined, z.number().min(0).max(1).optional()),
+        scale: z.preprocess(emptyToUndefined, z.number().positive().optional()),
+      })
+        .refine(
+          (l) =>
+            [l.weight, l.portion, l.scale].filter((v) => v !== undefined).length <= 1,
+          { message: 'Give at most one of weight, portion, scale' }
+        )
+        .refine((l) => l.weight !== undefined || l.portion !== undefined || l.scale !== undefined || l.action === 'sell', {
+          message: 'A leg with no size must be a sell (a full exit)',
+        })
+    ).default([]),
+  }),
+});
+
 // Series - For grouping entries
 const series = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/series' }),
@@ -103,4 +148,4 @@ const series = defineCollection({
   }),
 });
 
-export const collections = { entries, blogmarks, quotations, notes, photos, series };
+export const collections = { entries, blogmarks, quotations, notes, photos, series, portfolio };

@@ -1,0 +1,1356 @@
+---
+/**
+ * The performance chart: index series rebased to 100 at inception, with every
+ * decision marked on the portfolio line as a link to the entry that explains it.
+ *
+ * ARCHITECTURE
+ * ------------
+ * The SVG carries geometry ONLY. It is drawn with `preserveAspectRatio="none"`
+ * over a `0 0 (n-1) 1000` box, so one pre-rendered path serves every viewport,
+ * and `vector-effect="non-scaling-stroke"` keeps strokes exact while the box
+ * stretches. Nothing round and nothing textual may live inside it — a circle
+ * would shear into an ellipse and text would smear. Markers, end caps, tick
+ * labels and the crosshair are therefore HTML positioned in percent over the
+ * same box; the mapping is exact and identical for both.
+ *
+ * WITHOUT JAVASCRIPT
+ * ------------------
+ * Everything except the crosshair works. The lines, washes, grid, axis labels,
+ * end labels, decision markers (real `<a>`s with CSS-only hover/focus cards)
+ * and the data table are static markup. Range switching is a `<fieldset>` of
+ * radios plus `:has()`, with one pre-rendered layer per range — so the default
+ * range renders correctly and the other ranges still switch. The only
+ * enhancement the script adds is the hover/touch crosshair readout.
+ *
+ * PRIVACY
+ * -------
+ * Props are index levels, percentages, dates, slugs and colours. Nothing
+ * denominated in money can reach this component, and `buildChartModel()`
+ * throws in dev if a "level" is large enough to look like an amount.
+ */
+import type { ChartMarker, IndexSeries } from '../../lib/portfolio/types';
+import { buildChartModel, RANGE_TITLES, type RangeKey } from '../../lib/portfolio/chart';
+
+interface Props {
+  series: IndexSeries[];
+  markers: ChartMarker[];
+  defaultRange: RangeKey;
+  /** Optional id prefix; only needed for two charts on one page. */
+  id?: string;
+  class?: string;
+}
+
+const {
+  series = [],
+  markers = [],
+  defaultRange = 'ALL',
+  id,
+  class: className = '',
+} = Astro.props;
+
+const model = buildChartModel({ series, markers, defaultRange });
+
+/** Deterministic across builds, unique per distinct chart. */
+function hashId(input: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < input.length; i++) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(36);
+}
+const uid = id ?? `pfc${hashId(`${model.inception}|${model.asOf}|${model.defaultRange}|${model.series.length}`)}`;
+
+const portfolioColor = model.series[0]?.color ?? '#17b053';
+const LOSS_COLOR = '#fb7185';
+
+const layerViews = model.available.map((layer) => {
+  const hasBaseline = layer.baselineY !== null;
+  const split = layer.washSplitY;
+  return {
+    layer,
+    hasBaseline,
+    areaId: `${uid}-area-${layer.key}`,
+    gainId: `${uid}-gain-${layer.key}`,
+    lossId: `${uid}-loss-${layer.key}`,
+    upId: `${uid}-up-${layer.key}`,
+    downId: `${uid}-down-${layer.key}`,
+    // A gradient needs a non-zero extent, and a one-armed wash spans the box.
+    gainY2: hasBaseline ? Math.max(split, 1) : 1000,
+    lossY1: hasBaseline ? Math.min(split, 999) : 0,
+    downHeight: Math.max(1000 - split, 0),
+    // The 100 line is drawn separately and emphasised, so drop its gridline.
+    gridLines: layer.grid.filter((g) => !(hasBaseline && Math.abs(g.level - 100) < 1e-9)),
+    // Benchmarks first, portfolio last — the portfolio line is never occluded.
+    paintOrder: layer.lines.slice().reverse(),
+  };
+});
+
+const kindsPresent = new Set<string>();
+for (const view of layerViews) for (const m of view.layer.markers) kindsPresent.add(m.glyph);
+
+const glossary = [
+  { kind: 'open', glyph: '●', label: 'open', arm: 'in' },
+  { kind: 'add', glyph: '▲', label: 'add', arm: 'in' },
+  { kind: 'trim', glyph: '▼', label: 'trim', arm: 'out' },
+  { kind: 'exit', glyph: '✕', label: 'exit', arm: 'out' },
+  { kind: 'rebalance', glyph: '◇', label: 'rebalance', arm: 'neutral' },
+  { kind: 'note', glyph: '│', label: 'note', arm: 'neutral' },
+  { kind: 'cluster', glyph: '⧉', label: 'several', arm: 'neutral' },
+].filter((g) => kindsPresent.has(g.kind));
+
+// The radios are what `:has()` keys off, so they are always rendered — even
+// when there is only one range to offer. Only the control is hidden.
+const showRanges = model.available.length > 1;
+const showTable = model.tableRows.length > 0;
+---
+
+<figure
+  class:list={['pf-chart', className]}
+  data-pf-chart
+  data-pf-default={model.defaultRange}
+  aria-labelledby={`${uid}-cap`}
+>
+  {!model.empty && (
+    <Fragment>
+      <div class="pf-top">
+        <fieldset class:list={['pf-ranges', !showRanges && 'pf-ranges--hidden']}>
+          <legend class="pf-sr">Chart range</legend>
+          {model.available.map((layer) => (
+            <Fragment>
+              <input
+                class="pf-range__input pf-sr"
+                type="radio"
+                name={`${uid}-range`}
+                id={`${uid}-r-${layer.key}`}
+                value={layer.key}
+                checked={layer.key === model.defaultRange}
+              />
+              <label class="pf-range__label" for={`${uid}-r-${layer.key}`} title={RANGE_TITLES[layer.key]}>
+                {layer.key}
+              </label>
+            </Fragment>
+          ))}
+        </fieldset>
+
+        <div class="pf-readout">
+          <p class="pf-readout__asof">
+            AS OF <span class="pf-readout__date" data-pf-asof data-pf-latest={model.asOf}>{model.asOf}</span>
+          </p>
+          <ul class="pf-readout__list">
+            {model.series.map((s) => (
+              <li class="pf-key" data-pf-row={s.key} data-pf-dir={s.latestDirection} data-pf-latest-dir={s.latestDirection}>
+                <span
+                  class:list={['pf-key__swatch', s.dash && 'pf-key__swatch--dashed']}
+                  style={`--pf-c:${s.color}`}
+                  aria-hidden="true"
+                />
+                <span class="pf-key__label">{s.readout}</span>
+                <span class="pf-key__value" data-pf-value data-pf-latest={s.latestLabel}>{s.latestLabel}</span>
+                <span class="pf-key__glyph" data-pf-glyph data-pf-latest={s.latestGlyph} aria-hidden="true">
+                  {s.latestGlyph}
+                </span>
+                <span class="pf-key__delta" data-pf-delta data-pf-latest={s.latestDelta}>{s.latestDelta}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div class="pf-plotwrap">
+        <div class="pf-plot">
+          {layerViews.map((view) => (
+            <div
+              class:list={['pf-layer', view.layer.key === model.defaultRange && 'pf-layer--default']}
+              data-range={view.layer.key}
+            >
+              <svg
+                class="pf-geo"
+                viewBox={`0 0 ${view.layer.vbWidth} 1000`}
+                preserveAspectRatio="none"
+                aria-hidden="true"
+                focusable="false"
+                data-n={view.layer.n}
+                data-dmin={view.layer.dmin}
+                data-dmax={view.layer.dmax}
+                data-scale={model.yScale}
+                data-t0={view.layer.t0}
+                data-dd={view.layer.dd}
+              >
+                <defs>
+                  {view.layer.area && (
+                    <Fragment>
+                      <polygon id={view.areaId} points={view.layer.area} />
+                      <linearGradient
+                        id={view.gainId}
+                        gradientUnits="userSpaceOnUse"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2={view.gainY2}
+                      >
+                        <stop offset="0" stop-color={portfolioColor} stop-opacity="0.16" />
+                        <stop offset="1" stop-color={portfolioColor} stop-opacity="0.02" />
+                      </linearGradient>
+                      <linearGradient
+                        id={view.lossId}
+                        gradientUnits="userSpaceOnUse"
+                        x1="0"
+                        y1={view.lossY1}
+                        x2="0"
+                        y2="1000"
+                      >
+                        <stop offset="0" stop-color={LOSS_COLOR} stop-opacity="0.02" />
+                        <stop offset="1" stop-color={LOSS_COLOR} stop-opacity="0.14" />
+                      </linearGradient>
+                      {view.hasBaseline && (
+                        <Fragment>
+                          <clipPath id={view.upId}>
+                            <rect x="0" y="0" width={view.layer.vbWidth} height={view.layer.washSplitY} />
+                          </clipPath>
+                          <clipPath id={view.downId}>
+                            <rect
+                              x="0"
+                              y={view.layer.washSplitY}
+                              width={view.layer.vbWidth}
+                              height={view.downHeight}
+                            />
+                          </clipPath>
+                        </Fragment>
+                      )}
+                    </Fragment>
+                  )}
+                </defs>
+
+                <g class="pf-grid" shape-rendering="crispEdges">
+                  {view.gridLines.map((g) => (
+                    <line
+                      class:list={['pf-gridline', g.dense && 'pf-tick--dense']}
+                      x1="0"
+                      x2={view.layer.vbWidth}
+                      y1={g.y}
+                      y2={g.y}
+                      vector-effect="non-scaling-stroke"
+                    />
+                  ))}
+                </g>
+
+                {view.layer.baselineY !== null && (
+                  <line
+                    class="pf-baseline"
+                    x1="0"
+                    x2={view.layer.vbWidth}
+                    y1={view.layer.baselineY}
+                    y2={view.layer.baselineY}
+                    vector-effect="non-scaling-stroke"
+                    shape-rendering="crispEdges"
+                  />
+                )}
+
+                {view.layer.area && (
+                  <g class="pf-area">
+                    {view.hasBaseline ? (
+                      <Fragment>
+                        <use href={`#${view.areaId}`} clip-path={`url(#${view.upId})`} fill={`url(#${view.gainId})`} />
+                        <use href={`#${view.areaId}`} clip-path={`url(#${view.downId})`} fill={`url(#${view.lossId})`} />
+                      </Fragment>
+                    ) : (
+                      <use
+                        href={`#${view.areaId}`}
+                        fill={`url(#${view.layer.washSide === 'loss' ? view.lossId : view.gainId})`}
+                      />
+                    )}
+                  </g>
+                )}
+
+                {view.paintOrder.map((line) => (
+                  <polyline
+                    class="pf-line"
+                    data-key={line.key}
+                    data-i0={line.i0}
+                    points={line.points}
+                    fill="none"
+                    stroke={line.color}
+                    stroke-width={line.width}
+                    stroke-dasharray={line.dash ?? undefined}
+                    stroke-linejoin="round"
+                    stroke-linecap="round"
+                    vector-effect="non-scaling-stroke"
+                    shape-rendering="geometricPrecision"
+                  />
+                ))}
+              </svg>
+
+              <div class="pf-axis-y" aria-hidden="true">
+                {view.layer.grid.map((g) => (
+                  <span
+                    class:list={[
+                      'pf-ylab',
+                      g.dense && 'pf-tick--dense',
+                      view.hasBaseline && Math.abs(g.level - 100) < 1e-9 && 'pf-ylab--baseline',
+                    ]}
+                    style={`--y:${g.y / 10}%`}
+                  >
+                    {g.label}
+                  </span>
+                ))}
+              </div>
+
+              <div class="pf-axis-x" aria-hidden="true">
+                {view.layer.xTicks.map((t) => (
+                  <span
+                    class:list={['pf-xlab', `pf-xlab--${t.align}`, t.dense && 'pf-tick--dense']}
+                    style={`--x:${t.x}%`}
+                  >
+                    <span class="pf-xlab__main">{t.label}</span>
+                    {t.sub && <span class="pf-xlab__sub">{t.sub}</span>}
+                  </span>
+                ))}
+              </div>
+
+              <div class="pf-ends" aria-hidden="true">
+                {view.layer.endcaps.map((e) => (
+                  <Fragment>
+                    <span class="pf-end__dot" style={`--x:${e.x}%;--y:${e.y}%;--pf-c:${e.color}`} />
+                    <span class="pf-end__label" style={`--x:${e.x}%;--y:${e.labelY}%;--pf-c:${e.color}`}>
+                      {e.label}
+                    </span>
+                  </Fragment>
+                ))}
+              </div>
+
+              <div class="pf-markers">
+                {view.layer.markers.map((m) => (
+                  <a
+                    class:list={[
+                      'pf-mk',
+                      `pf-mk--${m.glyph}`,
+                      `pf-mk--${m.arm}`,
+                      m.gutter && 'pf-mk--gutter',
+                    ]}
+                    href={m.href}
+                    style={`--x:${m.x}%;--y:${m.y}%`}
+                    data-slot={m.slot}
+                    data-flip={m.flip}
+                    aria-label={m.ariaLabel}
+                  >
+                    <svg class="pf-mk__glyph" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                      {m.glyph === 'open' && (
+                        <circle cx="8" cy="8" r="4.25" fill="currentColor" class="pf-halo" stroke-width="2" paint-order="stroke" />
+                      )}
+                      {m.glyph === 'add' && (
+                        <Fragment>
+                          <polygon points="8,3 13,12 3,12" fill="none" class="pf-halo" stroke-width="3.5" stroke-linejoin="round" />
+                          <polygon points="8,3 13,12 3,12" class="pf-fill-bg" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+                        </Fragment>
+                      )}
+                      {m.glyph === 'trim' && (
+                        <Fragment>
+                          <polygon points="8,13 13,4 3,4" fill="none" class="pf-halo" stroke-width="3.5" stroke-linejoin="round" />
+                          <polygon points="8,13 13,4 3,4" class="pf-fill-bg" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+                        </Fragment>
+                      )}
+                      {m.glyph === 'exit' && (
+                        <Fragment>
+                          <path d="M4 4 L12 12 M12 4 L4 12" fill="none" class="pf-halo" stroke-width="4.5" stroke-linecap="round" />
+                          <path d="M4 4 L12 12 M12 4 L4 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                        </Fragment>
+                      )}
+                      {m.glyph === 'rebalance' && (
+                        <Fragment>
+                          <polygon points="8,3 13,8 8,13 3,8" fill="none" class="pf-halo" stroke-width="3.5" stroke-linejoin="round" />
+                          <polygon points="8,3 13,8 8,13 3,8" class="pf-fill-bg" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+                        </Fragment>
+                      )}
+                      {m.glyph === 'note' && (
+                        <path d="M8 3 L8 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                      )}
+                      {m.glyph === 'cluster' && (
+                        <Fragment>
+                          <rect x="6" y="6" width="8.5" height="8.5" rx="2.5" class="pf-fill-bg" stroke="currentColor" stroke-width="1.25" opacity="0.4" />
+                          <rect x="2.25" y="2.25" width="10" height="10" rx="2.5" class="pf-fill-bg" stroke="currentColor" stroke-width="1.25" />
+                          <text x="7.25" y="7.5" text-anchor="middle" dominant-baseline="central" font-size="7.5" font-weight="600" fill="currentColor">
+                            {m.count}
+                          </text>
+                        </Fragment>
+                      )}
+                    </svg>
+                    <span class="pf-mk__card" aria-hidden="true">
+                      <span class="pf-mk__cardhead">
+                        <span class="pf-mk__date">{m.dateLabel}</span>
+                        <span class="pf-mk__badge">{m.moveLabel}</span>
+                      </span>
+                      <span class="pf-mk__title">{m.title}</span>
+                      {m.tickers.length > 0 && <span class="pf-mk__tickers">{m.tickers.join(' · ')}</span>}
+                      {m.members.length > 0 && (
+                        <span class="pf-mk__members">
+                          {m.members.map((member) => (
+                            <span class="pf-mk__member">
+                              <span class="pf-mk__badge">{member.moveLabel}</span> {member.title}
+                            </span>
+                          ))}
+                        </span>
+                      )}
+                      {m.levelLabel && (
+                        <span class="pf-mk__stat">
+                          index {m.levelLabel} · {m.deltaLabel}
+                        </span>
+                      )}
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          <div class="pf-cursor" data-pf-cursor aria-hidden="true" hidden>
+            <span class="pf-cursor__line" />
+            {model.series.map((s) => (
+              <span class="pf-cursor__dot" data-pf-dot={s.key} style={`--pf-c:${s.color}`} hidden />
+            ))}
+            <span class="pf-cursor__chip" data-pf-chip />
+          </div>
+        </div>
+      </div>
+
+      {glossary.length > 0 && (
+        <ul class="pf-glossary">
+          {glossary.map((g) => (
+            <li class="pf-glossary__item">
+              <span class:list={['pf-glossary__glyph', `pf-mk--${g.arm}`]} aria-hidden="true">{g.glyph}</span>
+              <span>{g.label}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {showTable && (
+        <details class="pf-table">
+          <summary class="pf-table__summary">Data table</summary>
+          <div class="pf-table__scroll">
+            <table class="pf-table__el">
+              <caption>Month-end index levels, rebased to 100 at inception.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Date</th>
+                  {model.series.map((s) => <th scope="col">{s.label}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {model.tableRows.map((row) => (
+                  <tr>
+                    <th scope="row"><time datetime={row.d}>{row.d}</time></th>
+                    {row.values.map((v) => <td>{v}</td>)}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {model.decisionRows.length > 0 && (
+            <div class="pf-table__scroll">
+              <table class="pf-table__el">
+                <caption>Every decision marked on the chart.</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Move</th>
+                    <th scope="col">Holdings</th>
+                    <th scope="col">Decision</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {model.decisionRows.map((row) => (
+                    <tr>
+                      <th scope="row"><time datetime={row.d}>{row.d}</time></th>
+                      <td>{row.moveLabel}</td>
+                      <td>{row.tickers}</td>
+                      <td><a href={row.href}>{row.title}</a></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </details>
+      )}
+    </Fragment>
+  )}
+
+  <figcaption id={`${uid}-cap`} class:list={['pf-caption', model.empty && 'pf-caption--empty']}>
+    {model.summary}
+  </figcaption>
+</figure>
+
+<style>
+  /* ---------------------------------------------------------------------
+     Layout. The plot box IS the SVG viewBox, so `x% = i/(n-1)` and
+     `y% = y/1000` place HTML over geometry with no fudge factors. Axis
+     labels live in the wrapper's padding, which is why the x-axis band can
+     never be clipped by a fixed height.
+  --------------------------------------------------------------------- */
+  .pf-chart {
+    --pf-ar: 1.35;
+    --pf-gut-l: 40px;
+    --pf-gut-b: 34px;
+    --pf-gut-r: 4px;
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (min-width: 640px) {
+    .pf-chart {
+      --pf-ar: 2;
+      --pf-gut-l: 44px;
+      --pf-gut-r: 46px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .pf-chart {
+      --pf-ar: 2.35;
+    }
+  }
+
+  /* With no history the caption is the whole component — saying it twice
+     would just be noise. */
+  .pf-caption--empty {
+    margin-top: 0;
+    text-align: center;
+    padding: 2rem 0;
+    font-size: 0.875rem;
+  }
+
+  .pf-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .pf-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* --- range toggles: real radios, so they work without JS ------------- */
+  .pf-ranges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  /* One range is not a choice, but the radio must stay in the DOM: layer
+     visibility is driven by `:has(…:checked)`. */
+  .pf-ranges--hidden {
+    display: none;
+  }
+
+  .pf-range__label {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    border: 1px solid var(--color-terminal-border);
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    color: var(--color-terminal-muted);
+    cursor: pointer;
+    transition: color 120ms ease, border-color 120ms ease, background-color 120ms ease;
+  }
+
+  .pf-range__label:hover {
+    color: var(--color-terminal-accent-cyan);
+    border-color: var(--color-terminal-accent-cyan);
+  }
+
+  /* Selection is brackets + ink, never colour alone. */
+  .pf-range__input:checked + .pf-range__label {
+    color: var(--color-terminal-text);
+    background: var(--color-terminal-surface);
+    border-color: var(--color-terminal-border);
+  }
+
+  .pf-range__input:checked + .pf-range__label::before {
+    content: '[';
+  }
+
+  .pf-range__input:checked + .pf-range__label::after {
+    content: ']';
+  }
+
+  .pf-range__input:focus-visible + .pf-range__label {
+    outline: 2px solid var(--color-terminal-accent-cyan);
+    outline-offset: 2px;
+  }
+
+  /* --- readout: the legend doubles as the crosshair status line -------- */
+  .pf-readout {
+    margin-left: auto;
+    font-size: 0.6875rem;
+    line-height: 1.6;
+  }
+
+  .pf-readout__asof {
+    margin: 0 0 0.125rem;
+    color: var(--color-terminal-muted);
+    letter-spacing: 0.08em;
+  }
+
+  .pf-readout__date {
+    color: var(--color-terminal-text);
+  }
+
+  .pf-readout__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .pf-key {
+    display: grid;
+    grid-template-columns: 16px minmax(0, 1fr) auto 1ch auto;
+    align-items: center;
+    gap: 0 0.5rem;
+    color: var(--color-terminal-muted);
+    letter-spacing: 0.04em;
+  }
+
+  .pf-key__swatch {
+    height: 2px;
+    background: var(--pf-c);
+  }
+
+  .pf-key__swatch--dashed {
+    background: repeating-linear-gradient(
+      90deg,
+      var(--pf-c) 0 5px,
+      transparent 5px 8px
+    );
+  }
+
+  .pf-key__value {
+    color: var(--color-terminal-text);
+    text-align: right;
+  }
+
+  /* Identity comes from the coloured glyph beside the number, never from
+     colouring the digits — green/red stay reserved for polarity. */
+  .pf-key__glyph {
+    text-align: center;
+  }
+
+  .pf-key[data-pf-dir='up'] .pf-key__glyph {
+    color: var(--color-terminal-accent-green);
+  }
+
+  .pf-key[data-pf-dir='down'] .pf-key__glyph {
+    color: var(--color-pf-loss);
+  }
+
+  .pf-key__delta {
+    text-align: right;
+    color: var(--color-terminal-muted);
+  }
+
+  /* --- plot ------------------------------------------------------------ */
+  .pf-plotwrap {
+    position: relative;
+    padding: 4px var(--pf-gut-r) var(--pf-gut-b) var(--pf-gut-l);
+  }
+
+  .pf-plot {
+    position: relative;
+    aspect-ratio: var(--pf-ar);
+    min-height: 190px;
+    max-height: 440px;
+    background: var(--color-terminal-bg);
+    border-bottom: 1px solid var(--color-terminal-border);
+    /* A horizontal drag scrubs; a vertical drag still scrolls the page. */
+    touch-action: pan-y;
+  }
+
+  .pf-layer {
+    position: absolute;
+    inset: 0;
+  }
+
+  .pf-geo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .pf-gridline {
+    stroke: var(--color-terminal-border);
+    stroke-width: 1;
+  }
+
+  /* The only emphasised horizontal: 3.75:1 against the plot, versus 1.72:1
+     for the grid, so "where I started" reads at a glance. */
+  .pf-baseline {
+    stroke: var(--color-pf-mk-neutral);
+    stroke-width: 1;
+  }
+
+  /* --- axis labels: real CSS text, so they never shear or scale --------- */
+  .pf-axis-y,
+  .pf-axis-x {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .pf-ylab {
+    position: absolute;
+    top: var(--y);
+    right: calc(100% + 8px);
+    transform: translateY(-50%);
+    font-size: 11px;
+    line-height: 1;
+    color: var(--color-terminal-muted);
+    white-space: nowrap;
+  }
+
+  .pf-ylab--baseline {
+    color: var(--color-terminal-text);
+    font-weight: 500;
+  }
+
+  .pf-xlab {
+    position: absolute;
+    top: calc(100% + 7px);
+    left: var(--x);
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    color: var(--color-terminal-muted);
+    white-space: nowrap;
+  }
+
+  .pf-xlab--mid {
+    transform: translateX(-50%);
+  }
+
+  .pf-xlab--end {
+    transform: translateX(-100%);
+  }
+
+  .pf-xlab__sub {
+    font-size: 10px;
+    color: var(--color-terminal-border);
+  }
+
+  /* --- end caps: HTML, because a circle inside a sheared SVG is an ellipse */
+  .pf-ends {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .pf-end__dot {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: 7px;
+    height: 7px;
+    margin: -3.5px 0 0 -3.5px;
+    border-radius: 50%;
+    background: var(--pf-c);
+    box-shadow: 0 0 0 2px var(--color-terminal-bg);
+  }
+
+  .pf-end__label {
+    position: absolute;
+    left: calc(var(--x) + 9px);
+    top: var(--y);
+    transform: translateY(-50%);
+    font-size: 11px;
+    line-height: 1;
+    color: var(--pf-c);
+  }
+
+  @media (max-width: 639px) {
+    .pf-end__label {
+      display: none;
+    }
+  }
+
+  /* --- crosshair (JS only) --------------------------------------------- */
+  .pf-cursor {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .pf-cursor[hidden] {
+    display: none;
+  }
+
+  .pf-cursor__line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--x, 0%);
+    width: 0;
+    border-left: 1px dashed var(--color-terminal-muted);
+  }
+
+  .pf-cursor__dot {
+    position: absolute;
+    left: var(--x, 0%);
+    top: var(--y, 50%);
+    width: 7px;
+    height: 7px;
+    margin: -3.5px 0 0 -3.5px;
+    border-radius: 50%;
+    background: var(--pf-c);
+    box-shadow: 0 0 0 2px var(--color-terminal-bg);
+  }
+
+  .pf-cursor__dot[hidden] {
+    display: none;
+  }
+
+  .pf-cursor__chip {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: clamp(30px, var(--x, 0%), calc(100% - 30px));
+    transform: translateX(-50%);
+    padding: 0 4px;
+    background: var(--color-terminal-surface);
+    border: 1px solid var(--color-terminal-border);
+    border-radius: 3px;
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.06em;
+    color: var(--color-terminal-text);
+    white-space: nowrap;
+  }
+
+  /* --- markers ---------------------------------------------------------- */
+  .pf-markers {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+  }
+
+  .pf-mk {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    transform: translate(-50%, -50%);
+    display: block;
+    line-height: 0;
+    color: var(--color-pf-mk-neutral);
+    transition: transform 120ms ease;
+  }
+
+  /* Hit target exceeds the painted mark and clears the 24px minimum. */
+  .pf-mk::before {
+    content: '';
+    position: absolute;
+    inset: -9px;
+    border-radius: 50%;
+  }
+
+  .pf-mk--in {
+    color: var(--color-pf-mk-in);
+  }
+
+  .pf-mk--out {
+    color: var(--color-pf-mk-out);
+  }
+
+  .pf-mk--neutral {
+    color: var(--color-pf-mk-neutral);
+  }
+
+  /* `note` decisions move nothing, so they get a tick straddling the axis
+     rail rather than a point on a line they did not touch. The default
+     centring transform already places it there, above the x labels. */
+
+  .pf-mk__glyph {
+    display: block;
+    width: 16px;
+    height: 16px;
+    overflow: visible;
+  }
+
+  .pf-mk--cluster .pf-mk__glyph {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Every on-line glyph carries a plot-coloured ring so it stays legible
+     where it crosses the line. */
+  .pf-halo {
+    stroke: var(--color-terminal-bg);
+  }
+
+  .pf-fill-bg {
+    fill: var(--color-terminal-bg);
+  }
+
+  .pf-mk:hover,
+  .pf-mk:focus-visible,
+  .pf-mk:focus-within {
+    z-index: 30;
+    transform: translate(-50%, -50%) scale(1.25);
+  }
+
+  .pf-mk:focus-visible {
+    outline: 2px solid var(--color-terminal-accent-cyan);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  .pf-mk__card {
+    position: absolute;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: max-content;
+    max-width: min(220px, 60vw);
+    padding: 6px 8px;
+    background: var(--color-terminal-surface);
+    border: 1px solid var(--color-terminal-border);
+    border-radius: 6px;
+    font-size: 10px;
+    line-height: 1.45;
+    letter-spacing: normal;
+    color: var(--color-terminal-text);
+    text-align: left;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 120ms ease;
+  }
+
+  /* Placement is decided at build time, so the card can never leave the plot. */
+  .pf-mk[data-flip^='r'] .pf-mk__card {
+    left: 14px;
+  }
+
+  .pf-mk[data-flip^='l'] .pf-mk__card {
+    right: 14px;
+  }
+
+  .pf-mk[data-flip$='t'] .pf-mk__card {
+    top: -6px;
+  }
+
+  .pf-mk[data-flip$='b'] .pf-mk__card {
+    bottom: -6px;
+  }
+
+  /* Gated so a tap on a touch device just follows the link. */
+  @media (hover: hover) {
+    .pf-mk:hover .pf-mk__card {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
+  .pf-mk:focus-visible .pf-mk__card,
+  .pf-mk:focus-within .pf-mk__card {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .pf-mk__cardhead {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pf-mk__date,
+  .pf-mk__stat,
+  .pf-mk__tickers {
+    color: var(--color-terminal-muted);
+  }
+
+  .pf-mk__badge {
+    color: currentColor;
+    letter-spacing: 0.06em;
+  }
+
+  .pf-mk__title {
+    color: var(--color-terminal-text);
+  }
+
+  .pf-mk__members {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding-top: 2px;
+    border-top: 1px solid var(--color-terminal-border);
+    color: var(--color-terminal-muted);
+  }
+
+  /* --- glossary + table ------------------------------------------------- */
+  .pf-glossary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    font-size: 0.6875rem;
+    color: var(--color-terminal-muted);
+  }
+
+  .pf-glossary__item {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .pf-glossary__glyph {
+    color: var(--color-pf-mk-neutral);
+  }
+
+  .pf-glossary__glyph.pf-mk--in {
+    color: var(--color-pf-mk-in);
+  }
+
+  .pf-glossary__glyph.pf-mk--out {
+    color: var(--color-pf-mk-out);
+  }
+
+  .pf-table {
+    margin-top: 0.75rem;
+    font-size: 0.6875rem;
+  }
+
+  .pf-table__summary {
+    cursor: pointer;
+    color: var(--color-terminal-muted);
+    letter-spacing: 0.06em;
+  }
+
+  .pf-table__summary:hover {
+    color: var(--color-terminal-accent-cyan);
+  }
+
+  .pf-table__scroll {
+    max-height: 20rem;
+    overflow: auto;
+    margin-top: 0.5rem;
+    border: 1px solid var(--color-terminal-border);
+    border-radius: 0.5rem;
+  }
+
+  .pf-table__el {
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pf-table__el caption {
+    padding: 0.5rem;
+    text-align: left;
+    color: var(--color-terminal-muted);
+  }
+
+  .pf-table__el th,
+  .pf-table__el td {
+    padding: 0.25rem 0.5rem;
+    text-align: right;
+    border-top: 1px solid var(--color-terminal-border);
+    white-space: nowrap;
+  }
+
+  .pf-table__el thead th {
+    position: sticky;
+    top: 0;
+    background: var(--color-terminal-surface);
+    color: var(--color-terminal-muted);
+  }
+
+  .pf-table__el th[scope='row'] {
+    text-align: left;
+    font-weight: 400;
+    color: var(--color-terminal-muted);
+  }
+
+  .pf-table__el td {
+    color: var(--color-terminal-text);
+  }
+
+  .pf-caption {
+    margin-top: 0.75rem;
+    font-size: 0.6875rem;
+    line-height: 1.6;
+    color: var(--color-terminal-muted);
+  }
+
+  /* ---------------------------------------------------------------------
+     Range switching. One pre-rendered layer per range; the radios drive
+     visibility through `:has()`, so it works with JavaScript disabled and
+     hidden layers keep their links out of the tab order.
+  --------------------------------------------------------------------- */
+  .pf-chart [data-range] {
+    display: none;
+  }
+
+  .pf-chart:has(.pf-range__input[value='1M']:checked) [data-range='1M'],
+  .pf-chart:has(.pf-range__input[value='6M']:checked) [data-range='6M'],
+  .pf-chart:has(.pf-range__input[value='YTD']:checked) [data-range='YTD'],
+  .pf-chart:has(.pf-range__input[value='1Y']:checked) [data-range='1Y'],
+  .pf-chart:has(.pf-range__input[value='ALL']:checked) [data-range='ALL'] {
+    display: block;
+  }
+
+  /* Engines without `:has()` still get the default range, just no switching. */
+  @supports not selector(:has(*)) {
+    .pf-chart .pf-layer--default {
+      display: block;
+    }
+
+    .pf-ranges {
+      display: none;
+    }
+  }
+
+  /* Thin the axis lattice on narrow screens — pure CSS, no second render. */
+  @media (max-width: 639px) {
+    .pf-tick--dense {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pf-mk,
+    .pf-mk__card,
+    .pf-range__label {
+      transition: none;
+    }
+
+    .pf-mk:hover,
+    .pf-mk:focus-visible,
+    .pf-mk:focus-within {
+      transform: translate(-50%, -50%);
+    }
+  }
+
+  /* Shape already carries the move kind, so nothing is lost without colour. */
+  @media (forced-colors: active) {
+    .pf-area {
+      display: none;
+    }
+
+    .pf-gridline,
+    .pf-baseline {
+      stroke: CanvasText;
+    }
+
+    .pf-line {
+      stroke: CanvasText !important;
+    }
+
+    .pf-mk {
+      color: ButtonText;
+    }
+
+    .pf-halo {
+      stroke: Canvas;
+    }
+
+    .pf-fill-bg {
+      fill: Canvas;
+    }
+  }
+</style>
+
+<script>
+  // Progressive enhancement only: the crosshair readout. Everything else on
+  // this chart is static markup and works with this script absent.
+  const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  const MS_PER_DAY = 86_400_000;
+
+  function isoToDays(iso: string): number {
+    return Math.round(
+      Date.UTC(Number(iso.slice(0, 4)), Number(iso.slice(5, 7)) - 1, Number(iso.slice(8, 10))) / MS_PER_DAY
+    );
+  }
+
+  function daysToIso(days: number): string {
+    return new Date(days * MS_PER_DAY).toISOString().slice(0, 10);
+  }
+
+  function chipLabel(iso: string): string {
+    return `${iso.slice(8, 10)} ${MONTHS[Number(iso.slice(5, 7)) - 1]} ${iso.slice(2, 4)}`;
+  }
+
+  function signedPercent(points: number): string {
+    const rounded = Number(points.toFixed(1));
+    const sign = rounded > 0 ? '+' : rounded < 0 ? '-' : '';
+    return `${sign}${Math.abs(rounded).toFixed(1)}%`;
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-pf-chart]').forEach((root) => {
+    if (!('PointerEvent' in window)) return;
+    const plotEl = root.querySelector<HTMLElement>('.pf-plot');
+    const cursorEl = root.querySelector<HTMLElement>('[data-pf-cursor]');
+    if (!plotEl || !cursorEl) return;
+    // Re-bound with non-nullable types: the hoisted helpers below close over
+    // these, and narrowing from the guard above does not survive into them.
+    const plot: HTMLElement = plotEl;
+    const cursor: HTMLElement = cursorEl;
+
+    const asOf = root.querySelector<HTMLElement>('[data-pf-asof]');
+    const chip = cursor.querySelector<HTMLElement>('[data-pf-chip]');
+    const rows = Array.from(root.querySelectorAll<HTMLElement>('[data-pf-row]'));
+    const dateCache = new Map<string, string[]>();
+
+    function activeGeo(): SVGSVGElement | null {
+      const checked = root.querySelector<HTMLInputElement>('.pf-range__input:checked');
+      const key = checked ? checked.value : root.dataset.pfDefault;
+      if (!key) return null;
+      return root.querySelector<SVGSVGElement>(`[data-range="${key}"] .pf-geo`);
+    }
+
+    // Dates are reconstructed from one two-character base-36 day gap per slot,
+    // so no date list is duplicated into the page.
+    function datesOf(geo: SVGSVGElement): string[] {
+      const t0 = geo.dataset.t0 || '';
+      const cached = dateCache.get(t0 + geo.dataset.n);
+      if (cached) return cached;
+      const n = Number(geo.dataset.n) || 0;
+      const dd = geo.dataset.dd || '';
+      const out: string[] = [];
+      let day = isoToDays(t0);
+      for (let i = 0; i < n; i++) {
+        day += parseInt(dd.slice(i * 2, i * 2 + 2), 36) || 0;
+        out.push(daysToIso(day));
+      }
+      dateCache.set(t0 + geo.dataset.n, out);
+      return out;
+    }
+
+    function restore(el: Element | null) {
+      if (el instanceof HTMLElement && el.dataset.pfLatest !== undefined) {
+        el.textContent = el.dataset.pfLatest;
+      }
+    }
+
+    function reset() {
+      cursor.hidden = true;
+      restore(asOf);
+      rows.forEach((row) => {
+        restore(row.querySelector('[data-pf-value]'));
+        restore(row.querySelector('[data-pf-delta]'));
+        restore(row.querySelector('[data-pf-glyph]'));
+        row.dataset.pfDir = row.dataset.pfLatestDir || 'flat';
+      });
+    }
+
+    function show(slot: number) {
+      const geo = activeGeo();
+      if (!geo) return;
+      const n = Number(geo.dataset.n) || 1;
+      const i = Math.max(0, Math.min(n - 1, slot));
+      const x = n > 1 ? (i / (n - 1)) * 100 : 50;
+      const dmin = Number(geo.dataset.dmin);
+      const dmax = Number(geo.dataset.dmax);
+      const isLog = geo.dataset.scale === 'log';
+
+      cursor.hidden = false;
+      cursor.style.setProperty('--x', `${x}%`);
+
+      const iso = datesOf(geo)[i] || '';
+      if (asOf) asOf.textContent = iso;
+      if (chip) chip.textContent = iso ? chipLabel(iso) : '';
+
+      rows.forEach((row) => {
+        const key = row.dataset.pfRow;
+        const line = geo.querySelector<SVGPolylineElement>(`polyline[data-key="${key}"]`);
+        const dot = cursor.querySelector<HTMLElement>(`[data-pf-dot="${key}"]`);
+        const valueEl = row.querySelector<HTMLElement>('[data-pf-value]');
+        const deltaEl = row.querySelector<HTMLElement>('[data-pf-delta]');
+        const glyphEl = row.querySelector<HTMLElement>('[data-pf-glyph]');
+        const offset = line ? Number(line.dataset.i0) || 0 : 0;
+        const k = i - offset;
+
+        if (!line || k < 0 || k >= line.points.numberOfItems) {
+          if (dot) dot.hidden = true;
+          if (valueEl) valueEl.textContent = '—';
+          if (deltaEl) deltaEl.textContent = '—';
+          if (glyphEl) glyphEl.textContent = '·';
+          row.dataset.pfDir = 'flat';
+          return;
+        }
+
+        // The level is read back out of the geometry, so the page never ships
+        // the numbers twice.
+        const y = line.points.getItem(k).y;
+        const t = dmax - (y / 1000) * (dmax - dmin);
+        const level = isLog ? Math.exp(t) : t;
+        const delta = Number((level - 100).toFixed(1));
+
+        if (dot) {
+          dot.hidden = false;
+          dot.style.setProperty('--x', `${x}%`);
+          dot.style.setProperty('--y', `${y / 10}%`);
+        }
+        if (valueEl) valueEl.textContent = level.toFixed(1);
+        if (deltaEl) deltaEl.textContent = signedPercent(level - 100);
+        if (glyphEl) glyphEl.textContent = delta > 0 ? '↑' : delta < 0 ? '↓' : '·';
+        row.dataset.pfDir = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
+      });
+    }
+
+    // Uniform x lattice, so hit-testing is one rounding — no binary search and
+    // no per-slot rectangles.
+    let frame = 0;
+    let pending = 0;
+    function onPointer(event: PointerEvent) {
+      const geo = activeGeo();
+      if (!geo) return;
+      const rect = plot.getBoundingClientRect();
+      if (!rect.width) return;
+      const n = Number(geo.dataset.n) || 1;
+      const fraction = (event.clientX - rect.left) / rect.width;
+      pending = n > 1 ? Math.round(fraction * (n - 1)) : 0;
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        show(pending);
+      });
+    }
+
+    plot.addEventListener('pointermove', onPointer);
+    plot.addEventListener('pointerdown', onPointer);
+    plot.addEventListener('pointerleave', reset);
+    plot.addEventListener('pointercancel', reset);
+    root.addEventListener('change', reset);
+
+    // Keyboard parity: tabbing the markers scrubs exactly as hovering does.
+    root.addEventListener('focusin', (event) => {
+      const marker = (event.target as HTMLElement | null)?.closest<HTMLElement>('.pf-mk[data-slot]');
+      if (marker) show(Number(marker.dataset.slot));
+    });
+    root.addEventListener('focusout', (event) => {
+      const next = (event as FocusEvent).relatedTarget as Node | null;
+      if (!next || !root.contains(next)) reset();
+    });
+  });
+</script>

@@ -1,0 +1,332 @@
+---
+export const prerender = true;
+
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PerformanceChart from '../../components/portfolio/PerformanceChart.astro';
+import StatRow from '../../components/portfolio/StatRow.astro';
+import AllocationBar from '../../components/portfolio/AllocationBar.astro';
+import HoldingsTable from '../../components/portfolio/HoldingsTable.astro';
+import ClosedTable from '../../components/portfolio/ClosedTable.astro';
+import LogEntryCard from '../../components/portfolio/LogEntryCard.astro';
+import { buildPortfolio } from '../../lib/portfolio/engine';
+import { createPrices } from '../../lib/portfolio/prices';
+import { portfolioConfig } from '../../data/portfolio.config';
+import { CASH } from '../../lib/portfolio/types';
+import type {
+  IndexSeries,
+  IsoDate,
+  Leg,
+  LogEntry,
+  MoveKind,
+  PortfolioSnapshot,
+  PriceData,
+} from '../../lib/portfolio/types';
+import { formatShortDate } from '../../lib/content';
+
+// The page is published only when the config says so; otherwise /portfolio/
+// becomes a redirect to the homepage and nothing about the book is rendered.
+if (!portfolioConfig.enabled) {
+  return Astro.redirect('/', 302);
+}
+
+// ---------------------------------------------------------------- price data
+// `src/data/prices.json` is a generated artefact and may legitimately be
+// absent (fresh clone, no `npm run prices` yet). A glob resolves to `{}` in
+// that case instead of failing the build the way a bare import would.
+const priceModules = import.meta.glob<{ default: PriceData }>('../../data/*.json', {
+  eager: true,
+});
+const priceEntry = Object.entries(priceModules).find(([path]) =>
+  path.endsWith('/prices.json')
+);
+const priceData: PriceData | null = priceEntry ? priceEntry[1].default : null;
+const hasPriceData =
+  priceData !== null && Object.keys(priceData.series ?? {}).length > 0;
+
+// ------------------------------------------------------- collection → engine
+const isoDay = (d: Date): IsoDate => d.toISOString().slice(0, 10);
+/** Midday UTC so `toLocaleDateString` can never roll a date backwards. */
+const asDate = (d: IsoDate): Date => new Date(`${d}T12:00:00Z`);
+
+function toLogEntry(doc: CollectionEntry<'portfolio'>): LogEntry {
+  const created = isoDay(new Date(doc.data.created));
+  return {
+    slug: doc.data.slug,
+    title: doc.data.title,
+    created,
+    move: doc.data.move,
+    conviction: doc.data.conviction,
+    // A leg with no date of its own happened on the day of the decision.
+    legs: doc.data.legs.map(
+      (leg): Leg => ({
+        ticker: leg.ticker,
+        name: leg.name,
+        action: leg.action,
+        date: leg.date ? isoDay(new Date(leg.date)) : created,
+        weight: leg.weight,
+        portion: leg.portion,
+        scale: leg.scale,
+      })
+    ),
+    costBps: doc.data.cost_bps,
+    href: `/portfolio/${doc.data.slug}/`,
+    tags: doc.data.tags,
+    excerpt: doc.data.excerpt,
+  };
+}
+
+/**
+ * Coarse move kind, used only when the engine could not classify the decision
+ * (no price cache). The engine's own classification always wins.
+ */
+function fallbackMove(entry: LogEntry, seen: Set<string>): MoveKind {
+  const legs = entry.legs.filter((l) => l.ticker !== CASH);
+  if (legs.length === 0) return 'note';
+  const isExit = (l: Leg) =>
+    l.weight === 0 ||
+    l.portion === 1 ||
+    (l.action === 'sell' &&
+      l.weight === undefined &&
+      l.portion === undefined &&
+      l.scale === undefined);
+  const exits = legs.filter(isExit);
+  const opens = legs.filter((l) => !isExit(l) && !seen.has(l.ticker));
+  for (const l of legs) (isExit(l) ? seen.delete(l.ticker) : seen.add(l.ticker));
+  if (exits.length === legs.length) return 'exit';
+  if (opens.length === legs.length) return 'open';
+  if (legs.length === 1) {
+    const [l] = legs;
+    return l.portion !== undefined || (l.scale !== undefined && l.scale < 1) ? 'trim' : 'add';
+  }
+  return 'rebalance';
+}
+
+const docs = await getCollection('portfolio', ({ data }) => !data.is_draft);
+// Newest first for display; the engine gets them oldest first.
+const newestFirst = [...docs].sort(
+  (a, b) => new Date(b.data.created).getTime() - new Date(a.data.created).getTime()
+);
+const log = newestFirst.map(toLogEntry);
+const chronological = [...log].reverse();
+
+// `createPrices` tolerates a null cache (every lookup returns null) and the
+// engine turns unknown tickers into warnings, so this path is safe with no
+// prices, an empty log, or a benchmark that failed to fetch.
+let snapshot: PortfolioSnapshot | null = null;
+let buildError: string | null = null;
+try {
+  snapshot = buildPortfolio({
+    entries: chronological,
+    prices: createPrices(priceData, portfolioConfig.baseCurrency),
+    config: portfolioConfig,
+  });
+} catch (err) {
+  buildError = err instanceof Error ? err.message : String(err);
+}
+if (import.meta.env.DEV && buildError) {
+  console.warn(`[portfolio] engine failed, rendering the log only: ${buildError}`);
+}
+
+// Fallback classification, walked oldest → newest so "first appearance" works.
+const seen = new Set<string>();
+const fallbackKinds = new Map<string, MoveKind>();
+for (const entry of chronological) {
+  fallbackKinds.set(entry.slug, entry.move ?? fallbackMove(entry, seen));
+}
+
+// -------------------------------------------------------------- view model
+const positions = snapshot?.positions ?? [];
+// The engine reports instrument episodes only — cash is never a position, so
+// the uninvested remainder is whatever the holdings do not account for.
+const holdings = positions.filter((p) => p.ticker !== CASH);
+const cashWeight = Math.max(
+  0,
+  1 - holdings.reduce((sum, p) => sum + p.weight, 0)
+);
+const closed = snapshot?.closed ?? [];
+const benchmark =
+  snapshot?.benchmarks.find((b) => b.primary) ?? snapshot?.benchmarks[0] ?? undefined;
+
+// Series colours belong to the page, not the engine.
+const seriesColors = ['#17b053', '#3b82f6', '#ec4899', '#a78bfa', '#94a3b8'];
+const series: IndexSeries[] = (snapshot?.series ?? [])
+  .filter((s) => s.points.length > 0)
+  .map((s, i) => ({ ...s, color: s.color ?? seriesColors[i % seriesColors.length] }));
+
+const hasLog = log.length > 0;
+const hasChart = series.length > 0 && (series[0]?.points.length ?? 0) > 1;
+const markers = portfolioConfig.display.chartMarkers ? (snapshot?.markers ?? []) : [];
+const showClosed = portfolioConfig.display.closedPositions && closed.length > 0;
+// With no price cache the stats are all zeros and the chart has no points:
+// say so instead of publishing a track record that does not exist.
+const showStats = snapshot !== null && hasLog && hasPriceData;
+const showUnavailable = hasLog && !showStats;
+
+const inception = snapshot?.stats.inception ?? portfolioConfig.inception ?? null;
+const asOf = hasPriceData ? (snapshot?.asOf ?? null) : null;
+const pricesSource = hasPriceData
+  ? (snapshot?.pricesSource || priceData?.source || null)
+  : null;
+const warnings = snapshot?.warnings ?? [];
+---
+
+<BaseLayout title={portfolioConfig.title} description={portfolioConfig.description}>
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold flex items-center gap-2">
+      <span class="text-terminal-accent-green">$</span>
+      <span>{portfolioConfig.title}</span>
+    </h1>
+    <p class="text-terminal-muted text-sm mt-2 flex flex-wrap items-center gap-2">
+      <span>{holdings.length} position{holdings.length !== 1 ? 's' : ''}</span>
+      <span class="text-terminal-border">•</span>
+      <span>{log.length} decision{log.length !== 1 ? 's' : ''}</span>
+      {inception && (
+        <>
+          <span class="text-terminal-border">•</span>
+          <span>since {formatShortDate(asDate(inception))}</span>
+        </>
+      )}
+    </p>
+  </div>
+
+  {portfolioConfig.demo && (
+    <div class="mb-6 flex items-start gap-3 rounded-lg border border-terminal-border bg-terminal-surface p-3 text-sm">
+      <span class="text-yellow-400 shrink-0">!</span>
+      <p class="text-terminal-muted">
+        <span class="text-terminal-text">Example data.</span> This page is rendering the
+        bundled sample book, not a real track record. Flip <code
+          class="text-terminal-accent-cyan">demo</code
+        > to <code class="text-terminal-accent-cyan">false</code> in
+        <code class="text-terminal-accent-cyan">src/data/portfolio.config.ts</code> once your
+        own log is in place.
+      </p>
+    </div>
+  )}
+
+  <p class="mb-8 text-sm text-terminal-muted leading-relaxed">
+    {portfolioConfig.intro}
+  </p>
+
+  {import.meta.env.DEV && (buildError || warnings.length > 0) && (
+    <section class="mb-8 rounded-lg border border-terminal-border bg-terminal-surface p-3">
+      <p class="text-xs text-terminal-muted mb-2">engine warnings (dev only)</p>
+      <ul class="text-xs text-yellow-400 space-y-1">
+        {buildError && <li>build failed: {buildError}</li>}
+        {warnings.map((w) => (
+          <li>{w}</li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  {showStats && snapshot && (
+    <section class="mb-8">
+      <header class="mb-4 pb-2 border-b border-terminal-border">
+        <h2 class="text-terminal-text font-medium">Track record</h2>
+      </header>
+      <StatRow stats={snapshot.stats} benchmark={benchmark} />
+      {hasChart && (
+        <div class="mt-6">
+          <PerformanceChart
+            series={series}
+            markers={markers}
+            defaultRange={portfolioConfig.display.defaultRange}
+          />
+        </div>
+      )}
+    </section>
+  )}
+
+  {showUnavailable && (
+    <p class="mb-8 text-terminal-muted text-sm">
+      Performance figures are unavailable in this build — the price cache
+      (<code class="text-terminal-accent-cyan">src/data/prices.json</code>) is missing or could
+      not be read. The decision log below is unaffected.
+    </p>
+  )}
+
+  {holdings.length > 0 && (
+    <section class="mb-8">
+      <header class="mb-4 pb-2 border-b border-terminal-border flex items-baseline justify-between gap-3">
+        <h2 class="text-terminal-text font-medium">Holdings</h2>
+        <span class="text-xs text-terminal-muted">
+          {(cashWeight * 100).toFixed(1)}% cash
+        </span>
+      </header>
+      <AllocationBar positions={holdings} cashWeight={cashWeight} />
+      <div class="mt-6">
+        <HoldingsTable positions={holdings} />
+      </div>
+    </section>
+  )}
+
+  <section class="mb-8" id="log">
+    <header class="mb-4 pb-2 border-b border-terminal-border">
+      <h2 class="text-terminal-text font-medium">Decision log</h2>
+    </header>
+    {hasLog ? (
+      <div class="space-y-4 pl-2">
+        {newestFirst.map((doc) => {
+          const slug = doc.data.slug;
+          const outcome = snapshot?.outcomes[slug];
+          return (
+            <LogEntryCard
+              entry={doc}
+              move={outcome?.kind ?? fallbackKinds.get(slug) ?? 'note'}
+              isDoubleDown={outcome?.isDoubleDown ?? false}
+              href={`/portfolio/${slug}/`}
+              outcome={outcome}
+            />
+          );
+        })}
+      </div>
+    ) : (
+      <p class="text-terminal-muted text-center py-8">No decisions logged yet.</p>
+    )}
+  </section>
+
+  {showClosed && (
+    <section class="mb-8">
+      <header class="mb-4 pb-2 border-b border-terminal-border">
+        <h2 class="text-terminal-text font-medium">Closed positions</h2>
+      </header>
+      <ClosedTable closed={closed} />
+    </section>
+  )}
+
+  <footer class="mt-12 pt-8 border-t border-terminal-border text-xs text-terminal-muted">
+    <p class="flex flex-wrap items-center gap-2">
+      {asOf ? (
+        <span>Prices as of {formatShortDate(asDate(asOf))}</span>
+      ) : (
+        <span>No price data in this build</span>
+      )}
+      {pricesSource && (
+        <>
+          <span class="text-terminal-border">•</span>
+          <span>{pricesSource}</span>
+        </>
+      )}
+      <span class="text-terminal-border">•</span>
+      <span>total return, {snapshot?.baseCurrency ?? portfolioConfig.baseCurrency}</span>
+    </p>
+    <p class="mt-2">
+      Sizes are weights, never amounts.{' '}
+      <a href="/portfolio/methodology/" class="hover:text-terminal-accent-cyan">
+        How these numbers are computed →
+      </a>
+    </p>
+  </footer>
+
+  <div class="mt-8 text-center">
+    <a
+      href="/atom/portfolio.xml"
+      class="inline-flex items-center gap-2 text-terminal-muted hover:text-terminal-accent-cyan transition-colors text-sm"
+    >
+      <span>Subscribe via RSS</span>
+      <span>→</span>
+    </a>
+  </div>
+</BaseLayout>

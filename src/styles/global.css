@@ -195,3 +195,31 @@
 .internal-link-preview:hover .preview-title {
   @apply text-terminal-accent-cyan;
 }
+
+/* ---------------------------------------------------------------------------
+   Portfolio tokens (appended; @theme blocks merge in Tailwind v4)
+   --------------------------------------------------------------------------- */
+@theme {
+  /* Was used in six places without ever being defined, so those glyphs
+     silently inherited their colour. yellow-500, matching .terminal-dot-yellow. */
+  --color-terminal-accent-yellow: #eab308;
+
+  /* The portfolio's own line. Deliberately a deeper green than
+     --color-terminal-accent-green, which stays reserved for up/positive
+     polarity: on this page green/red mean direction, so the series identity
+     colour must not be the same green. */
+  --color-pf-portfolio: #17b053;
+  /* Secondary benchmark line (the primary reuses --color-terminal-accent-blue). */
+  --color-pf-bench-2: #ec4899;
+  /* Loss wash and the down arrow. There is no terminal-accent-red token. */
+  --color-pf-loss: #fb7185;
+
+  /* Decision markers: a diverging annotation ramp, not a categorical palette.
+     Cool arm = exposure in, warm arm = exposure out, gray = neutral/mixed.
+     These sit ON a line as 8–10px glyphs, so they run bright on purpose
+     (9.9:1 and 10.7:1 against --color-terminal-bg). */
+  --color-pf-mk-in: #22d3ee;
+  --color-pf-mk-out: #fbbf24;
+  /* Also the emphasised 100 baseline: 3.75:1, versus 1.72:1 for the grid. */
+  --color-pf-mk-neutral: #64748b;
+}
