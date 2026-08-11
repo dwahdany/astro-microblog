@@ -95,11 +95,15 @@ let cookie = '';
 
 /** Yahoo hands out an A1/A3 cookie pair; requests carrying one are throttled
  *  noticeably less than anonymous ones. */
-async function warmUp() {
+async function warmUp(needed) {
+  // Only worth a request if Yahoo is actually going to be called. When every
+  // symbol resolves through Nasdaq this would just stall on a host that is
+  // currently refusing us.
+  if (!needed) return;
   try {
     const res = await fetch('https://fc.yahoo.com/', {
       headers: { 'User-Agent': UA, Accept: 'text/html,*/*' },
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(8000),
     });
     const jar = res.headers.getSetCookie?.() ?? [];
     cookie = jar.map((c) => c.split(';')[0]).join('; ');
@@ -166,6 +170,14 @@ function parseUsDate(s) {
 async function fetchNasdaq(target, from, to) {
   const spec = NASDAQ_MAP[target];
   if (!spec) return null;
+  // Without this the URL carries `assetclass=undefined`, which returns no rows
+  // and quietly demotes the symbol to the Yahoo fallback — minutes of backoff
+  // for what is really a one-line typo in the map.
+  if (!spec.symbol || !spec.assetclass) {
+    const e = new Error(`nasdaq-symbol-map.json: ${target} needs both "symbol" and "assetclass"`);
+    e.fatal = true;
+    throw e;
+  }
   const url =
     `https://api.nasdaq.com/api/quote/${encodeURIComponent(spec.symbol)}/historical` +
     `?assetclass=${spec.assetclass}&fromdate=${from}&todate=${to}&limit=9999`;
@@ -190,7 +202,9 @@ async function fetchNasdaq(target, from, to) {
 
   return {
     symbol: target,
-    name: spec.note ? `${spec.symbol} — ${spec.note}` : spec.symbol,
+    // `note` is documentation for whoever maintains the mapping — it must never
+    // reach this field, which is what the site prints next to the ticker.
+    name: spec.name ?? spec.symbol,
     currency: 'USD',
     instrumentType: spec.assetclass === 'etf' ? 'ETF' : 'EQUITY',
     dates: points.map((p) => p[0]),
@@ -289,7 +303,7 @@ const existing = existsSync(OUT) ? JSON.parse(readFileSync(OUT, 'utf8')) : { ser
 const series = { ...(existing.series ?? {}) };
 const failed = [];
 
-await warmUp();
+await warmUp([...wanted].some((s) => !NASDAQ_MAP[s]));
 
 /** Persist after every symbol: a run that dies at symbol 8 must not throw away
  *  the first seven, which cost minutes of backoff to obtain. */

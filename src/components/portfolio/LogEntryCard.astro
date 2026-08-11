@@ -97,8 +97,14 @@ const created = entry.data.created;
       </ul>
     )}
 
-    <div class="mt-1.5 text-terminal-muted text-sm line-clamp-2">
-      {entry.data.excerpt ? <p>{entry.data.excerpt}</p> : <Content />}
+    {/*
+      Rendered in full, like NoteCard and BlogmarkCard. EntryCard clamps
+      because those are long articles standing in for themselves; here the
+      reasoning IS the entry, and a decision note truncated mid-thesis is
+      worse than a longer page.
+    */}
+    <div class="mt-1.5 text-terminal-text text-sm prose prose-sm max-w-none">
+      <Content />
     </div>
 
     {entry.data.tags.length > 0 && (

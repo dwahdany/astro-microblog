@@ -14,6 +14,4 @@ legs:
      reasoning is not written yet. Replace the text below, set is_draft: false,
      and delete this comment. -->
 
-**Why:** _(what was the thesis? what would prove it wrong? why this size?)_
-
-**What changed:** _(what made you act now rather than earlier or later?)_
+Bio wildcard. They have a bunch of cash and mRNA experience from the COVID vaccines, maybe they'll cook something up.

@@ -14,6 +14,6 @@ legs:
      reasoning is not written yet. Replace the text below, set is_draft: false,
      and delete this comment. -->
 
-**Why:** _(what was the thesis? what would prove it wrong? why this size?)_
+Rebound Capital idea. They rate funds and took a hit recently.
 
-**What changed:** _(what made you act now rather than earlier or later?)_
+<!--We're all fucked cyber-wise. ChatGPT is drive-by hacking websites to get people into fitness courses. Most companies in SPGI are glasswing partners and I think they'll only get more business.-->

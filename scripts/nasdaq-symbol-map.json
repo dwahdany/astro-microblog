@@ -4,38 +4,79 @@
     "this project. It only serves US listings, so anything held on a European",
     "venue has to be mapped to a US line here.",
     "",
-    "'exact' means the same security, so the EUR return is identical once FX is",
-    "applied. 'proxy' means a DIFFERENT instrument tracking the same index — its",
-    "return is close but not the real one. Prefer replacing proxies with a real",
-    "feed for the European listings when one is available.",
+    "  symbol     the Nasdaq ticker to fetch",
+    "  name       display name shown on the site for this holding",
+    "  fidelity   'exact' = the same security, so the EUR return is identical",
+    "             once FX is applied. 'proxy' = a DIFFERENT instrument tracking",
+    "             the same index; its return is close but not the real one.",
+    "  note       maintainer's note. Never displayed — it explains the mapping",
+    "             to whoever reads this file next.",
     "",
-    "Nasdaq serves raw closes, not dividend-adjusted ones. Distributions are",
-    "applied separately from the broker statements; accumulating funds need no",
-    "adjustment because the price already is the total return."
+    "To change how a holding is labelled on the page, edit `name` here, or set",
+    "`name:` on the leg in the log entry, which overrides this."
   ],
-
-  "AAPL": { "symbol": "AAPL", "assetclass": "stocks", "fidelity": "exact" },
-  "KO":   { "symbol": "KO",   "assetclass": "stocks", "fidelity": "exact" },
-  "NET":  { "symbol": "NET",  "assetclass": "stocks", "fidelity": "exact" },
-  "GOOG": { "symbol": "GOOG", "assetclass": "stocks", "fidelity": "exact" },
-  "IBM":  { "symbol": "IBM",  "assetclass": "stocks", "fidelity": "exact" },
-  "SPGI": { "symbol": "SPGI", "assetclass": "stocks", "fidelity": "exact" },
-
-  "22UA.DE": {
-    "symbol": "BNTX", "assetclass": "stocks", "fidelity": "exact",
-    "note": "Same BioNTech ADR (US09075V1026), NASDAQ line instead of the Xetra one. Quoted in USD; the EUR return matches once FX is applied. Pays no dividend."
+  "AAPL": {
+    "symbol": "AAPL",
+    "name": "Apple Inc.",
+    "fidelity": "exact",
+    "assetclass": "stocks"
   },
-
+  "KO": {
+    "symbol": "KO",
+    "name": "The Coca-Cola Company",
+    "fidelity": "exact",
+    "assetclass": "stocks"
+  },
+  "NET": {
+    "symbol": "NET",
+    "name": "Cloudflare, Inc.",
+    "fidelity": "exact",
+    "assetclass": "stocks"
+  },
+  "GOOG": {
+    "symbol": "GOOG",
+    "name": "Alphabet Inc.",
+    "fidelity": "exact",
+    "assetclass": "stocks"
+  },
+  "IBM": {
+    "symbol": "IBM",
+    "name": "International Business Machines",
+    "fidelity": "exact",
+    "assetclass": "stocks"
+  },
+  "SPGI": {
+    "symbol": "SPGI",
+    "name": "S&P Global Inc.",
+    "fidelity": "exact",
+    "assetclass": "stocks"
+  },
+  "22UA.DE": {
+    "symbol": "BNTX",
+    "name": "BioNTech",
+    "fidelity": "exact",
+    "note": "Same BioNTech ADR (US09075V1026), NASDAQ line instead of the Xetra one. Quoted in USD; the EUR return matches once FX is applied. Pays no dividend.",
+    "assetclass": "stocks"
+  },
   "CIBR.L": {
-    "symbol": "CIBR", "assetclass": "etf", "fidelity": "proxy",
-    "note": "PROXY. Held line is the First Trust Cybersecurity UCITS ETF (IE00BF16M727) on LSE; this is the US First Trust NASDAQ Cybersecurity ETF. Same index, different fund — fees and timing differ."
+    "symbol": "CIBR",
+    "name": "First Trust Cybersecurity UCITS ETF",
+    "fidelity": "proxy",
+    "note": "PROXY. Held line is the First Trust Cybersecurity UCITS ETF (IE00BF16M727) on LSE; this is the US First Trust NASDAQ Cybersecurity ETF. Same index, different fund, so fees and timing differ.",
+    "assetclass": "etf"
   },
   "VWCE.DE": {
-    "symbol": "VT", "assetclass": "etf", "fidelity": "proxy",
-    "note": "PROXY benchmark. Vanguard Total World (FTSE Global All Cap) standing in for VWCE (FTSE All-World). Distributing, so it needs dividend adjustment; VWCE accumulates and would not."
+    "symbol": "VT",
+    "name": "FTSE All-World",
+    "fidelity": "proxy",
+    "note": "PROXY benchmark. Vanguard Total World (FTSE Global All Cap) standing in for VWCE (FTSE All-World). Distributing, so it needs dividend adjustment; VWCE accumulates and would not.",
+    "assetclass": "etf"
   },
   "^GSPC": {
-    "symbol": "SPY", "assetclass": "etf", "fidelity": "proxy",
-    "note": "PROXY benchmark. SPY stands in for the S&P 500 index. Distributing."
+    "symbol": "SPY",
+    "name": "S&P 500",
+    "fidelity": "proxy",
+    "note": "PROXY benchmark. SPY stands in for the S&P 500 index. Distributing.",
+    "assetclass": "etf"
   }
 }
