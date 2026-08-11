@@ -29,21 +29,11 @@ const benchmarks = portfolioConfig.benchmarks;
 
   <TerminalWindow title="methodology.txt" class="mb-8">
     <div class="prose prose-sm max-w-none">
-      <h2>Sizes are weights, not amounts</h2>
-      <p>
-        A decision in the log records the <strong>weights it produced</strong> — “after this,
-        the position is 8% of the book” — and nothing else. No share counts, no prices paid,
-        no fees in currency, no totals. The source of this site is public, and shares × price
-        reconstructs a balance, so that information is never written down in the first place.
-      </p>
-      <p>
-        Between decisions, weights drift with prices. On a decision date they snap to the
-        values declared in that entry. A weight path plus a price history is a complete
-        description of the portfolio up to one unknown scale factor — and the scale is
-        precisely the part being withheld.
-      </p>
-
       <h2>Return is time-weighted</h2>
+      <p>
+        Each decision records the position weights it produced. Between decisions those
+        weights drift with prices; on a decision date they reset to the declared values.
+      </p>
       <p>
         The headline number is the <strong>time-weighted return</strong> (TWR). Each trading
         day, the book's return is the weighted sum of its holdings' returns:
@@ -51,15 +41,8 @@ const benchmarks = portfolioConfig.benchmarks;
       <pre><code>r_p(t) = Σ_i w_i(t−1) · r_i(t)</code></pre>
       <p>
         and the cumulative figure is the compounded chain of those daily returns:
-        <code>Π (1 + r_p(t)) − 1</code>. Weights are carried forward and renormalised as
-        prices move, and reset to the declared weights on each decision date.
-      </p>
-      <p>
-        TWR is <em>scale-invariant</em>: it depends only on the weight path, not on how much
-        money was in the account. Publishing weights therefore costs nothing in accuracy — the
-        track record here is the real one, not an approximation of one. It is also the measure
-        that isolates the decisions from the timing of deposits, which is what a log of
-        reasoning should be judged on.
+        <code>Π (1 + r_p(t)) − 1</code>. TWR depends only on the weight path, which makes it
+        the measure that isolates the decisions from the timing of deposits.
       </p>
       <p>
         Everything else — annualised return, drawdowns, best and worst day, hit rate, and each
@@ -96,9 +79,7 @@ const benchmarks = portfolioConfig.benchmarks;
         shifts 5% of the book from one holding to another is charged on 5%, not 10%.
       </p>
       <p>
-        This is a cost in <em>return</em> terms, never a currency amount: a percentage of a
-        percentage. It keeps the chart from flattering itself by trading for free, without
-        revealing what a trade was worth.
+        Without it the chart would flatter itself by trading for free.
       </p>
 
       <h2>Cash</h2>

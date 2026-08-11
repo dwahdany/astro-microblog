@@ -51,10 +51,9 @@ export const portfolioConfig: PortfolioConfig = {
   enabled: true,
   demo: false,
   title: 'Portfolio',
-  description:
-    'What I own, what I changed, and why — with the track record attached.',
+  description: 'What I own, what I have changed, and why.',
   intro:
-    'A log of the positions I hold and the changes I make to them, each with the reasoning I had at the time. Published so the reasoning stays honest: the chart keeps score whether or not the notes aged well. Sizes are weights, never amounts — enough to judge the calls, not enough to reconstruct the balance.',
+    'The positions I hold, every change I make to them, and the reasoning at the time.',
   baseCurrency: 'EUR',
   // The book was transferred in from another broker on this date; the track
   // record starts here because it is the first day with a verifiable snapshot.

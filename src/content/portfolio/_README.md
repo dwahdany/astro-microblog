@@ -1,19 +1,10 @@
----
-# This file is documentation, not a decision. It lives in a content collection
-# whose loader globs **/*.md, so it needs frontmatter that satisfies the schema
-# — and `is_draft: true`, which keeps it out of the page, the feed and the
-# engine. Ignore this block; the template you want is further down.
-slug: readme
-title: How to write a decision entry
-created: 2024-01-01
-is_draft: true
-legs: []
----
-
 # The decision log
 
 One file per decision. The frontmatter says **what it did to the book**, the
 body says **why**. Both are published; the body is the point.
+
+Files whose name starts with `_` are ignored by the loader, so this one is
+not an entry and neither is any scratch draft you leave here.
 
 Filenames are free-form (`2025-03-14-trimmed-nvda.md` sorts nicely); the URL
 comes from `slug`, not the filename: `/portfolio/<slug>/`.

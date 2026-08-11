@@ -99,7 +99,9 @@ const photos = defineCollection({
 // weight path is all a time-weighted track record needs. See
 // src/lib/portfolio/types.ts for why.
 const portfolio = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/portfolio' }),
+  // Underscore-prefixed files are ignored, so notes-to-self and scratch drafts
+  // can live beside the entries without being loaded as one.
+  loader: glob({ pattern: ['**/*.md', '!**/_*.md'], base: './src/content/portfolio' }),
   schema: ({ image }) => z.object({
     ...createBaseSchema(image),
     title: z.string(),
