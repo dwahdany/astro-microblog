@@ -18,7 +18,7 @@ reconstructs a balance. A decision records only the *weights* it produced.
 That is not a compromise on the numbers: time-weighted return depends only on
 the weight path, so the published track record is the real one. What genuinely
 cannot be published is anything denominated in money — realised P&L in euros,
-and money-weighted return (XIRR). See `/portfolio/methodology/`.
+and money-weighted return (XIRR).
 
 ## Template
 
