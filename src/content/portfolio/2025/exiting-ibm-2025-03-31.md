@@ -10,10 +10,4 @@ legs:
     weight: 0.000   # was 8.0%
 ---
 
-<!-- DRAFT, imported from a broker statement. The weights are real; the
-     reasoning is not written yet. Replace the text below, set is_draft: false,
-     and delete this comment. -->
-
-**Why:** _(what was the thesis? what would prove it wrong? why this size?)_
-
-**What changed:** _(what made you act now rather than earlier or later?)_
+IBM played out nicely with the Quantum hype and I might enter again later, but I find the overall package no longer that attractive.
