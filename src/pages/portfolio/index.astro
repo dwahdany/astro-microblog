@@ -265,6 +265,11 @@ const warnings = snapshot?.warnings ?? [];
   <section class="mb-8" id="log">
     <header class="mb-4 pb-2 border-b border-terminal-border">
       <h2 class="text-terminal-text font-medium">Decision log</h2>
+      {hasLog && (
+        <p class="text-[11px] text-terminal-muted mt-1">
+          Percentages are each position's share of the book, before → after.
+        </p>
+      )}
     </header>
     {hasLog ? (
       <div class="space-y-5">

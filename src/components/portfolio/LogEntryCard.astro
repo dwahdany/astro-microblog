@@ -36,15 +36,15 @@ const fmtW = (w: number) => {
   const v = w * 100;
   return `${Math.abs(v - Math.round(v)) < 0.05 ? Math.round(v) : v.toFixed(1)}`;
 };
-const signedPct = (x: number) => `${x > 0 ? '+' : x < 0 ? '−' : ''}${Math.abs(x * 100).toFixed(1)}%`;
-const tone = (x: number) =>
-  x > 0 ? 'text-terminal-accent-green' : x < 0 ? 'text-pf-loss' : 'text-terminal-muted';
-
 interface LegLine {
   ticker: string;
   change: string;
-  since: { text: string; tone: string } | null;
 }
+
+// The log says what changed; it does not score it. A single "since" return per
+// leg meant the opposite thing on an exit (what was left on the table) as on an
+// open, in the same unlabelled column. That belongs on the decision page under
+// "How this has aged", where there is room to say which it is.
 
 // `outcome` carries the pre-trade weight, which the frontmatter cannot: a leg
 // only records what the weight BECAME. With it we can print "11.5 → 17.5%";
@@ -53,10 +53,6 @@ const legs: LegLine[] = outcome
   ? outcome.legs.map((l) => ({
       ticker: l.ticker,
       change: `${fmtW(l.weightBefore)} → ${fmtW(l.weightAfter)}%`,
-      since:
-        l.returnSince === null
-          ? null
-          : { text: signedPct(l.returnSince), tone: tone(l.returnSince) },
     }))
   : entry.data.legs.map((l) => ({
       ticker: l.ticker,
@@ -68,7 +64,6 @@ const legs: LegLine[] = outcome
             : l.scale !== undefined
               ? `×${l.scale}`
               : 'out',
-      since: null,
     }));
 
 const created = entry.data.created;
@@ -97,7 +92,6 @@ const created = entry.data.created;
           <li class="whitespace-nowrap">
             <span class="text-terminal-text">{leg.ticker}</span>
             {' '}{leg.change}
-            {leg.since && <span class={leg.since.tone}> {leg.since.text}</span>}
           </li>
         ))}
       </ul>
