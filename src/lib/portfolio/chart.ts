@@ -637,9 +637,11 @@ function markerAria(p: PlacedMarker, date: IsoDate): string {
   const m = p.source;
   const verb = MOVE_VERB[p.kind];
   const who = m.tickers.length ? m.tickers.join(', ') : m.title;
+  // Levels are re-anchored per range, so this is movement across the window on
+  // screen, not since inception.
   const level =
     p.level !== null
-      ? ` Portfolio index ${formatLevel(p.level)}, ${formatSignedPercent(p.level - 100)} since inception.`
+      ? ` Portfolio ${formatSignedPercent(p.level - 100)} over the range shown.`
       : '';
   const doubleDown = m.isDoubleDown ? ' Added while underwater.' : '';
   return `${verb} ${who} — ${formatLongDate(date)}. ${m.title}.${level}${doubleDown} Read the reasoning.`;
@@ -819,7 +821,25 @@ function buildLayer(
   const slots = allSlots.slice(start);
   const n = slots.length;
   const vbWidth = Math.max(n - 1, 1);
-  const windows = filled.map((values) => values.slice(start));
+
+  // Every window is re-anchored to 100 at its own first point, so a range
+  // button answers "what happened over this period" instead of "where does
+  // this period sit relative to inception". Without it, 1M on a book up 48%
+  // draws a line hovering around 148 and the 100 baseline is off-screen —
+  // the reader has to do the division themselves, and the two series are no
+  // longer visually comparable over the window they are being shown for.
+  //
+  // Each series takes its own base, so one that starts mid-window enters at
+  // 100 on its own first day rather than being scaled by a value it did not
+  // have. Everything downstream — domain, ticks, endcap labels, markers, the
+  // area wash, and the crosshair, which reads levels back out of the plotted
+  // geometry — inherits this automatically.
+  const windows = filled.map((values) => {
+    const w = values.slice(start);
+    const base = w.find((v) => v !== null && v !== 0) ?? null;
+    if (base === null) return w;
+    return w.map((v) => (v === null ? null : (v / base) * 100));
+  });
 
   const visible: number[] = [];
   for (const values of windows) {

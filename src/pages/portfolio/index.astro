@@ -178,17 +178,6 @@ const warnings = snapshot?.warnings ?? [];
       <span class="text-terminal-accent-green">$</span>
       <span>{portfolioConfig.title}</span>
     </h1>
-    <p class="text-terminal-muted text-sm mt-2 flex flex-wrap items-center gap-2">
-      <span>{holdings.length} position{holdings.length !== 1 ? 's' : ''}</span>
-      <span class="text-terminal-border">•</span>
-      <span>{log.length} decision{log.length !== 1 ? 's' : ''}</span>
-      {inception && (
-        <>
-          <span class="text-terminal-border">•</span>
-          <span>since {formatShortDate(asDate(inception))}</span>
-        </>
-      )}
-    </p>
   </div>
 
   {portfolioConfig.demo && (
@@ -205,27 +194,8 @@ const warnings = snapshot?.warnings ?? [];
     </div>
   )}
 
-  <p class="mb-8 text-sm text-terminal-muted leading-relaxed">
-    {portfolioConfig.intro}
-  </p>
-
-  {import.meta.env.DEV && (buildError || warnings.length > 0) && (
-    <section class="mb-8 rounded-lg border border-terminal-border bg-terminal-surface p-3">
-      <p class="text-xs text-terminal-muted mb-2">engine warnings (dev only)</p>
-      <ul class="text-xs text-yellow-400 space-y-1">
-        {buildError && <li>build failed: {buildError}</li>}
-        {warnings.map((w) => (
-          <li>{w}</li>
-        ))}
-      </ul>
-    </section>
-  )}
-
   {showStats && snapshot && (
     <section class="mb-8">
-      <header class="mb-4 pb-2 border-b border-terminal-border">
-        <h2 class="text-terminal-text font-medium">Track record</h2>
-      </header>
       <StatRow stats={snapshot.stats} benchmark={benchmark} />
       {hasChart && (
         <div class="mt-6">

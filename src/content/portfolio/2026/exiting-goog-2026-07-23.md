@@ -14,4 +14,4 @@ legs:
      reasoning is not written yet. Replace the text below, set is_draft: false,
      and delete this comment. -->
 
-They bumped nicely on earnings, and thinking about the upcoming RSI I think Google is out.
+They bumped nicely on earnings, and I'm uncertain about the company's strategy.
