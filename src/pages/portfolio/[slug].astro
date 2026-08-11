@@ -91,7 +91,7 @@ export async function getStaticPaths() {
   const hasPriceData =
     priceData !== null && Object.keys(priceData.series ?? {}).length > 0;
 
-  const docs = await getCollection('portfolio', ({ data }) => !data.is_draft);
+  const docs = await getCollection('portfolio', ({ data }) => (!data.is_draft || import.meta.env.DEV));
   const newestFirst = [...docs].sort(
     (a, b) => new Date(b.data.created).getTime() - new Date(a.data.created).getTime()
   );

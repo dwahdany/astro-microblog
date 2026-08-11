@@ -1,0 +1,41 @@
+{
+  "_README": [
+    "Nasdaq's public quote API is keyless and, unlike Yahoo, does not rate-limit",
+    "this project. It only serves US listings, so anything held on a European",
+    "venue has to be mapped to a US line here.",
+    "",
+    "'exact' means the same security, so the EUR return is identical once FX is",
+    "applied. 'proxy' means a DIFFERENT instrument tracking the same index — its",
+    "return is close but not the real one. Prefer replacing proxies with a real",
+    "feed for the European listings when one is available.",
+    "",
+    "Nasdaq serves raw closes, not dividend-adjusted ones. Distributions are",
+    "applied separately from the broker statements; accumulating funds need no",
+    "adjustment because the price already is the total return."
+  ],
+
+  "AAPL": { "symbol": "AAPL", "assetclass": "stocks", "fidelity": "exact" },
+  "KO":   { "symbol": "KO",   "assetclass": "stocks", "fidelity": "exact" },
+  "NET":  { "symbol": "NET",  "assetclass": "stocks", "fidelity": "exact" },
+  "GOOG": { "symbol": "GOOG", "assetclass": "stocks", "fidelity": "exact" },
+  "IBM":  { "symbol": "IBM",  "assetclass": "stocks", "fidelity": "exact" },
+  "SPGI": { "symbol": "SPGI", "assetclass": "stocks", "fidelity": "exact" },
+
+  "22UA.DE": {
+    "symbol": "BNTX", "assetclass": "stocks", "fidelity": "exact",
+    "note": "Same BioNTech ADR (US09075V1026), NASDAQ line instead of the Xetra one. Quoted in USD; the EUR return matches once FX is applied. Pays no dividend."
+  },
+
+  "CIBR.L": {
+    "symbol": "CIBR", "assetclass": "etf", "fidelity": "proxy",
+    "note": "PROXY. Held line is the First Trust Cybersecurity UCITS ETF (IE00BF16M727) on LSE; this is the US First Trust NASDAQ Cybersecurity ETF. Same index, different fund — fees and timing differ."
+  },
+  "VWCE.DE": {
+    "symbol": "VT", "assetclass": "etf", "fidelity": "proxy",
+    "note": "PROXY benchmark. Vanguard Total World (FTSE Global All Cap) standing in for VWCE (FTSE All-World). Distributing, so it needs dividend adjustment; VWCE accumulates and would not."
+  },
+  "^GSPC": {
+    "symbol": "SPY", "assetclass": "etf", "fidelity": "proxy",
+    "note": "PROXY benchmark. SPY stands in for the S&P 500 index. Distributing."
+  }
+}

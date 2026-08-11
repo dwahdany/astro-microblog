@@ -135,6 +135,69 @@ async function fetchChart(symbol, period1, period2, attempt = 0) {
   return json.chart.result[0];
 }
 
+// ------------------------------------------------------------------ nasdaq
+/**
+ * Nasdaq's public quote API: keyless, unthrottled, and its closes reconcile to
+ * the cent against the broker statements. It only covers US listings and serves
+ * RAW closes, so European lines need a mapping and distributions are handled
+ * separately. Preferred over Yahoo purely because Yahoo blocks us.
+ */
+function loadNasdaqMap() {
+  const p = join(HERE, 'nasdaq-symbol-map.json');
+  if (!existsSync(p)) return {};
+  const raw = JSON.parse(readFileSync(p, 'utf8'));
+  delete raw._README;
+  return raw;
+}
+const NASDAQ_MAP = loadNasdaqMap();
+
+/** `$308.26` / `100.60` / `N/A` -> number | null */
+function parseMoney(s) {
+  const v = Number(String(s ?? '').replace(/[$,]/g, ''));
+  return Number.isFinite(v) && v > 0 ? v : null;
+}
+
+/** `08/10/2026` -> `2026-08-10` */
+function parseUsDate(s) {
+  const m = String(s ?? '').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  return m ? `${m[3]}-${m[1]}-${m[2]}` : null;
+}
+
+async function fetchNasdaq(target, from, to) {
+  const spec = NASDAQ_MAP[target];
+  if (!spec) return null;
+  const url =
+    `https://api.nasdaq.com/api/quote/${encodeURIComponent(spec.symbol)}/historical` +
+    `?assetclass=${spec.assetclass}&fromdate=${from}&todate=${to}&limit=9999`;
+  const res = await fetch(url, {
+    headers: { 'User-Agent': UA, Accept: 'application/json', Referer: 'https://www.nasdaq.com/' },
+    signal: AbortSignal.timeout(30000),
+  });
+  if (res.status === 429) { const e = new Error('rate limited'); e.rateLimited = true; throw e; }
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const rows = (await res.json())?.data?.tradesTable?.rows;
+  if (!rows?.length) throw new Error('no rows');
+
+  // Newest-first in the response; the cache is ascending.
+  const points = [];
+  for (const r of rows) {
+    const d = parseUsDate(r.date);
+    const c = parseMoney(r.close);
+    if (d && c != null) points.push([d, c]);
+  }
+  points.sort((a, b) => (a[0] < b[0] ? -1 : 1));
+  if (!points.length) throw new Error('no parseable rows');
+
+  return {
+    symbol: target,
+    name: spec.note ? `${spec.symbol} — ${spec.note}` : spec.symbol,
+    currency: 'USD',
+    instrumentType: spec.assetclass === 'etf' ? 'ETF' : 'EQUITY',
+    dates: points.map((p) => p[0]),
+    adjClose: points.map((p) => round(p[1])),
+  };
+}
+
 /**
  * A trading date is the exchange-local calendar day of the bar. Yahoo stamps
  * each bar with the session's *open* in UTC, so a European open (07:00Z) and a
@@ -211,15 +274,19 @@ if (ONLY) for (const s of [...wanted]) if (!ONLY.has(s)) wanted.delete(s);
 const start = new Date(inception);
 start.setUTCDate(start.getUTCDate() - 10); // slack so the first day has a prior close
 const period1 = Math.floor(start.getTime() / 1000);
+const from = start.toISOString().slice(0, 10);
+const to = new Date().toISOString().slice(0, 10);
 const period2 = Math.floor(Date.now() / 1000);
 
 console.log(`Base currency : ${baseCurrency}`);
 console.log(`Range         : ${start.toISOString().slice(0, 10)} .. today`);
 console.log(`Instruments   : ${[...wanted].sort().join(', ') || '(none)'}`);
 
-const SOURCE = 'Yahoo Finance (dividend- and split-adjusted closes)';
+const SOURCE = 'Nasdaq (closes) and the ECB via Frankfurter (FX)';
 const existing = existsSync(OUT) ? JSON.parse(readFileSync(OUT, 'utf8')) : { series: {} };
-const series = {};
+// Seed from the cache so a partial run (--only, or one cut short by a throttle)
+// merges into what is already there instead of replacing the whole file.
+const series = { ...(existing.series ?? {}) };
 const failed = [];
 
 await warmUp();
@@ -259,11 +326,24 @@ async function grab(symbol) {
   }
   process.stdout.write(`  ${symbol.padEnd(12)}`);
   try {
-    const result = await withRetry(symbol, (attempt) => fetchChart(symbol, period1, period2, attempt));
-    const s = toSeries(symbol, result);
+    let s = null;
+    let via = 'yahoo';
+    // Nasdaq first when it can serve the symbol: it is not rate-limiting us.
+    if (NASDAQ_MAP[symbol]) {
+      try {
+        s = await fetchNasdaq(symbol, from, to);
+        via = NASDAQ_MAP[symbol].fidelity === 'proxy' ? 'nasdaq~' : 'nasdaq';
+      } catch (e) {
+        if (VERBOSE) process.stdout.write(` [nasdaq: ${e.message}]`);
+      }
+    }
+    if (!s) {
+      const result = await withRetry(symbol, (attempt) => fetchChart(symbol, period1, period2, attempt));
+      s = toSeries(symbol, result);
+    }
     if (!s || !s.dates.length) throw new Error('empty series');
     series[symbol] = s;
-    console.log(` ok  ${String(s.dates.length).padStart(4)} days  ${s.currency.padEnd(4)} ${s.dates[0]}..${s.dates.at(-1)}`);
+    console.log(` ok  ${String(s.dates.length).padStart(4)} days  ${s.currency.padEnd(4)} ${via.padEnd(7)} ${s.dates[0]}..${s.dates.at(-1)}`);
     persist();
     return s;
   } catch (e) {
@@ -289,7 +369,7 @@ for (const symbol of [...wanted].sort()) {
     const ccy = s.currency === 'GBp' || s.currency === 'GBX' ? 'GBP' : s.currency;
     if (ccy !== baseCurrency) quoteCurrencies.add(ccy);
   }
-  await sleep(SYMBOL_GAP_MS); // deliberate: bursts get this IP throttled for minutes
+  if (!NASDAQ_MAP[symbol]) await sleep(SYMBOL_GAP_MS); // only Yahoo needs the pause: bursts get this IP throttled for minutes
 }
 
 /**
@@ -329,7 +409,7 @@ const fxWanted = [...quoteCurrencies];
 if (fxWanted.length) {
   console.log('\nFX (ECB via Frankfurter):');
   try {
-    await fetchFx(fxWanted.sort(), start.toISOString().slice(0, 10), new Date().toISOString().slice(0, 10));
+    await fetchFx(fxWanted.sort(), from, to);
   } catch (e) {
     console.log(`  FAILED (${e.message})`);
     for (const c of fxWanted) failed.push(`${c}${baseCurrency}=X`);

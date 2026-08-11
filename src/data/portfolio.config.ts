@@ -49,7 +49,7 @@ export interface PortfolioConfig {
 
 export const portfolioConfig: PortfolioConfig = {
   enabled: true,
-  demo: true,
+  demo: false,
   title: 'Portfolio',
   description:
     'What I own, what I changed, and why — with the track record attached.',

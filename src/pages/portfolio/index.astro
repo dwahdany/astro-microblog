@@ -103,7 +103,7 @@ function fallbackMove(entry: LogEntry, seen: Set<string>): MoveKind {
   return 'rebalance';
 }
 
-const docs = await getCollection('portfolio', ({ data }) => !data.is_draft);
+const docs = await getCollection('portfolio', ({ data }) => (!data.is_draft || import.meta.env.DEV));
 // Newest first for display; the engine gets them oldest first.
 const newestFirst = [...docs].sort(
   (a, b) => new Date(b.data.created).getTime() - new Date(a.data.created).getTime()
@@ -267,7 +267,7 @@ const warnings = snapshot?.warnings ?? [];
       <h2 class="text-terminal-text font-medium">Decision log</h2>
     </header>
     {hasLog ? (
-      <div class="space-y-4 pl-2">
+      <div class="space-y-5">
         {newestFirst.map((doc) => {
           const slug = doc.data.slug;
           const outcome = snapshot?.outcomes[slug];
