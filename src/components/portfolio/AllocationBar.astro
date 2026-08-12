@@ -1,0 +1,134 @@
+---
+import type { Position } from '../../lib/portfolio/types';
+
+interface Props {
+  positions: Position[];
+  /** Uninvested remainder, 0..1. Omitted or 0 hides the CASH slice. */
+  cashWeight?: number;
+}
+
+const { positions, cashWeight = 0 } = Astro.props;
+
+// Categorical palette — eight fixed slots, assigned in order, never cycled.
+// Validated with the dataviz skill's checker in dark mode against BOTH surfaces
+// this bar can sit on (#0f172a page, #1e293b panel): lightness band, chroma
+// floor, adjacent CVD separation (worst pair ΔE 19.3 deutan), normal-vision
+// floor (23.3) and 3:1 contrast all PASS. The slot ORDER is the CVD-safety
+// mechanism — it was chosen by enumerating every ordering of these eight hues
+// and keeping the one with the largest minimum adjacent separation. Do not
+// reorder or re-step without re-running the validator.
+//
+// Deliberately stepped away from the chart's own hexes (#17b053 portfolio,
+// #3b82f6 / #ec4899 benchmarks, #22d3ee / #fbbf24 markers) and away from the
+// green/red polarity pair, so a slice colour can never be misread as a series
+// line or as "up"/"down".
+const PALETTE = [
+  '#0284c7', // sky
+  '#ea580c', // orange
+  '#d946ef', // fuchsia
+  '#d97706', // amber
+  '#a855f7', // purple
+  '#65a30d', // lime
+  '#6366f1', // indigo
+  '#0d9488', // teal
+];
+const NEUTRAL = '#64748b'; // the chart's neutral ink — used for the folded tail
+// Cash is not an instrument, so it gets a texture rather than a ninth hue.
+const CASH_FILL = 'repeating-linear-gradient(45deg, #64748b 0 4px, #94a3b8 4px 8px)';
+
+const pct = (x: number) => `${(x * 100).toFixed(1)}%`;
+
+interface Slice {
+  key: string;
+  label: string;
+  weight: number;
+  fill: string;
+  detail?: string;
+}
+
+const live = positions.filter((p) => p.weight > 0);
+
+// Colour follows the holding, never its rank: slots are handed out in the order
+// positions were opened, so weight drift never repaints the bar and a newly
+// opened position appends the next unused slot instead of shifting everyone.
+// Past eight holdings the smallest fold into one neutral "OTHER" slice (the
+// palette is never cycled); the legend still names every ticker in it.
+let shown = live;
+let folded: Position[] = [];
+if (live.length > PALETTE.length) {
+  const byWeight = [...live].sort((a, b) => b.weight - a.weight);
+  shown = byWeight.slice(0, PALETTE.length - 1);
+  folded = byWeight.slice(PALETTE.length - 1);
+}
+shown = [...shown].sort(
+  (a, b) => a.openedAt.localeCompare(b.openedAt) || a.ticker.localeCompare(b.ticker)
+);
+
+const slices: Slice[] = shown.map((p, i) => ({
+  key: p.ticker,
+  label: p.ticker,
+  weight: p.weight,
+  fill: PALETTE[i],
+  detail: p.name && p.name !== p.ticker ? p.name : undefined,
+}));
+
+if (folded.length > 0) {
+  slices.push({
+    key: '__other',
+    label: `OTHER (${folded.length})`,
+    weight: folded.reduce((sum, p) => sum + p.weight, 0),
+    fill: NEUTRAL,
+    detail: folded.map((p) => p.ticker).join(', '),
+  });
+}
+
+if (cashWeight > 0.0005) {
+  slices.push({
+    key: '__cash',
+    label: 'CASH',
+    weight: cashWeight,
+    fill: CASH_FILL,
+    detail: 'uninvested',
+  });
+}
+
+// Geometry is normalised so the bar always spans the full width even when the
+// declared weights round to slightly less (or more) than 100%. The legend
+// prints the real weights.
+const total = slices.reduce((sum, s) => sum + s.weight, 0);
+---
+
+{slices.length === 0 || total <= 0 ? (
+  <p class="text-terminal-muted text-center py-8">Nothing allocated yet.</p>
+) : (
+  <div>
+    {/* The bar is decoration: the legend below is the accessible text version. */}
+    <div class="flex w-full h-6 sm:h-7 gap-[2px] overflow-hidden" aria-hidden="true">
+      {slices.map((s) => (
+        <div
+          class="rounded-sm min-w-[3px]"
+          style={`flex: ${((s.weight / total) * 100).toFixed(4)} 1 0%; background: ${s.fill};`}
+          title={`${s.label} — ${pct(s.weight)}${s.detail ? ` (${s.detail})` : ''}`}
+        />
+      ))}
+    </div>
+    <ul class="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs">
+      {slices.map((s) => (
+        <li class="inline-flex items-center gap-1.5 min-w-0">
+          <span
+            class="w-2.5 h-2.5 rounded-sm shrink-0"
+            style={`background: ${s.fill};`}
+            aria-hidden="true"
+          />
+          <span class="text-terminal-text">{s.label}</span>
+          <span class="text-terminal-muted">{pct(s.weight)}</span>
+        </li>
+      ))}
+    </ul>
+    {folded.length > 0 && (
+      <p class="mt-2 text-xs text-terminal-muted">
+        OTHER: {folded.map((p) => p.ticker).join(', ')}
+      </p>
+    )}
+  </div>
+)}

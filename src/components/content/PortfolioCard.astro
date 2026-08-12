@@ -1,0 +1,107 @@
+---
+/**
+ * A decision as it appears in the main timeline.
+ *
+ * Deliberately reads only frontmatter. The portfolio page's own LogEntryCard
+ * takes engine output (pre-trade weights, how the call has aged), but the
+ * timeline is rendered by the homepage, every tag page and every date archive
+ * — running the return engine once per page to enrich one card would be a lot
+ * of build work for a line of text. The permalink has the full picture.
+ */
+import { render } from 'astro:content';
+import type { PortfolioItem } from '../../lib/types';
+import { getItemUrl } from '../../lib/content';
+import MoveBadge from '../portfolio/MoveBadge.astro';
+import TagList from './TagList.astro';
+
+interface Props {
+  entry: PortfolioItem;
+}
+
+const { entry } = Astro.props;
+const url = getItemUrl({ type: 'portfolio', item: entry });
+const { Content } = await render(entry);
+
+const legs = entry.data.legs ?? [];
+
+// The engine derives this from the weight path; here we can only read what the
+// entry declared, which is why `move` is written into frontmatter on import.
+function inferMove() {
+  if (entry.data.move) return entry.data.move;
+  if (!legs.length) return 'note' as const;
+  const out = legs.every((l) => l.weight === 0 || (l.weight === undefined && l.action === 'sell'));
+  if (out) return 'exit' as const;
+  return legs.some((l) => l.action === 'sell' || l.portion !== undefined) ? 'trim' as const : 'add' as const;
+}
+const move = inferMove();
+
+const SIGILS: Record<string, string> = {
+  open: '+', add: '+', trim: '−', exit: '×', rebalance: '~', note: '·',
+};
+const sigil = SIGILS[move] ?? '·';
+
+const pct = (w: number) => {
+  const v = w * 100;
+  return `${Math.abs(v - Math.round(v)) < 0.05 ? Math.round(v) : v.toFixed(1)}%`;
+};
+const describe = (l: (typeof legs)[number]) =>
+  l.weight !== undefined
+    ? `→ ${pct(l.weight)}`
+    : l.portion !== undefined
+      ? `−${pct(l.portion)} of it`
+      : l.scale !== undefined
+        ? `×${l.scale}`
+        : 'out';
+---
+
+<article class="group">
+  <div class="flex items-start gap-2">
+    <a
+      href={url}
+      class="text-terminal-border shrink-0 -mt-0.5 group-hover:text-terminal-muted transition-colors"
+      aria-hidden="true"
+      tabindex="-1">{sigil}</a>
+    <div class="flex-1 min-w-0">
+      <div class="text-[11px] text-terminal-muted">
+        <MoveBadge kind={move} />
+      </div>
+
+      <h3 class="text-base font-medium text-terminal-text mt-1 mb-1">
+        <a href={url} class="text-inherit hover:text-terminal-accent-cyan transition-colors">
+          {entry.data.title}
+        </a>
+      </h3>
+
+      {legs.length > 0 && (
+        <ul class="mb-1.5 flex flex-wrap gap-x-5 gap-y-0.5 text-xs text-terminal-muted">
+          {legs.map((l) => (
+            <li class="whitespace-nowrap">
+              <span class="text-terminal-text">{l.name ?? l.ticker}</span> {describe(l)}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div class="text-terminal-text text-sm prose prose-sm max-w-none">
+        <Content />
+      </div>
+
+      {/*
+        No time here, unlike the other cards. A decision is imported from a
+        broker statement with a date and no clock, so it parses as midnight UTC
+        and any time rendered from it is an artefact of the build machine's
+        offset rather than when the trade happened. The day is already in the
+        timeline's date header.
+      */}
+      <div class="mt-2 flex items-center gap-3 text-xs text-terminal-muted">
+        <a href={url} class="hover:text-terminal-accent-cyan transition-colors">decision →</a>
+        {entry.data.tags.length > 0 && (
+          <>
+            <span class="text-terminal-border">•</span>
+            <TagList tags={entry.data.tags} />
+          </>
+        )}
+      </div>
+    </div>
+  </div>
+</article>

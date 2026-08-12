@@ -1,0 +1,128 @@
+---
+import type { Position } from '../../lib/portfolio/types';
+import { formatShortDate } from '../../lib/content';
+
+interface Props {
+  positions: Position[];
+}
+
+const { positions } = Astro.props;
+
+const asDate = (iso: string) => new Date(`${iso}T12:00:00Z`);
+const shortDate = (iso: string) => formatShortDate(asDate(iso));
+
+const pct = (x: number, dp = 1) => `${(x * 100).toFixed(dp)}%`;
+const sign = (x: number) => (x > 0 ? '+' : x < 0 ? '−' : '');
+const signedPct = (x: number, dp = 1) => `${sign(x)}${Math.abs(x * 100).toFixed(dp)}%`;
+// A difference between two returns is percentage points, not percent.
+const signedPp = (x: number, dp = 1) => `${sign(x)}${Math.abs(x * 100).toFixed(dp)} pp`;
+// Polarity, matching the chart's delta glyphs. Sign and colour always travel
+// together, so the number never relies on colour alone.
+const tone = (x: number) =>
+  x > 0 ? 'text-terminal-accent-green' : x < 0 ? 'text-pf-loss' : 'text-terminal-muted';
+
+const rows = [...positions].sort((a, b) => b.weight - a.weight);
+
+// Anchor of the log entry that last touched this ticker. The log cards render
+// the matching id (see LogEntryCard).
+const logHref = (slug: string | undefined) => (slug ? `#pf-${slug}` : null);
+
+// Row shell: a bordered card below `sm:`, a plain table row above it.
+const rowClass =
+  'block sm:table-row mb-3 sm:mb-0 rounded-lg sm:rounded-none border border-terminal-border sm:border-0 bg-terminal-surface sm:bg-transparent p-3 sm:p-0 sm:hover:bg-terminal-border/30 transition-colors';
+// Every cell: a label/value line on mobile, a plain cell on desktop.
+const cellClass =
+  'flex justify-between items-baseline gap-3 py-0.5 sm:table-cell sm:text-right sm:py-2 sm:px-3 sm:border-b sm:border-terminal-border align-top whitespace-nowrap';
+const labelClass = 'text-terminal-muted sm:hidden';
+const headClass =
+  'text-right font-medium pb-2 px-3 border-b border-terminal-border whitespace-nowrap';
+---
+
+{rows.length === 0 ? (
+  <p class="text-terminal-muted text-center py-8">No open positions.</p>
+) : (
+  <table class="block sm:table w-full border-collapse text-sm">
+    <thead class="hidden sm:table-header-group">
+      <tr class="text-xs uppercase tracking-wider text-terminal-muted">
+        <th scope="col" class="text-left font-medium pb-2 pr-3 border-b border-terminal-border">
+          Ticker
+        </th>
+        <th scope="col" class={headClass}>Weight</th>
+        <th scope="col" class={headClass}>Since open</th>
+        <th scope="col" class={headClass} title="Instrument return minus the benchmark over the same holding window">
+          vs bench
+        </th>
+        <th scope="col" class={headClass} title="Share of the portfolio's cumulative time-weighted return">
+          Contrib
+        </th>
+        <th scope="col" class="text-left font-medium pb-2 pl-3 border-b border-terminal-border whitespace-nowrap">
+          Opened
+        </th>
+      </tr>
+    </thead>
+    <tbody class="block sm:table-row-group">
+      {rows.map((p) => {
+        const href = logHref(p.entrySlugs[0]);
+        const excess =
+          p.benchmarkSinceOpen === null ? null : p.returnSinceOpen - p.benchmarkSinceOpen;
+        return (
+          <tr class={rowClass}>
+            <th
+              scope="row"
+              class="block sm:table-cell text-left font-normal pb-1 sm:pb-0 sm:py-2 sm:pr-3 sm:border-b sm:border-terminal-border align-top"
+            >
+              {href ? (
+                <a
+                  href={href}
+                  class="font-medium text-terminal-text hover:text-terminal-accent-cyan transition-colors"
+                >
+                  {p.ticker}<span class="text-terminal-muted ml-1.5">→</span>
+                </a>
+              ) : (
+                <span class="font-medium text-terminal-text">{p.ticker}</span>
+              )}
+              <span class="block text-xs text-terminal-muted break-words">
+                {p.name || p.ticker}
+              </span>
+            </th>
+
+            <td class={cellClass}>
+              <span class={labelClass}>Weight</span>
+              <span class="text-terminal-text sm:block sm:text-right">{pct(p.weight)}</span>
+            </td>
+
+            <td class={cellClass}>
+              <span class={labelClass}>Since open</span>
+              <span class:list={[tone(p.returnSinceOpen), 'sm:block sm:text-right']}>
+                {signedPct(p.returnSinceOpen)}
+              </span>
+            </td>
+
+            <td class={cellClass}>
+              <span class={labelClass}>vs bench</span>
+              {excess === null ? (
+                <span class="text-terminal-muted sm:block sm:text-right">—</span>
+              ) : (
+                <span class:list={[tone(excess), 'sm:block sm:text-right']}>
+                  {signedPp(excess)}
+                </span>
+              )}
+            </td>
+
+            <td class={cellClass}>
+              <span class={labelClass}>Contribution</span>
+              <span class:list={[tone(p.contribution), 'sm:block sm:text-right']}>
+                {signedPp(p.contribution)}
+              </span>
+            </td>
+
+            <td class="flex justify-between items-baseline gap-3 py-0.5 sm:table-cell sm:py-2 sm:pl-3 sm:border-b sm:border-terminal-border align-top whitespace-nowrap">
+              <span class={labelClass}>Opened</span>
+              <span class="text-terminal-muted">{shortDate(p.openedAt)}</span>
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+)}

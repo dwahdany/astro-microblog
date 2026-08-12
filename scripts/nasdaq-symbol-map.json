@@ -1,0 +1,82 @@
+{
+  "_README": [
+    "Nasdaq's public quote API is keyless and, unlike Yahoo, does not rate-limit",
+    "this project. It only serves US listings, so anything held on a European",
+    "venue has to be mapped to a US line here.",
+    "",
+    "  symbol     the Nasdaq ticker to fetch",
+    "  name       display name shown on the site for this holding",
+    "  fidelity   'exact' = the same security, so the EUR return is identical",
+    "             once FX is applied. 'proxy' = a DIFFERENT instrument tracking",
+    "             the same index; its return is close but not the real one.",
+    "  note       maintainer's note. Never displayed — it explains the mapping",
+    "             to whoever reads this file next.",
+    "",
+    "To change how a holding is labelled on the page, edit `name` here, or set",
+    "`name:` on the leg in the log entry, which overrides this."
+  ],
+  "AAPL": {
+    "symbol": "AAPL",
+    "name": "Apple Inc.",
+    "fidelity": "exact",
+    "assetclass": "stocks"
+  },
+  "KO": {
+    "symbol": "KO",
+    "name": "The Coca-Cola Company",
+    "fidelity": "exact",
+    "assetclass": "stocks"
+  },
+  "NET": {
+    "symbol": "NET",
+    "name": "Cloudflare, Inc.",
+    "fidelity": "exact",
+    "assetclass": "stocks"
+  },
+  "GOOG": {
+    "symbol": "GOOG",
+    "name": "Alphabet Inc.",
+    "fidelity": "exact",
+    "assetclass": "stocks"
+  },
+  "IBM": {
+    "symbol": "IBM",
+    "name": "International Business Machines",
+    "fidelity": "exact",
+    "assetclass": "stocks"
+  },
+  "SPGI": {
+    "symbol": "SPGI",
+    "name": "S&P Global Inc.",
+    "fidelity": "exact",
+    "assetclass": "stocks"
+  },
+  "22UA.DE": {
+    "symbol": "BNTX",
+    "name": "BioNTech",
+    "fidelity": "exact",
+    "note": "Same BioNTech ADR (US09075V1026), NASDAQ line instead of the Xetra one. Quoted in USD; the EUR return matches once FX is applied. Pays no dividend.",
+    "assetclass": "stocks"
+  },
+  "CIBR.L": {
+    "symbol": "CIBR",
+    "name": "First Trust Cybersecurity UCITS ETF",
+    "fidelity": "proxy",
+    "note": "PROXY. Held line is the First Trust Cybersecurity UCITS ETF (IE00BF16M727) on LSE; this is the US First Trust NASDAQ Cybersecurity ETF. Same index, different fund, so fees and timing differ.",
+    "assetclass": "etf"
+  },
+  "VWCE.DE": {
+    "symbol": "VT",
+    "name": "FTSE All-World",
+    "fidelity": "proxy",
+    "note": "PROXY benchmark. Vanguard Total World (FTSE Global All Cap) standing in for VWCE (FTSE All-World). Distributing, so it needs dividend adjustment; VWCE accumulates and would not.",
+    "assetclass": "etf"
+  },
+  "^GSPC": {
+    "symbol": "SPY",
+    "name": "S&P 500",
+    "fidelity": "proxy",
+    "note": "PROXY benchmark. SPY stands in for the S&P 500 index. Distributing.",
+    "assetclass": "etf"
+  }
+}

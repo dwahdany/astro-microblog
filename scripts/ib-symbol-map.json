@@ -1,0 +1,28 @@
+{
+  "_README": [
+    "Maps Interactive Brokers local symbols to Yahoo Finance tickers.",
+    "IB reports the symbol of the venue you traded on, so the same fund on SIX,",
+    "Xetra and NASDAQ has three different IB symbols and three different Yahoo",
+    "tickers. Confirm each mapping against the ISIN — a wrong ticker charts a",
+    "different instrument and nothing will look obviously broken.",
+    "Set a value to null to keep an instrument out of the tracked book.",
+    "Regenerate a skeleton with: node scripts/import-ib.mjs private/*.csv --map-suggest"
+  ],
+
+  "AAPL": "AAPL",
+  "GOOG": "GOOG",
+  "IBM": "IBM",
+  "KO": "KO",
+  "NET": "NET",
+  "SPGI": "SPGI",
+
+  "22UA": "22UA.DE",
+  "CIBR": "CIBR.L",
+
+  "ANIC": null,
+  "ATCHW": null,
+  "BOTZ": null,
+  "FAZEW": null,
+  "FAZEW.OLD": null,
+  "PGYWW": null
+}

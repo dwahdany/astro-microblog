@@ -1,0 +1,134 @@
+---
+import type { ClosedPosition } from '../../lib/portfolio/types';
+import { formatShortDate } from '../../lib/content';
+
+interface Props {
+  closed: ClosedPosition[];
+}
+
+const { closed } = Astro.props;
+
+const asDate = (iso: string) => new Date(`${iso}T12:00:00Z`);
+const shortDate = (iso: string) => formatShortDate(asDate(iso));
+
+const sign = (x: number) => (x > 0 ? '+' : x < 0 ? '−' : '');
+const signedPct = (x: number, dp = 1) => `${sign(x)}${Math.abs(x * 100).toFixed(dp)}%`;
+// A difference between two returns is percentage points, not percent.
+const signedPp = (x: number, dp = 1) => `${sign(x)}${Math.abs(x * 100).toFixed(dp)} pp`;
+// Polarity, matching the chart's delta glyphs. Sign and colour always travel
+// together, so the number never relies on colour alone.
+const tone = (x: number) =>
+  x > 0 ? 'text-terminal-accent-green' : x < 0 ? 'text-pf-loss' : 'text-terminal-muted';
+
+// Most recent exit first.
+const rows = [...closed].sort((a, b) => b.closedAt.localeCompare(a.closedAt));
+
+const logHref = (slug: string | undefined) => (slug ? `#pf-${slug}` : null);
+
+// Row shell: a bordered card below `sm:`, a plain table row above it.
+const rowClass =
+  'block sm:table-row mb-3 sm:mb-0 rounded-lg sm:rounded-none border border-terminal-border sm:border-0 bg-terminal-surface sm:bg-transparent p-3 sm:p-0 sm:hover:bg-terminal-border/30 transition-colors';
+const cellClass =
+  'flex justify-between items-baseline gap-3 py-0.5 sm:table-cell sm:text-right sm:py-2 sm:px-3 sm:border-b sm:border-terminal-border align-top whitespace-nowrap';
+const labelClass = 'text-terminal-muted sm:hidden';
+const headClass =
+  'text-right font-medium pb-2 px-3 border-b border-terminal-border whitespace-nowrap';
+---
+
+{rows.length === 0 ? (
+  <p class="text-terminal-muted text-center py-8">Nothing closed yet.</p>
+) : (
+  <table class="block sm:table w-full border-collapse text-sm">
+    <thead class="hidden sm:table-header-group">
+      <tr class="text-xs uppercase tracking-wider text-terminal-muted">
+        <th scope="col" class="text-left font-medium pb-2 pr-3 border-b border-terminal-border">
+          Ticker
+        </th>
+        <th scope="col" class="text-left font-medium pb-2 px-3 border-b border-terminal-border">
+          Held
+        </th>
+        <th scope="col" class={headClass}>While held</th>
+        <th scope="col" class={headClass} title="The primary benchmark over exactly the same window">
+          Benchmark
+        </th>
+        <th scope="col" class={headClass} title="Return while held minus the benchmark over the same window">
+          Excess
+        </th>
+        <th scope="col" class={headClass} title="What the instrument has done since the exit">
+          Since exit
+        </th>
+      </tr>
+    </thead>
+    <tbody class="block sm:table-row-group">
+      {rows.map((c) => {
+        const href = logHref(c.entrySlugs[0]);
+        return (
+          <tr class={rowClass}>
+            <th
+              scope="row"
+              class="block sm:table-cell text-left font-normal pb-1 sm:pb-0 sm:py-2 sm:pr-3 sm:border-b sm:border-terminal-border align-top"
+            >
+              {href ? (
+                <a
+                  href={href}
+                  class="font-medium text-terminal-text hover:text-terminal-accent-cyan transition-colors"
+                >
+                  {c.ticker}<span class="text-terminal-muted ml-1.5">→</span>
+                </a>
+              ) : (
+                <span class="font-medium text-terminal-text">{c.ticker}</span>
+              )}
+              <span class="block text-xs text-terminal-muted break-words">
+                {c.name || c.ticker}
+              </span>
+            </th>
+
+            <td class="flex justify-between items-baseline gap-3 py-0.5 sm:table-cell sm:py-2 sm:px-3 sm:border-b sm:border-terminal-border align-top">
+              <span class={labelClass}>Held</span>
+              <span class="text-right sm:text-left">
+                <span class="text-terminal-muted">
+                  <time datetime={c.openedAt} class="whitespace-nowrap">{shortDate(c.openedAt)}</time>
+                  <span class="text-terminal-border"> → </span>
+                  <time datetime={c.closedAt} class="whitespace-nowrap">{shortDate(c.closedAt)}</time>
+                </span>
+                <span class="block text-xs text-terminal-muted">{c.heldDays} days</span>
+              </span>
+            </td>
+
+            <td class={cellClass}>
+              <span class={labelClass}>While held</span>
+              <span class={tone(c.returnWhileHeld)}>{signedPct(c.returnWhileHeld)}</span>
+            </td>
+
+            <td class={cellClass}>
+              <span class={labelClass}>Benchmark</span>
+              {c.benchmarkReturn === null ? (
+                <span class="text-terminal-muted">—</span>
+              ) : (
+                <span class={tone(c.benchmarkReturn)}>{signedPct(c.benchmarkReturn)}</span>
+              )}
+            </td>
+
+            <td class={cellClass}>
+              <span class={labelClass}>Excess</span>
+              {c.excess === null ? (
+                <span class="text-terminal-muted">—</span>
+              ) : (
+                <span class:list={['font-medium', tone(c.excess)]}>{signedPp(c.excess)}</span>
+              )}
+            </td>
+
+            <td class={cellClass}>
+              <span class={labelClass}>Since exit</span>
+              {c.returnSinceExit === null ? (
+                <span class="text-terminal-muted">—</span>
+              ) : (
+                <span class={tone(c.returnSinceExit)}>{signedPct(c.returnSinceExit)}</span>
+              )}
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+)}

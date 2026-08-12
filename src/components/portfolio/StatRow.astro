@@ -1,0 +1,117 @@
+---
+import type { BenchmarkComparison, PortfolioStats } from '../../lib/portfolio/types';
+import { formatShortDate } from '../../lib/content';
+
+interface Props {
+  stats: PortfolioStats;
+  benchmark?: BenchmarkComparison;
+}
+
+const { stats, benchmark } = Astro.props;
+
+// IsoDate ("YYYY-MM-DD", always UTC) -> "Aug 21, 2024". Anchoring at noon UTC
+// keeps a date-only string from slipping a day on a build machine behind UTC.
+const asDate = (iso: string) => new Date(`${iso}T12:00:00Z`);
+const shortDate = (iso: string) => formatShortDate(asDate(iso));
+const monthYear = (iso: string) =>
+  asDate(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+
+// Every number here is a return, a share or a count. Nothing is denominated in
+// money — the log holds weights only, so there is no amount to render.
+const sign = (x: number) => (x > 0 ? '+' : x < 0 ? '−' : '');
+const signedPct = (x: number, dp = 1) => `${sign(x)}${Math.abs(x * 100).toFixed(dp)}%`;
+// A difference between two returns is percentage points, not percent.
+const signedPp = (x: number, dp = 1) => `${sign(x)}${Math.abs(x * 100).toFixed(dp)} pp`;
+const pct = (x: number, dp = 1) => `${(x * 100).toFixed(dp)}%`;
+
+// Signed values carry three redundant channels: the sign, an arrow, and colour.
+// Green/red here are polarity, matching the chart's delta glyphs
+// (--color-terminal-accent-green / --color-pf-loss).
+const tone = (x: number) =>
+  x > 0 ? 'text-terminal-accent-green' : x < 0 ? 'text-pf-loss' : 'text-terminal-text';
+const arrow = (x: number) => (x > 0 ? '↑' : x < 0 ? '↓' : undefined);
+
+const MUTED = 'text-terminal-muted';
+
+interface Tile {
+  label: string;
+  value: string;
+  glyph?: string;
+  tone: string;
+  sub: string;
+}
+
+const ann = stats.twrAnnualized;
+const dd = stats.maxDrawdown;
+
+const tiles: Tile[] = [
+  {
+    label: 'Total return',
+    value: signedPct(stats.twr),
+    glyph: arrow(stats.twr),
+    tone: tone(stats.twr),
+    sub: `since ${shortDate(stats.inception)}`,
+  },
+  {
+    label: 'Annualised',
+    value: ann === null ? '—' : signedPct(ann),
+    glyph: ann === null ? undefined : arrow(ann),
+    tone: ann === null ? MUTED : tone(ann),
+    sub: ann === null ? 'needs ~60 days' : 'time-weighted',
+  },
+];
+
+if (benchmark) {
+  tiles.push({
+    label: `vs ${benchmark.label}`,
+    value: signedPp(benchmark.excess),
+    glyph: arrow(benchmark.excess),
+    tone: tone(benchmark.excess),
+    sub: `${benchmark.label} ${signedPct(benchmark.twr)}`,
+  });
+}
+
+tiles.push(
+  {
+    label: 'Max drawdown',
+    value: dd ? signedPct(dd.depth) : '—',
+    tone: dd ? tone(dd.depth) : MUTED,
+    sub: dd
+      ? `${monthYear(dd.peak)} → ${monthYear(dd.trough)}${dd.recovered ? '' : ' · not recovered'}`
+      : 'no history yet',
+  },
+  {
+    label: 'Volatility',
+    value: stats.volatility === null ? '—' : pct(stats.volatility),
+    tone: stats.volatility === null ? MUTED : 'text-terminal-text',
+    sub: 'annualised',
+  },
+  {
+    label: 'Positions',
+    value: String(stats.positionCount),
+    tone: 'text-terminal-text',
+    sub: `${stats.closedCount} closed · ${stats.decisionCount} decision${
+      stats.decisionCount === 1 ? '' : 's'
+    }`,
+  }
+);
+---
+
+<dl class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+  {tiles.map((tile) => (
+    <div class="bg-terminal-surface border border-terminal-border rounded-lg px-3 py-2.5 min-w-0">
+      <dt class="text-xs uppercase tracking-wider leading-tight text-terminal-muted break-words">
+        {tile.label}
+      </dt>
+      <dd class="mt-1.5 min-w-0">
+        <span class:list={['block text-lg font-semibold leading-tight', tile.tone]}>
+          {tile.glyph && <span aria-hidden="true">{tile.glyph}</span>}
+          {tile.glyph ? ' ' : ''}{tile.value}
+        </span>
+        <span class="block mt-1 text-xs leading-tight text-terminal-muted break-words">
+          {tile.sub}
+        </span>
+      </dd>
+    </div>
+  ))}
+</dl>

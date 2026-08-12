@@ -5,13 +5,23 @@ import { MONTHS_3 } from './types';
 /**
  * Fetches all non-draft content from all collections
  */
+/**
+ * Drafts are visible in `astro dev` and hidden in every build, so a
+ * work-in-progress can be previewed exactly where it will eventually appear.
+ * Without this the portfolio page showed drafts while the timeline silently
+ * dropped them, which just looks like the timeline is broken.
+ */
+const isVisible = ({ data }: { data: { is_draft: boolean } }) =>
+  !data.is_draft || import.meta.env.DEV;
+
 export async function getAllContent(): Promise<ContentItem[]> {
-  const [entries, blogmarks, quotations, notes, photos] = await Promise.all([
-    getCollection('entries', ({ data }) => !data.is_draft),
-    getCollection('blogmarks', ({ data }) => !data.is_draft),
-    getCollection('quotations', ({ data }) => !data.is_draft),
-    getCollection('notes', ({ data }) => !data.is_draft),
-    getCollection('photos', ({ data }) => !data.is_draft),
+  const [entries, blogmarks, quotations, notes, photos, portfolio] = await Promise.all([
+    getCollection('entries', isVisible),
+    getCollection('blogmarks', isVisible),
+    getCollection('quotations', isVisible),
+    getCollection('notes', isVisible),
+    getCollection('photos', isVisible),
+    getCollection('portfolio', isVisible),
   ]);
 
   const all: ContentItem[] = [
@@ -20,6 +30,7 @@ export async function getAllContent(): Promise<ContentItem[]> {
     ...quotations.map((item) => ({ type: 'quotation' as const, item })),
     ...notes.map((item) => ({ type: 'note' as const, item })),
     ...photos.map((item) => ({ type: 'photo' as const, item })),
+    ...portfolio.map((item) => ({ type: 'portfolio' as const, item })),
   ];
 
   return all.sort(
@@ -79,6 +90,11 @@ export function formatShortDate(date: Date): string {
  * Format: /{YEAR}/{Month}/{Day}/{slug}/
  */
 export function getItemUrl(item: ContentItem): string {
+  // Decisions keep their own section: the page needs the portfolio engine and
+  // carries section-specific navigation, so it stays put and the timeline
+  // links across to it. Every other type uses the dated permalink.
+  if (item.type === 'portfolio') return `/portfolio/${item.item.data.slug}/`;
+
   const date = new Date(item.item.data.created);
   const year = date.getFullYear();
   const month = MONTHS_3[date.getMonth() + 1];
@@ -102,6 +118,8 @@ export function getItemTitle(item: ContentItem): string {
       return item.item.data.title || `Note from ${formatShortDate(new Date(item.item.data.created))}`;
     case 'photo':
       return item.item.data.title || `Photo from ${formatShortDate(new Date(item.item.data.created))}`;
+    case 'portfolio':
+      return item.item.data.title;
   }
 }
 

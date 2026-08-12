@@ -1,0 +1,35 @@
+---
+import type { MoveKind } from '../../lib/portfolio/types';
+
+interface Props {
+  kind: MoveKind;
+  isDoubleDown?: boolean;
+}
+
+const { kind, isDoubleDown = false } = Astro.props;
+
+// Set as plain letterspaced text, not a chip. In a monospace layout the word
+// itself is already a distinct object — boxing it adds chrome without adding
+// information, and a row of tinted pills reads as decoration rather than a
+// ledger. Colour stays off the label entirely so it never becomes the only
+// channel; the returns are the one thing on the page allowed to be coloured.
+const LABELS: Record<MoveKind, string> = {
+  open: 'OPENED',
+  add: 'ADDED',
+  trim: 'TRIMMED',
+  exit: 'EXITED',
+  rebalance: 'REBALANCED',
+  note: 'NOTE',
+};
+
+const label = LABELS[kind] ?? LABELS.note;
+---
+
+<span class="inline-flex items-baseline gap-2 whitespace-nowrap">
+  <span class="tracking-[0.18em] text-terminal-muted">{label}</span>
+  {isDoubleDown && (
+    <span class="tracking-[0.18em] text-pf-loss" title="Bought more while the position was under water">
+      DOUBLED DOWN
+    </span>
+  )}
+</span>
