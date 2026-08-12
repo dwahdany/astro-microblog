@@ -86,12 +86,15 @@ const describe = (l: (typeof legs)[number]) =>
         <Content />
       </div>
 
+      {/*
+        No time here, unlike the other cards. A decision is imported from a
+        broker statement with a date and no clock, so it parses as midnight UTC
+        and any time rendered from it is an artefact of the build machine's
+        offset rather than when the trade happened. The day is already in the
+        timeline's date header.
+      */}
       <div class="mt-2 flex items-center gap-3 text-xs text-terminal-muted">
-        <a href={url} class="hover:text-terminal-accent-cyan transition-colors">
-          <time datetime={entry.data.created.toISOString()}>
-            {entry.data.created.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-          </time>
-        </a>
+        <a href={url} class="hover:text-terminal-accent-cyan transition-colors">decision →</a>
         {entry.data.tags.length > 0 && (
           <>
             <span class="text-terminal-border">•</span>

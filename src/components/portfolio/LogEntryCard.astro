@@ -67,6 +67,13 @@ const legs: LegLine[] = outcome
     }));
 
 const created = entry.data.created;
+
+// Imported entries carry a date with no time, which parses as midnight UTC.
+// Formatted in a negative-offset timezone that rolls back to the previous day,
+// so the date is read at midday UTC where no offset can move it.
+const displayDate = formatShortDate(
+  new Date(Date.UTC(created.getUTCFullYear(), created.getUTCMonth(), created.getUTCDate(), 12))
+);
 ---
 
 <article id={`pf-${entry.data.slug}`} class="group scroll-mt-8 flex gap-3">
@@ -76,7 +83,7 @@ const created = entry.data.created;
 
   <div class="flex-1 min-w-0">
     <div class="flex flex-wrap items-baseline gap-x-3 text-[11px] text-terminal-muted">
-      <time datetime={created.toISOString()}>{formatShortDate(created)}</time>
+      <time datetime={created.toISOString().slice(0, 10)}>{displayDate}</time>
       <MoveBadge kind={move} isDoubleDown={isDoubleDown} />
     </div>
 
