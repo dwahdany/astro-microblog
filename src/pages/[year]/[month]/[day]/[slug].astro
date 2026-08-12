@@ -12,12 +12,17 @@ import { getItemTitle, getItemUrl, formatDisplayDate } from '../../../../lib/con
 import type { ContentItem } from '../../../../lib/types';
 
 export async function getStaticPaths() {
+  // Matches getAllContent: drafts get a page in dev so the timeline can link
+  // to them, and no page in a build.
+  const visible = ({ data }: { data: { is_draft: boolean } }) =>
+    !data.is_draft || import.meta.env.DEV;
+
   const [entries, blogmarks, quotations, notes, photos] = await Promise.all([
-    getCollection('entries', ({ data }) => !data.is_draft),
-    getCollection('blogmarks', ({ data }) => !data.is_draft),
-    getCollection('quotations', ({ data }) => !data.is_draft),
-    getCollection('notes', ({ data }) => !data.is_draft),
-    getCollection('photos', ({ data }) => !data.is_draft),
+    getCollection('entries', visible),
+    getCollection('blogmarks', visible),
+    getCollection('quotations', visible),
+    getCollection('notes', visible),
+    getCollection('photos', visible),
   ]);
 
   const allItems = [

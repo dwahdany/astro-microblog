@@ -14,4 +14,4 @@ legs:
      reasoning is not written yet. Replace the text below, set is_draft: false,
      and delete this comment. -->
 
-They bumped nicely on earnings, and I'm uncertain about the company's strategy.
+They bumped nicely on earnings, and I'm too unsure about the company's strategy to hold them at this valuation.

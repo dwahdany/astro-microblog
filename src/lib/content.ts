@@ -5,14 +5,23 @@ import { MONTHS_3 } from './types';
 /**
  * Fetches all non-draft content from all collections
  */
+/**
+ * Drafts are visible in `astro dev` and hidden in every build, so a
+ * work-in-progress can be previewed exactly where it will eventually appear.
+ * Without this the portfolio page showed drafts while the timeline silently
+ * dropped them, which just looks like the timeline is broken.
+ */
+const isVisible = ({ data }: { data: { is_draft: boolean } }) =>
+  !data.is_draft || import.meta.env.DEV;
+
 export async function getAllContent(): Promise<ContentItem[]> {
   const [entries, blogmarks, quotations, notes, photos, portfolio] = await Promise.all([
-    getCollection('entries', ({ data }) => !data.is_draft),
-    getCollection('blogmarks', ({ data }) => !data.is_draft),
-    getCollection('quotations', ({ data }) => !data.is_draft),
-    getCollection('notes', ({ data }) => !data.is_draft),
-    getCollection('photos', ({ data }) => !data.is_draft),
-    getCollection('portfolio', ({ data }) => !data.is_draft),
+    getCollection('entries', isVisible),
+    getCollection('blogmarks', isVisible),
+    getCollection('quotations', isVisible),
+    getCollection('notes', isVisible),
+    getCollection('photos', isVisible),
+    getCollection('portfolio', isVisible),
   ]);
 
   const all: ContentItem[] = [
