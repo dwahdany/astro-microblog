@@ -3,7 +3,7 @@ slug: exiting-ibm-2025-03-31
 created: 2025-03-31
 title: Exiting IBM
 tags: []
-is_draft: true
+is_draft: false
 move: exit
 legs:
   - ticker: IBM
