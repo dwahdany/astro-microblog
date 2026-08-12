@@ -3,7 +3,7 @@ slug: opening-net-ko-ibm-cibr-l-aapl-22ua-de-2024-08-21
 created: 2024-08-21
 title: Opening NET, KO, IBM, CIBR.L, AAPL, 22UA.DE
 tags: []
-is_draft: true
+is_draft: false
 move: open
 legs:
   - ticker: NET
@@ -19,9 +19,5 @@ legs:
   - ticker: 22UA.DE
     weight: 0.095   # was 0.0%
 ---
-
-<!-- DRAFT, imported from a broker statement. The weights are real; the
-     reasoning is not written yet. Replace the text below, set is_draft: false,
-     and delete this comment. -->
 
 Transfered my brokerage.
