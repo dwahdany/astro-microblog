@@ -95,6 +95,26 @@ const num = (s) => {
 };
 const dateOf = (s) => String(s ?? '').trim().split(',')[0].trim(); // "2025-01-31, 05:33:05" -> date
 
+const MONTH_NAMES = [
+  'january', 'february', 'march', 'april', 'may', 'june',
+  'july', 'august', 'september', 'october', 'november', 'december',
+];
+
+/**
+ * `August 11, 2026` -> `2026-08-11`, without going through `new Date(string)`.
+ * That parses to LOCAL midnight, and `toISOString()` then shifts it back a day
+ * anywhere east of UTC — which dated every statement snapshot one day early.
+ * Harmless until a trade lands in the gap, then it reads as a position
+ * mismatch against the broker.
+ */
+function parseLongDate(s) {
+  const m = String(s ?? '').trim().match(/^([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})$/);
+  if (!m) return null;
+  const month = MONTH_NAMES.indexOf(m[1].toLowerCase());
+  if (month < 0) return null;
+  return `${m[3]}-${String(month + 1).padStart(2, '0')}-${m[2].padStart(2, '0')}`;
+}
+
 // ------------------------------------------------------------- symbol map
 /**
  * IB reports the local symbol of the venue you traded on. The same fund on
@@ -185,8 +205,23 @@ if (!files.length) {
 // ---- read every statement ------------------------------------------------
 const instruments = new Map(); // ibSymbol -> {symbol, description, isin, exchange, category}
 const events = [];             // {date, symbol, dq, kind}
+
+/**
+ * Statements overlap: a year-to-date export re-reports every trade already in
+ * the previous one. Executions are identified by their full row — IB stamps
+ * Date/Time to the second, so two genuine fills are never identical — and a
+ * repeat is dropped rather than counted twice.
+ */
+const seenRows = new Set();
+const firstSighting = (section, rec) => {
+  const key = `${section} ${JSON.stringify(rec)}`;
+  if (seenRows.has(key)) return false;
+  seenRows.add(key);
+  return true;
+};
+let duplicateRows = 0;
 const snapshots = [];          // {date, positions: Map<ibSymbol,{qty,currency,value}>}
-const periods = [];            // {start, end, twr}
+let periods = [];            // {start, end, twr}
 let baseCurrency = 'EUR';
 
 for (const file of files) {
@@ -212,6 +247,7 @@ for (const file of files) {
   for (const r of st.get('Transfers') ?? []) {
     const sym = r.Symbol, qty = num(r.Qty);
     if (!sym || !Number.isFinite(qty) || qty === 0) continue;
+    if (!firstSighting('Transfers', r)) { duplicateRows++; continue; }
     const sign = (r.Direction ?? 'In').toLowerCase() === 'out' ? -1 : 1;
     events.push({ date: r.Date, symbol: sym, dq: sign * Math.abs(qty), kind: 'transfer' });
   }
@@ -221,6 +257,7 @@ for (const file of files) {
     if (r.DataDiscriminator && r.DataDiscriminator !== 'Order') continue;
     const sym = r.Symbol, qty = num(r.Quantity);
     if (!sym || !Number.isFinite(qty) || qty === 0) continue;
+    if (!firstSighting('Trades', r)) { duplicateRows++; continue; }
     events.push({ date: dateOf(r['Date/Time']), symbol: sym, dq: qty, kind: 'trade' });
   }
 
@@ -241,10 +278,10 @@ for (const file of files) {
     const m = String(periodRow['Field Value']).match(
       /(\w+ \d+, \d{4})\s*-\s*(\w+ \d+, \d{4})/
     );
-    if (m) { start = new Date(m[1]).toISOString().slice(0, 10); end = new Date(m[2]).toISOString().slice(0, 10); }
+    if (m) { start = parseLongDate(m[1]); end = parseLongDate(m[2]); }
     else {
       const one = String(periodRow['Field Value']).match(/(\w+ \d+, \d{4})/);
-      if (one) { start = end = new Date(one[1]).toISOString().slice(0, 10); }
+      if (one) { start = end = parseLongDate(one[1]); }
     }
   }
   if (!end) {
@@ -263,6 +300,25 @@ for (const file of files) {
 
 events.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.kind === 'transfer' ? -1 : 1));
 snapshots.sort((a, b) => (a.date < b.date ? -1 : 1));
+
+/**
+ * A year-to-date statement covers the same ground as the one before it, so
+ * chaining both would compound the same months twice — 2026 counted once at
+ * 20.8% and again at 19.6% turned a 52% record into 82%. Keep one period per
+ * start date: the one that runs furthest.
+ */
+{
+  const byStart = new Map();
+  for (const p of periods) {
+    const held = byStart.get(p.start);
+    if (!held || p.end > held.end) byStart.set(p.start, p);
+  }
+  const superseded = periods.length - byStart.size;
+  periods = [...byStart.values()];
+  if (superseded > 0) {
+    console.log(`Superseded statement period(s) ignored for the return chain: ${superseded}`);
+  }
+}
 periods.sort((a, b) => (a.end < b.end ? -1 : 1));
 
 /**
@@ -292,6 +348,7 @@ for (const snap of snapshots) {
 }
 
 console.log(`Base currency: ${baseCurrency}`);
+if (duplicateRows) console.log(`Overlapping statements: ${duplicateRows} repeated row(s) ignored.`);
 console.log(`Instruments: ${instruments.size} (${aliasesOfKey.size} distinct by ISIN), events: ${events.length}, snapshots: ${snapshots.length}`);
 console.log(`Track record starts: ${events[0]?.date ?? '—'} (first transfer or trade)`);
 
