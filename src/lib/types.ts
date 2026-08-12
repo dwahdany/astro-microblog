@@ -6,15 +6,17 @@ export type QuotationItem = CollectionEntry<'quotations'>;
 export type NoteItem = CollectionEntry<'notes'>;
 export type PhotoItem = CollectionEntry<'photos'>;
 export type SeriesItem = CollectionEntry<'series'>;
+export type PortfolioItem = CollectionEntry<'portfolio'>;
 
-export type ContentType = 'entry' | 'blogmark' | 'quotation' | 'note' | 'photo';
+export type ContentType = 'entry' | 'blogmark' | 'quotation' | 'note' | 'photo' | 'portfolio';
 
 export type ContentItem =
   | { type: 'entry'; item: EntryItem }
   | { type: 'blogmark'; item: BlogmarkItem }
   | { type: 'quotation'; item: QuotationItem }
   | { type: 'note'; item: NoteItem }
-  | { type: 'photo'; item: PhotoItem };
+  | { type: 'photo'; item: PhotoItem }
+  | { type: 'portfolio'; item: PortfolioItem };
 
 export type DayGroup = {
   date: string; // ISO date string YYYY-MM-DD
