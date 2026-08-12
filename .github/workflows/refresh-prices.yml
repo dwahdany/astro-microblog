@@ -14,14 +14,6 @@ on:
         description: 'Commit the refreshed cache back to the branch'
         type: boolean
         default: true
-  # TEMPORARY: workflow_dispatch only works once this file is on the default
-  # branch, so this lets the feature branch produce a cache before it merges.
-  # Remove before merging.
-  push:
-    branches: ['worktree-portfolio-feature']
-    paths:
-      - '.github/workflows/refresh-prices.yml'
-      - 'scripts/fetch-prices.mjs'
 
 permissions:
   contents: write
