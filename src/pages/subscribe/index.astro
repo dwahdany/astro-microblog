@@ -3,9 +3,7 @@ export const prerender = true;
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TerminalWindow from '../../components/ui/TerminalWindow.astro';
-
-const newsletter = 'dwahdany';
-const actionUrl = `https://buttondown.com/api/emails/embed-subscribe/${newsletter}`;
+import { SUBSCRIBE_ACTION_URL } from '../../lib/newsletter';
 ---
 
 <BaseLayout title="Subscribe" description="Subscribe to this blog via email or RSS.">
@@ -17,80 +15,15 @@ const actionUrl = `https://buttondown.com/api/emails/embed-subscribe/${newslette
   <TerminalWindow title="newsletter.sh">
     <div class="prose prose-sm max-w-none">
       <p>
-        Get a curated digest delivered to your inbox. Choose how often and what content you want.
+        Get everything new on the blog delivered to your inbox.
       </p>
 
       <form
         id="subscribe-form"
-        action={actionUrl}
+        action={SUBSCRIBE_ACTION_URL}
         method="post"
         class="not-prose mt-6"
       >
-        <!-- Frequency Selection -->
-        <div class="mb-6">
-          <label class="block text-terminal-text font-medium mb-3">Frequency</label>
-          <div class="flex gap-2">
-            <button
-              type="button"
-              data-freq="daily"
-              class="freq-btn px-4 py-2 border border-terminal-border rounded-lg text-sm transition-colors bg-terminal-bg text-terminal-muted hover:border-terminal-accent-cyan"
-            >
-              Daily
-            </button>
-            <button
-              type="button"
-              data-freq="weekly"
-              class="freq-btn px-4 py-2 border border-terminal-border rounded-lg text-sm transition-colors bg-terminal-accent-cyan text-terminal-bg"
-            >
-              Weekly
-            </button>
-          </div>
-          <input type="hidden" name="tag" id="freq-tag" value="freq:weekly" />
-        </div>
-
-        <!-- Content Type Selection -->
-        <div class="mb-6">
-          <label class="block text-terminal-text font-medium mb-3">Content types</label>
-          <div class="space-y-2">
-            <label class="flex items-center gap-3 cursor-pointer group">
-              <input type="checkbox" name="tag" value="type:entries" checked class="content-checkbox sr-only peer" />
-              <span class="w-5 h-5 border border-terminal-border rounded flex items-center justify-center peer-checked:bg-terminal-accent-green peer-checked:border-terminal-accent-green transition-colors">
-                <span class="hidden peer-checked:block text-terminal-bg text-xs">&#10003;</span>
-              </span>
-              <span class="text-terminal-accent-green">&#9656;</span>
-              <span class="text-terminal-accent-green group-hover:text-terminal-accent-cyan transition-colors">Entries</span>
-              <span class="text-terminal-muted text-sm">- Articles and tutorials</span>
-            </label>
-            <label class="flex items-center gap-3 cursor-pointer group">
-              <input type="checkbox" name="tag" value="type:blogmarks" checked class="content-checkbox sr-only peer" />
-              <span class="w-5 h-5 border border-terminal-border rounded flex items-center justify-center peer-checked:bg-terminal-accent-green peer-checked:border-terminal-accent-green transition-colors">
-                <span class="hidden peer-checked:block text-terminal-bg text-xs">&#10003;</span>
-              </span>
-              <span class="text-terminal-accent-blue">@</span>
-              <span class="text-terminal-accent-blue group-hover:text-terminal-accent-cyan transition-colors">Blogmarks</span>
-              <span class="text-terminal-muted text-sm">- Links with commentary</span>
-            </label>
-            <label class="flex items-center gap-3 cursor-pointer group">
-              <input type="checkbox" name="tag" value="type:quotations" checked class="content-checkbox sr-only peer" />
-              <span class="w-5 h-5 border border-terminal-border rounded flex items-center justify-center peer-checked:bg-terminal-accent-green peer-checked:border-terminal-accent-green transition-colors">
-                <span class="hidden peer-checked:block text-terminal-bg text-xs">&#10003;</span>
-              </span>
-              <span class="text-terminal-accent-cyan">"</span>
-              <span class="text-terminal-accent-cyan group-hover:text-terminal-accent-cyan transition-colors">Quotations</span>
-              <span class="text-terminal-muted text-sm">- Memorable quotes</span>
-            </label>
-            <label class="flex items-center gap-3 cursor-pointer group">
-              <input type="checkbox" name="tag" value="type:notes" checked class="content-checkbox sr-only peer" />
-              <span class="w-5 h-5 border border-terminal-border rounded flex items-center justify-center peer-checked:bg-terminal-accent-green peer-checked:border-terminal-accent-green transition-colors">
-                <span class="hidden peer-checked:block text-terminal-bg text-xs">&#10003;</span>
-              </span>
-              <span class="text-terminal-muted">&#9675;</span>
-              <span class="text-terminal-text group-hover:text-terminal-accent-cyan transition-colors">Notes</span>
-              <span class="text-terminal-muted text-sm">- Micro-posts (frequent)</span>
-            </label>
-          </div>
-        </div>
-
         <!-- Email Input -->
         <div class="flex flex-col sm:flex-row gap-3">
           <input
@@ -109,7 +42,7 @@ const actionUrl = `https://buttondown.com/api/emails/embed-subscribe/${newslette
         </div>
 
         <p class="text-xs text-terminal-muted mt-4">
-          No spam, unsubscribe anytime. Powered by <a href="https://buttondown.com" class="text-terminal-accent-cyan hover:text-terminal-accent-green" target="_blank" rel="noopener noreferrer">Buttondown</a>.
+          Powered by <a href="https://buttondown.com" class="text-terminal-accent-cyan hover:text-terminal-accent-green" target="_blank" rel="noopener noreferrer">Buttondown</a>.
         </p>
       </form>
     </div>
@@ -160,53 +93,12 @@ const actionUrl = `https://buttondown.com/api/emails/embed-subscribe/${newslette
           <span class="text-terminal-muted">- Photo posts</span>
         </li>
       </ul>
-
-      <h2>What is RSS?</h2>
-      <p>
-        RSS (Really Simple Syndication) lets you follow websites without visiting them directly.
-        Use an RSS reader like <a href="https://feedly.com">Feedly</a>, <a href="https://netnewswire.com">NetNewsWire</a>,
-        or <a href="https://newsblur.com">NewsBlur</a> to subscribe.
-      </p>
     </div>
   </TerminalWindow>
 </BaseLayout>
 
 <script>
-  // Frequency toggle
-  const freqButtons = document.querySelectorAll('.freq-btn');
-  const freqTag = document.getElementById('freq-tag') as HTMLInputElement;
-
-  freqButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const freq = btn.getAttribute('data-freq');
-      freqTag.value = `freq:${freq}`;
-
-      // Update button styles
-      freqButtons.forEach(b => {
-        b.classList.remove('bg-terminal-accent-cyan', 'text-terminal-bg');
-        b.classList.add('bg-terminal-bg', 'text-terminal-muted');
-      });
-      btn.classList.remove('bg-terminal-bg', 'text-terminal-muted');
-      btn.classList.add('bg-terminal-accent-cyan', 'text-terminal-bg');
-    });
-  });
-
-  // Fix checkbox visual state (peer-checked doesn't work without this in some browsers)
-  const checkboxes = document.querySelectorAll('.content-checkbox');
-  checkboxes.forEach(cb => {
-    const checkbox = cb as HTMLInputElement;
-    const checkmark = checkbox.parentElement?.querySelector('span > span');
-
-    const updateVisual = () => {
-      if (checkmark) {
-        checkmark.classList.toggle('hidden', !checkbox.checked);
-        checkmark.classList.toggle('block', checkbox.checked);
-      }
-    };
-
-    checkbox.addEventListener('change', updateVisual);
-    updateVisual(); // Initial state
-  });
+  import { SUBSCRIBE_CONFIRMED_URL } from '../../lib/newsletter';
 
   // Handle form submission with custom redirect
   const form = document.getElementById('subscribe-form') as HTMLFormElement;
@@ -228,7 +120,7 @@ const actionUrl = `https://buttondown.com/api/emails/embed-subscribe/${newslette
       });
 
       // Redirect to confirmation page
-      window.location.href = '/subscribe/confirmed/';
+      window.location.href = SUBSCRIBE_CONFIRMED_URL;
     } catch (error) {
       console.error('Subscription error:', error);
       submitBtn.textContent = originalText;
