@@ -3,7 +3,7 @@ main = "src/index.ts"
 compatibility_date = "2024-12-01"
 
 [triggers]
-crons = ["0 8 * * *"]  # Daily at 8am UTC
+crons = ["0 8 * * 1"]  # Mondays at 8am UTC
 
 [vars]
 BLOG_URL = "https://blog.wahdany.eu"

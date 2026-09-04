@@ -3,11 +3,27 @@ export const prerender = true;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import DayGroup from '../components/content/DayGroup.astro';
+import SubscribeBreak from '../components/integrations/SubscribeBreak.astro';
 import { getAllContent, groupByDay } from '../lib/content';
 
 const allContent = await getAllContent();
 const recent = allContent.slice(0, 30);
 const dayGroups = groupByDay(recent);
+
+// Drop a single subscribe prompt into the feed once a reader has scrolled past
+// a handful of posts, but never so late that it lands near the bottom.
+const POSTS_BEFORE_BREAK = 5;
+const POSTS_AFTER_BREAK = 3;
+
+let seen = 0;
+let breakAfter = -1;
+for (const [i, group] of dayGroups.entries()) {
+  seen += group.items.length;
+  if (seen >= POSTS_BEFORE_BREAK) {
+    if (recent.length - seen >= POSTS_AFTER_BREAK) breakAfter = i;
+    break;
+  }
+}
 ---
 
 <BaseLayout title="Home" description="A personal microblog with notes, links, quotes, and articles.">
@@ -25,8 +41,11 @@ const dayGroups = groupByDay(recent);
 
   <h1 class="sr-only">Recent Posts</h1>
 
-  {dayGroups.map((group) => (
-    <DayGroup group={group} />
+  {dayGroups.map((group, i) => (
+    <>
+      <DayGroup group={group} />
+      {i === breakAfter && <SubscribeBreak />}
+    </>
   ))}
 
   {allContent.length > 30 && (

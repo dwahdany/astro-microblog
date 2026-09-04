@@ -1,0 +1,77 @@
+---
+/**
+ * Inline signup form dropped into the post feed. Sits on the same left rail as
+ * the post cards and borrows their glyph-plus-content layout, but with a dashed
+ * border and tinted surface so it reads as a sidebar rather than a post.
+ */
+import { SUBSCRIBE_ACTION_URL } from '../../lib/newsletter';
+---
+
+<section class="mb-8">
+  <div class="pl-2">
+    <div class="rounded-lg border border-dashed border-terminal-border bg-terminal-surface/50 p-4">
+      <div class="flex items-start gap-2">
+        <span class="text-terminal-accent-green shrink-0 -mt-0.5" aria-hidden="true">&#9993;</span>
+        <div class="flex-1 min-w-0">
+          <h2 class="text-base font-medium text-terminal-text mb-3">
+            Get new posts by email
+          </h2>
+
+          <form
+            id="inline-subscribe-form"
+            action={SUBSCRIBE_ACTION_URL}
+            method="post"
+            class="flex flex-col sm:flex-row gap-2"
+          >
+            <label class="sr-only" for="inline-subscribe-email">Email address</label>
+            <input
+              id="inline-subscribe-email"
+              type="email"
+              name="email"
+              placeholder="you@example.com"
+              required
+              class="flex-1 min-w-0 px-3 py-1.5 text-sm bg-terminal-bg border border-terminal-border rounded-lg text-terminal-text placeholder-terminal-muted focus:border-terminal-accent-cyan focus:outline-none focus:ring-1 focus:ring-terminal-accent-cyan/50"
+            />
+            <button
+              type="submit"
+              class="px-4 py-1.5 text-sm bg-terminal-accent-green text-terminal-bg font-medium rounded-lg hover:bg-terminal-accent-green/90 transition-colors"
+            >
+              Subscribe
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { SUBSCRIBE_CONFIRMED_URL } from '../../lib/newsletter';
+
+  const form = document.getElementById('inline-subscribe-form') as HTMLFormElement | null;
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+    const originalText = submitBtn.textContent;
+
+    try {
+      submitBtn.textContent = 'Subscribing...';
+      submitBtn.disabled = true;
+
+      await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        mode: 'no-cors' // Buttondown doesn't support CORS
+      });
+
+      window.location.href = SUBSCRIBE_CONFIRMED_URL;
+    } catch (error) {
+      console.error('Subscription error:', error);
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+      alert('Something went wrong. Please try again.');
+    }
+  });
+</script>

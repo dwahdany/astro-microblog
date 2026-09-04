@@ -19,90 +19,54 @@ interface ContentResponse {
   items: ContentItem[];
 }
 
-interface Subscriber {
-  id: string;
-  email: string;
-  tags: string[];
-  metadata: Record<string, string>;
-}
-
-interface SubscribersResponse {
-  results: Subscriber[];
-  next: string | null;
-}
-
 export default {
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
-    const today = new Date();
-    const dayOfWeek = today.getDay();
-
-    console.log(`Digest worker running at ${today.toISOString()}, day of week: ${dayOfWeek}`);
-
-    // Send daily digests every day
-    await sendDigest(env, 'daily', 1);
-
-    // Send weekly digests on Mondays (day 1)
-    if (dayOfWeek === 1) {
-      await sendDigest(env, 'weekly', 7);
-    }
+    console.log(`Digest worker running at ${new Date().toISOString()}`);
+    // Let failures reject so the invocation is recorded as failed.
+    await sendDigest(env);
   },
 
   // For testing via HTTP request
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
-    if (url.pathname === '/test/daily') {
-      await sendDigest(env, 'daily', 1);
-      return new Response('Daily digest sent');
+    if (url.pathname === '/test') {
+      try {
+        await sendDigest(env);
+      } catch (error) {
+        return new Response(String(error), { status: 500 });
+      }
+      return new Response('Digest sent');
     }
 
-    if (url.pathname === '/test/weekly') {
-      await sendDigest(env, 'weekly', 7);
-      return new Response('Weekly digest sent');
-    }
-
-    return new Response('Blog Digest Worker. Use /test/daily or /test/weekly to trigger manually.');
+    return new Response('Blog Digest Worker. Use /test to trigger manually.');
   },
 };
 
-async function sendDigest(env: Env, frequency: string, daysBack: number) {
-  console.log(`Sending ${frequency} digest for last ${daysBack} days...`);
+const DAYS_BACK = 7;
 
-  // 1. Fetch recent content from blog
-  const content = await fetchRecentContent(env.BLOG_URL, daysBack);
+async function sendDigest(env: Env) {
+  console.log(`Sending digest for last ${DAYS_BACK} days...`);
+
+  const content = await fetchRecentContent(env.BLOG_URL, DAYS_BACK);
   if (content.length === 0) {
     console.log('No new content, skipping digest');
     return;
   }
 
-  console.log(`Found ${content.length} content items`);
+  const sorted = [...content].sort(
+    (a, b) => new Date(b.created).getTime() - new Date(a.created).getTime()
+  );
 
-  // 2. Get subscribers with this frequency preference
-  const subscribers = await getSubscribersByFrequency(env, frequency);
-  console.log(`Found ${subscribers.length} subscribers for ${frequency} digest`);
+  // Buttondown owns the subscriber list, so this is one email, not one per
+  // subscriber. It also appends the unsubscribe footer.
+  await sendEmail(
+    env,
+    generateSubject(sorted.length),
+    generateDigestHTML(sorted, env.BLOG_URL)
+  );
 
-  if (subscribers.length === 0) {
-    return;
-  }
-
-  // 3. Group content by type for filtering
-  const contentByType = groupContentByType(content);
-
-  // 4. Send personalized digest to each subscriber
-  for (const subscriber of subscribers) {
-    const personalizedContent = filterBySubscriberTags(contentByType, subscriber.tags);
-
-    if (personalizedContent.length === 0) {
-      console.log(`No matching content for ${subscriber.email}, skipping`);
-      continue;
-    }
-
-    const emailBody = generateDigestHTML(personalizedContent, frequency, env.BLOG_URL);
-    const subject = generateSubject(frequency, personalizedContent.length);
-
-    await sendEmail(env, subscriber.email, subject, emailBody);
-    console.log(`Sent ${frequency} digest to ${subscriber.email} with ${personalizedContent.length} items`);
-  }
+  console.log(`Sent digest with ${sorted.length} items`);
 }
 
 async function fetchRecentContent(blogUrl: string, days: number): Promise<ContentItem[]> {
@@ -117,72 +81,7 @@ async function fetchRecentContent(blogUrl: string, days: number): Promise<Conten
   return data.items;
 }
 
-async function getSubscribersByFrequency(env: Env, frequency: string): Promise<Subscriber[]> {
-  const subscribers: Subscriber[] = [];
-  let nextUrl: string | null = `https://api.buttondown.com/v1/subscribers?tag=freq:${frequency}`;
-
-  while (nextUrl) {
-    const response = await fetch(nextUrl, {
-      headers: {
-        Authorization: `Token ${env.BUTTONDOWN_API_KEY}`,
-      },
-    });
-
-    if (!response.ok) {
-      console.error(`Failed to fetch subscribers: ${response.status}`);
-      break;
-    }
-
-    const data: SubscribersResponse = await response.json();
-    subscribers.push(...data.results);
-    nextUrl = data.next;
-  }
-
-  return subscribers;
-}
-
-function groupContentByType(content: ContentItem[]): Map<string, ContentItem[]> {
-  const grouped = new Map<string, ContentItem[]>();
-
-  for (const item of content) {
-    const typeKey = item.type;
-    if (!grouped.has(typeKey)) {
-      grouped.set(typeKey, []);
-    }
-    grouped.get(typeKey)!.push(item);
-  }
-
-  return grouped;
-}
-
-function filterBySubscriberTags(
-  contentByType: Map<string, ContentItem[]>,
-  subscriberTags: string[]
-): ContentItem[] {
-  const result: ContentItem[] = [];
-
-  // Map content types to tag names
-  const typeToTag: Record<string, string> = {
-    entry: 'type:entries',
-    blogmark: 'type:blogmarks',
-    quotation: 'type:quotations',
-    note: 'type:notes',
-  };
-
-  for (const [type, items] of contentByType) {
-    const tagName = typeToTag[type];
-    if (tagName && subscriberTags.includes(tagName)) {
-      result.push(...items);
-    }
-  }
-
-  // Sort by date (newest first)
-  return result.sort(
-    (a, b) => new Date(b.created).getTime() - new Date(a.created).getTime()
-  );
-}
-
-function generateSubject(frequency: string, itemCount: number): string {
+function generateSubject(itemCount: number): string {
   const today = new Date();
   const dateStr = today.toLocaleDateString('en-US', {
     month: 'short',
@@ -190,15 +89,10 @@ function generateSubject(frequency: string, itemCount: number): string {
     year: 'numeric',
   });
 
-  const freqLabel = frequency === 'daily' ? 'Daily' : 'Weekly';
-  return `${freqLabel} Digest - ${dateStr} (${itemCount} ${itemCount === 1 ? 'item' : 'items'})`;
+  return `New on blog.wahdany.eu - ${dateStr} (${itemCount} ${itemCount === 1 ? 'item' : 'items'})`;
 }
 
-function generateDigestHTML(
-  content: ContentItem[],
-  frequency: string,
-  blogUrl: string
-): string {
+function generateDigestHTML(content: ContentItem[], blogUrl: string): string {
   const typeLabels: Record<string, { label: string; icon: string; color: string }> = {
     entry: { label: 'Entries', icon: '&#9656;', color: '#4ade80' },
     blogmark: { label: 'Blogmarks', icon: '&#8853;', color: '#60a5fa' },
@@ -248,8 +142,6 @@ function generateDigestHTML(
     `;
   }
 
-  const freqLabel = frequency === 'daily' ? 'Daily' : 'Weekly';
-
   return `
 <!DOCTYPE html>
 <html>
@@ -264,7 +156,7 @@ function generateDigestHTML(
         <span style="margin-right: 8px;">></span>blog.wahdany.eu
       </h1>
       <p style="color: #9ca3af; margin: 8px 0 0 0; font-size: 14px;">
-        Your ${freqLabel.toLowerCase()} digest
+        What's new since last time
       </p>
     </header>
 
@@ -275,11 +167,9 @@ function generateDigestHTML(
     <footer style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #30363d; font-size: 12px; color: #6b7280;">
       <p style="margin: 0;">
         <a href="${blogUrl}" style="color: #22d3ee; text-decoration: none;">Visit the blog</a>
-        &nbsp;&middot;&nbsp;
-        <a href="${blogUrl}/subscribe/" style="color: #22d3ee; text-decoration: none;">Manage preferences</a>
       </p>
       <p style="margin: 8px 0 0 0;">
-        You're receiving this because you subscribed to the ${freqLabel.toLowerCase()} digest.
+        You're receiving this because you subscribed to blog.wahdany.eu.
       </p>
     </footer>
   </div>
@@ -297,12 +187,7 @@ function escapeHtml(text: string): string {
     .replace(/'/g, '&#39;');
 }
 
-async function sendEmail(
-  env: Env,
-  toEmail: string,
-  subject: string,
-  body: string
-): Promise<void> {
+async function sendEmail(env: Env, subject: string, body: string): Promise<void> {
   const response = await fetch('https://api.buttondown.com/v1/emails', {
     method: 'POST',
     headers: {
@@ -313,14 +198,12 @@ async function sendEmail(
       subject,
       body,
       status: 'sent',
-      email_type: 'private', // Send to specific subscriber
-      // Note: Buttondown's API may require different fields for individual emails
-      // This might need adjustment based on actual API behavior
     }),
   });
 
   if (!response.ok) {
-    const error = await response.text();
-    console.error(`Failed to send email to ${toEmail}: ${response.status} - ${error}`);
+    throw new Error(
+      `Buttondown rejected the digest: ${response.status} - ${await response.text()}`
+    );
   }
 }

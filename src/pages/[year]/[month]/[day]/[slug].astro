@@ -197,8 +197,9 @@ const hasTitle = isEntry || isBlogmark || isQuotation || Boolean(noteTitle) || B
     <Giscus />
 
     <footer class="mt-12 pt-8 border-t border-terminal-border">
-      <div class="flex items-center justify-between text-sm text-terminal-muted">
+      <div class="flex items-center justify-between gap-4 text-sm text-terminal-muted">
         <a href="/" class="hover:text-terminal-accent-cyan">← Back to home</a>
+        <a href="/subscribe/" class="hover:text-terminal-accent-cyan">Subscribe</a>
         <a href={`/${year}/${month}/${day}/`} class="hover:text-terminal-accent-cyan">
           More from this day →
         </a>
