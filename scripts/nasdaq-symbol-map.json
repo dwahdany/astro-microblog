@@ -51,6 +51,12 @@
     "fidelity": "exact",
     "assetclass": "stocks"
   },
+  "UBER": {
+    "symbol": "UBER",
+    "name": "Uber Technologies, Inc.",
+    "fidelity": "exact",
+    "assetclass": "stocks"
+  },
   "22UA.DE": {
     "symbol": "BNTX",
     "name": "BioNTech",
