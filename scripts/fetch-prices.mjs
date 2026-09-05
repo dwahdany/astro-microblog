@@ -321,14 +321,26 @@ function persist() {
   );
 }
 
-/** Cached and recent enough to leave alone. Lets an interrupted run be resumed
- *  by simply running it again, which matters when the feed throttles you. */
+/** The most recent weekday before today: the newest close any market can
+ *  have published by the time this runs. */
+function lastWeekday() {
+  const d = new Date();
+  d.setUTCHours(0, 0, 0, 0);
+  do d.setUTCDate(d.getUTCDate() - 1); while (d.getUTCDay() === 0 || d.getUTCDay() === 6);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Cached through the last weekday's close, so there is nothing new to get.
+ *  Lets an interrupted run be resumed by simply running it again, which matters
+ *  when the feed throttles you — but never lets the daily refresh skip a
+ *  symbol that is missing yesterday's close. (An age-in-days threshold did:
+ *  every series sat still for four days at a time, and a decision dated in that
+ *  gap rendered with its legs dropped as "after the last priced day".) */
 function isFresh(symbol) {
   if (FORCE) return false;
   const s = existing.series?.[symbol];
   if (!s?.dates?.length) return false;
-  const ageDays = (Date.now() - Date.parse(s.dates.at(-1))) / 86_400_000;
-  return ageDays <= 4;
+  return s.dates.at(-1) >= lastWeekday();
 }
 
 async function grab(symbol) {
