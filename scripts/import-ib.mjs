@@ -1,13 +1,17 @@
 #!/usr/bin/env node
 /**
- * Turn Interactive Brokers *Activity Statement* CSVs into weight-based
+ * Turn Interactive Brokers *Activity Statement* CSVs — or *Activity Flex
+ * Query* XML reports fetched through the Flex Web Service — into weight-based
  * decision log entries.
  *
  * WHAT GOES IN vs WHAT COMES OUT
  * ------------------------------
  * In: your activity statements, which contain share counts, cost basis,
  * position values, your name and your account number. All private. Keep them
- * in `private/` — it is gitignored.
+ * in `private/` — it is gitignored. Two formats are accepted and may be mixed:
+ *   - the CSV you download by hand from Client Portal (Statements > Activity)
+ *   - the XML a Flex Web Service query returns (see scripts/ibkr-flex-mcp.py,
+ *     which Claude Code calls to pull these on demand)
  *
  * Out: weights, and nothing else. No quantity, no price, no value, no account
  * id ever reaches a file this script writes. That asymmetry is the point: the
@@ -27,9 +31,9 @@
  * here as an independent check on the site's return engine.
  *
  * USAGE
- *   node scripts/import-ib.mjs private/U*.csv                 # inspect + verify
- *   node scripts/import-ib.mjs private/U*.csv --write         # emit draft entries
- *   node scripts/import-ib.mjs private/U*.csv --map-suggest   # print a symbol map
+ *   node scripts/import-ib.mjs private/*.csv private/*.xml   # inspect + verify
+ *   node scripts/import-ib.mjs private/* --write             # emit draft entries
+ *   node scripts/import-ib.mjs private/* --map-suggest       # print a symbol map
  *
  *   --write         Write draft entries to src/content/portfolio/.
  *   --map-suggest   Print a scripts/ib-symbol-map.json skeleton and exit.
@@ -70,8 +74,8 @@ function parseCsv(text) {
  * Header row when the columns change (Trades does this between Stocks and
  * Forex), so the active header is tracked per section.
  */
-function readStatement(path) {
-  const rows = parseCsv(readFileSync(path, 'utf8'));
+function readStatement(text) {
+  const rows = parseCsv(text);
   const headers = new Map();
   const out = new Map();
   for (const r of rows) {
@@ -86,6 +90,178 @@ function readStatement(path) {
     if (!out.has(section)) out.set(section, []);
     out.get(section).push(rec);
   }
+  return out;
+}
+
+// ------------------------------------------------------------- flex reader
+/**
+ * A Flex Web Service report is flat XML: every record is one element whose
+ * attributes are the columns, and nothing has text content. That makes a
+ * dependency-free parser a short regex, and lets this reader emit the same
+ * `Map<section, records[]>` as `readStatement`, under the Activity Statement
+ * column names, so nothing downstream knows which format a file came from.
+ *
+ * Attribute names follow IB's Activity Flex Query reference (they are the
+ * camel-cased column names of the query editor): Trade/Order.dateTime,
+ * Transfer.direction, OpenPosition.position, ChangeInNAV.twr, SecurityInfo.isin.
+ */
+const XML_ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
+const decodeXml = (s) =>
+  s.replace(/&(?:(amp|lt|gt|quot|apos)|#(\d+)|#x([0-9a-fA-F]+));/g, (_, name, dec, hex) =>
+    name ? XML_ENTITIES[name] : String.fromCodePoint(parseInt(dec ?? hex, dec ? 10 : 16)));
+
+/**
+ * Flex date formatting is a per-query setting, so accept all of them:
+ * `20240902;030128`, `2024-09-02;03:01:28`, `2024-09-02 03:01:28`, `20240902`.
+ * Returns `[date, time]` with `time` null when the value has no time part.
+ */
+function splitFlexDateTime(s) {
+  const digits = String(s ?? '').replace(/\D/g, '');
+  if (digits.length < 8) return [null, null];
+  const date = `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
+  const t = digits.slice(8, 14);
+  return [date, t.length === 6 ? `${t.slice(0, 2)}:${t.slice(2, 4)}:${t.slice(4, 6)}` : null];
+}
+const flexDate = (s) => splitFlexDateTime(s)[0];
+
+// Flex uses codes where the statement uses words. Only Forex is looked at
+// downstream (it is cash, not a position); the rest is for the --map-suggest
+// reference listing.
+const FLEX_ASSET = {
+  STK: 'Stocks', CASH: 'Forex', OPT: 'Equity and Index Options', FOP: 'Futures Options',
+  FUT: 'Futures', FUND: 'Mutual Funds', BOND: 'Bonds', WAR: 'Warrants', CFD: 'CFDs',
+  CRYPTO: 'Crypto', IOPT: 'Structured Products',
+};
+const flexAsset = (code) => FLEX_ASSET[code] ?? code ?? '';
+const FLEX_TWR_IS_PERCENT = true;
+
+function readFlex(text, label) {
+  const out = new Map();
+  const push = (section, rec) => {
+    if (!out.has(section)) out.set(section, []);
+    out.get(section).push(rec);
+  };
+
+  const tagRe = /<(\/?)([A-Za-z][\w.-]*)((?:\s+[\w.:-]+\s*=\s*"[^"]*")*)\s*\/?>/g;
+  const attrRe = /([\w.:-]+)\s*=\s*"([^"]*)"/g;
+  const statements = []; // {from, to, summary: [], lots: []}
+  const orders = [], executions = [];
+  let stmt = null, queryType = null;
+  let m;
+  while ((m = tagRe.exec(text))) {
+    const [, closing, name, attrText] = m;
+    if (closing) continue;
+    const a = {};
+    let am;
+    while ((am = attrRe.exec(attrText))) a[am[1]] = decodeXml(am[2]);
+
+    switch (name) {
+      case 'FlexQueryResponse':
+        queryType = a.type ?? null;
+        break;
+      case 'FlexStatement':
+        stmt = { from: flexDate(a.fromDate), to: flexDate(a.toDate), summary: [], lots: [] };
+        statements.push(stmt);
+        break;
+      case 'AccountInformation':
+        if (a.currency) push('Account Information', { 'Field Name': 'Base Currency', 'Field Value': a.currency });
+        break;
+      case 'ChangeInNAV':
+        if (a.twr) {
+          // IB writes twr as a percentage figure without the sign: a real
+          // one-day export shows twr="0.050688891" beside NAV figures that move
+          // 0.05%, so 0.0507% — not a 5% fraction. The statement CSV writes
+          // "4.19%". If a real download ever disagrees with the CSV for the
+          // same period by a factor of 100, flip FLEX_TWR_IS_PERCENT.
+          const pct = FLEX_TWR_IS_PERCENT ? num(a.twr) : num(a.twr) * 100;
+          push('Net Asset Value', { 'Time Weighted Rate of Return': `${pct}%` });
+        }
+        break;
+      case 'SecurityInfo':
+        push('Financial Instrument Information', {
+          'Asset Category': flexAsset(a.assetCategory),
+          Symbol: a.symbol ?? '',
+          Description: a.description ?? '',
+          Conid: a.conid ?? '',
+          'Security ID': a.isin || a.securityID || '',
+          'Listing Exch': a.listingExchange ?? '',
+        });
+        break;
+      case 'Transfer':
+        push('Transfers', {
+          'Asset Category': flexAsset(a.assetCategory),
+          Currency: a.currency ?? '',
+          Symbol: a.symbol ?? '',
+          Date: flexDate(a.date ?? a.reportDate ?? a.dateTime) ?? '',
+          Type: a.type ?? '',
+          Direction: a.direction ?? '',
+          Qty: a.quantity ?? '',
+        });
+        break;
+      case 'Order': orders.push(a); break;
+      case 'Trade': executions.push(a); break;
+      case 'OpenPosition':
+        if (stmt) (a.levelOfDetail === 'LOT' ? stmt.lots : stmt.summary).push(a);
+        break;
+      default: break;
+    }
+  }
+
+  if (queryType && queryType !== 'AF') {
+    console.log(`! ${label}: Flex query type is "${queryType}" — expected an Activity Flex Query (AF).`);
+  }
+  if (!statements.length) {
+    console.log(`! ${label}: no FlexStatement in this file (an error response from the Flex service?).`);
+    return out;
+  }
+
+  // Prefer order-level rows: they line up one-to-one with the statement CSV's
+  // "Order" rows, so a hand-downloaded statement and a Flex report covering
+  // the same days deduplicate cleanly. Executions split one order into fills.
+  const rows = orders.length ? orders : executions;
+  if (!orders.length && executions.length) {
+    console.log(`! ${label}: Flex report has executions but no orders — enable "Orders" in the query's Trades section so overlapping statements deduplicate.`);
+  }
+  for (const a of rows) {
+    const [date, time] = splitFlexDateTime(a.dateTime || `${a.tradeDate ?? ''};${a.tradeTime ?? ''}`);
+    push('Trades', {
+      DataDiscriminator: 'Order',
+      'Asset Category': flexAsset(a.assetCategory),
+      Currency: a.currency ?? '',
+      Symbol: a.symbol ?? '',
+      'Date/Time': date ? (time ? `${date}, ${time}` : date) : '',
+      Quantity: a.quantity ?? '',
+    });
+  }
+
+  // The snapshot is the open positions of the statement that runs furthest.
+  const last = [...statements].sort((x, y) => ((x.to ?? '') < (y.to ?? '') ? -1 : 1)).pop();
+  let positions = last.summary;
+  if (!positions.length && last.lots.length) {
+    const bySymbol = new Map();
+    for (const a of last.lots) {
+      const prev = bySymbol.get(a.symbol);
+      const q = num(a.position), v = num(a.positionValue);
+      bySymbol.set(a.symbol, prev
+        ? { ...prev, position: prev.position + q, positionValue: prev.positionValue + v }
+        : { ...a, position: q, positionValue: v });
+    }
+    positions = [...bySymbol.values()];
+  }
+  for (const a of positions) {
+    push('Open Positions', {
+      DataDiscriminator: 'Summary',
+      'Asset Category': flexAsset(a.assetCategory),
+      Currency: a.currency ?? '',
+      Symbol: a.symbol ?? '',
+      Quantity: String(a.position ?? ''),
+      Value: String(a.positionValue ?? ''),
+    });
+  }
+
+  const from = statements.map((s) => s.from).filter(Boolean).sort()[0];
+  const to = statements.map((s) => s.to).filter(Boolean).sort().pop();
+  if (from && to) push('Statement', { 'Field Name': 'Period', 'Field Value': `${from} - ${to}` });
   return out;
 }
 
@@ -208,17 +384,20 @@ const events = [];             // {date, symbol, dq, kind}
 
 /**
  * Statements overlap: a year-to-date export re-reports every trade already in
- * the previous one. Executions are identified by their full row — IB stamps
- * Date/Time to the second, so two genuine fills are never identical — and a
- * repeat is dropped rather than counted twice.
+ * the previous one, and a Flex report re-reports whatever a hand-downloaded
+ * CSV already covers. So a row is identified by what both formats agree on —
+ * IB stamps Date/Time to the second, so two genuine fills of one symbol in one
+ * size are never identical — and a repeat is dropped rather than counted twice.
  */
 const seenRows = new Set();
-const firstSighting = (section, rec) => {
-  const key = `${section} ${JSON.stringify(rec)}`;
+const firstSighting = (key) => {
   if (seenRows.has(key)) return false;
   seenRows.add(key);
   return true;
 };
+const tradeKey = (r) => `Trades|${String(r['Date/Time']).replace(/\D/g, '')}|${r.Symbol}|${num(r.Quantity)}`;
+const transferKey = (r) =>
+  `Transfers|${flexDate(r.Date) ?? r.Date}|${r.Symbol}|${String(r.Direction ?? '').toLowerCase()}|${Math.abs(num(r.Qty))}`;
 let duplicateRows = 0;
 const snapshots = [];          // {date, positions: Map<ibSymbol,{qty,currency,value}>}
 let periods = [];            // {start, end, twr}
@@ -226,7 +405,8 @@ let baseCurrency = 'EUR';
 
 for (const file of files) {
   if (!existsSync(file)) { console.error(`! missing: ${file}`); continue; }
-  const st = readStatement(file);
+  const text = readFileSync(file, 'utf8');
+  const st = text.trimStart().startsWith('<') ? readFlex(text, file) : readStatement(text);
 
   for (const r of st.get('Account Information') ?? []) {
     if (r['Field Name'] === 'Base Currency' && r['Field Value']) baseCurrency = r['Field Value'];
@@ -247,9 +427,9 @@ for (const file of files) {
   for (const r of st.get('Transfers') ?? []) {
     const sym = r.Symbol, qty = num(r.Qty);
     if (!sym || !Number.isFinite(qty) || qty === 0) continue;
-    if (!firstSighting('Transfers', r)) { duplicateRows++; continue; }
+    if (!firstSighting(transferKey(r))) { duplicateRows++; continue; }
     const sign = (r.Direction ?? 'In').toLowerCase() === 'out' ? -1 : 1;
-    events.push({ date: r.Date, symbol: sym, dq: sign * Math.abs(qty), kind: 'transfer' });
+    events.push({ date: flexDate(r.Date) ?? r.Date, symbol: sym, dq: sign * Math.abs(qty), kind: 'transfer' });
   }
 
   for (const r of st.get('Trades') ?? []) {
@@ -257,7 +437,7 @@ for (const file of files) {
     if (r.DataDiscriminator && r.DataDiscriminator !== 'Order') continue;
     const sym = r.Symbol, qty = num(r.Quantity);
     if (!sym || !Number.isFinite(qty) || qty === 0) continue;
-    if (!firstSighting('Trades', r)) { duplicateRows++; continue; }
+    if (!firstSighting(tradeKey(r))) { duplicateRows++; continue; }
     events.push({ date: dateOf(r['Date/Time']), symbol: sym, dq: qty, kind: 'trade' });
   }
 
@@ -275,17 +455,18 @@ for (const file of files) {
   const periodRow = stmt.find((r) => r['Field Name'] === 'Period');
   let start = null, end = null;
   if (periodRow) {
-    const m = String(periodRow['Field Value']).match(
-      /(\w+ \d+, \d{4})\s*-\s*(\w+ \d+, \d{4})/
-    );
-    if (m) { start = parseLongDate(m[1]); end = parseLongDate(m[2]); }
+    const value = String(periodRow['Field Value']);
+    const iso = value.match(/^(\d{4}-\d{2}-\d{2})\s*-\s*(\d{4}-\d{2}-\d{2})$/);
+    const m = value.match(/(\w+ \d+, \d{4})\s*-\s*(\w+ \d+, \d{4})/);
+    if (iso) { start = iso[1]; end = iso[2]; }
+    else if (m) { start = parseLongDate(m[1]); end = parseLongDate(m[2]); }
     else {
-      const one = String(periodRow['Field Value']).match(/(\w+ \d+, \d{4})/);
+      const one = value.match(/(\w+ \d+, \d{4})/);
       if (one) { start = end = parseLongDate(one[1]); }
     }
   }
   if (!end) {
-    const m = file.match(/_(\d{8})_(\d{8})\.csv$/) || file.match(/_(\d{4})_(\d{4})\.csv$/);
+    const m = file.match(/(\d{8})[-_](\d{8})\.(?:csv|xml)$/i) || file.match(/_(\d{4})_(\d{4})\.csv$/);
     if (m && m[1].length === 8) { start = `${m[1].slice(0,4)}-${m[1].slice(4,6)}-${m[1].slice(6)}`; end = `${m[2].slice(0,4)}-${m[2].slice(4,6)}-${m[2].slice(6)}`; }
     else if (m) { start = `${m[1]}-01-01`; end = `${m[2]}-12-31`; }
   }

@@ -113,15 +113,20 @@ in `npm run dev` only).
 
 ### 1. Import from the broker (optional but preferred)
 
-`scripts/import-ib.mjs` turns Interactive Brokers **Activity Statement** CSVs
-into draft entries. Statements contain share counts, cost basis and your
-account number — keep them in `private/`, which is gitignored. Nothing but
-weights comes out the other end.
+`scripts/import-ib.mjs` turns Interactive Brokers activity data into draft
+entries. Statements contain share counts, cost basis and your account number —
+keep them in `private/`, which is gitignored. Nothing but weights comes out the
+other end. Two input formats are accepted and may be mixed; overlapping files
+deduplicate by trade timestamp:
+
+- **Activity Statement CSV**, downloaded by hand from Client Portal
+  (Performance & Reports > Statements > Activity, CSV).
+- **Activity Flex Query XML**, fetched for you by the IBKR connector below.
 
 ```sh
-node scripts/import-ib.mjs private/U*.csv                # inspect + verify, writes nothing
-node scripts/import-ib.mjs private/U*.csv --map-suggest  # print a symbol map skeleton
-node scripts/import-ib.mjs private/U*.csv --write        # write draft entries here
+node scripts/import-ib.mjs private/*                     # inspect + verify, writes nothing
+node scripts/import-ib.mjs private/* --map-suggest       # print a symbol map skeleton
+node scripts/import-ib.mjs private/* --write             # write draft entries here
 ```
 
 Drafts land in this directory with `is_draft: true`. Write the *why*, then flip
@@ -130,6 +135,51 @@ period-end snapshot; `--force` writes anyway if you know better.
 
 Unmapped or oddly-named symbols go in `scripts/ib-symbol-map.json`
 (broker symbol → Yahoo Finance symbol).
+
+#### The IBKR connector
+
+`scripts/ibkr-flex-mcp.py` pulls reports straight from IBKR through the
+[Flex Web Service](https://www.ibkrguides.com/clientportal/performanceandstatements/flex-web-service.htm)
+— token-based, no gateway, no browser login — and saves them to `private/`. It
+is registered in `.mcp.json`, so Claude Code can call it as the `ibkr` MCP
+server (`flex_status`, `fetch_activity`, `summarize_statement`, `run_import`),
+and it doubles as a CLI:
+
+```sh
+uv run --script scripts/ibkr-flex-mcp.py status                    # config + which dates private/ covers
+uv run --script scripts/ibkr-flex-mcp.py fetch                     # from the day after the last file, to yesterday
+uv run --script scripts/ibkr-flex-mcp.py fetch --from 2024-08-21   # full history, in one-year chunks
+uv run --script scripts/ibkr-flex-mcp.py import --write            # = node scripts/import-ib.mjs private/* --write
+```
+
+One-time setup in Client Portal (the script header has the long version):
+
+1. Performance & Reports > Flex Queries > **Flex Web Service Configuration**
+   (gear icon): enable, generate a token, and set *Should Expire After* to
+   1 year — the default is 6 hours.
+2. Performance & Reports > Flex Queries > **Activity Flex Query** > create one
+   with sections Account Information, Change in NAV, Open Positions (Summary),
+   Trades (Orders), Transfers, Financial Instrument Information; format XML.
+   The Query ID is in the (i) pop-over next to the saved query.
+3. Save both, outside git, in `private/ibkr.env`:
+
+   ```
+   IBKR_FLEX_TOKEN=...
+   IBKR_FLEX_QUERY_ID=...
+   IBKR_FLEX_TOKEN_CREATED=2026-09-05   # optional, enables the expiry warning
+   ```
+
+4. First run, interactively: fetch `--from 2026-01-01 --to 2026-08-11` and run
+   the import. The Flex report must verify against the same snapshot as the
+   hand-downloaded CSV for that period, its TWR must match the CSV's, and a
+   trade's Date/Time must agree to the second in both files (the deduplication
+   relies on it).
+
+IBKR finalises activity data once a day after the close, so fetch the morning
+after a trade. The connector reads that file (or the same names from the
+environment) and never returns either value. What it does return to the model is shapes only —
+dates, symbols, buy/sell, row counts, IBKR's period TWR — never quantities or
+values; those stay in `private/` for the importer.
 
 ### 2. Refresh prices
 

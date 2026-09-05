@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "ibkr": {
+      "command": "${UV:-uv}",
+      "args": ["run", "--quiet", "--script", "${CLAUDE_PROJECT_DIR:-.}/scripts/ibkr-flex-mcp.py"],
+      "timeout": 900000
+    }
+  }
+}
