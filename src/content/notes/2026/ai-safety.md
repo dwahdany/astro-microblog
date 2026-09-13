@@ -9,7 +9,10 @@ tags:
 is_draft: false
 ---
 
-As two months of my AI safety fellowship have passed I've come to realize how much more safety-pilled I've become. I was aware of some bad things that models can do, but I was mostly thinking about misinformation, deepfakes, limited cyber ops, and privacy issues by scalable surveillance[^1: Today this is all very easy to believe as it is happening [_right now_](https://www.anthropic.com/threat-intelligence-report-september-2026).][^2: Placeholder waiting for Daniel Paleka]. I basically read [a blog post from Nicholas Carlini](https://nicholas.carlini.com/writing/2025/machines-of-ruthless-efficiency.html), thought it made sense up to the middle, and disregarded “bioweapon” as too complicated, too physically involved, to actually achieve with an AI and “doom” as just nonsense. Trying to [grapple with the unprecedented changes](https://blog.wahdany.eu/2025/Dec/28/normal-times/) and accompanying uncertainty was hard enough, but focusing on building fun things or how this'll cure cancer was a happy place made of blissful ignorance. 
+As two months of my AI safety fellowship have passed I've come to realize how much more safety-pilled I've become. I was aware of some bad things that models can do, but I was mostly thinking about misinformation, deepfakes, limited cyber ops, and privacy issues by scalable surveillance[^1][^2]. I basically read [a blog post from Nicholas Carlini](https://nicholas.carlini.com/writing/2025/machines-of-ruthless-efficiency.html), thought it made sense up to the middle, and disregarded “bioweapon” as too complicated, too physically involved, to actually achieve with an AI and “doom” as just nonsense. Trying to [grapple with the unprecedented changes](https://blog.wahdany.eu/2025/Dec/28/normal-times/) and accompanying uncertainty was hard enough, but focusing on building fun things or how this'll cure cancer was a happy place made of blissful ignorance. 
+
+[^1]: Today this is all very easy to believe as it is happening [_right now_](https://www.anthropic.com/threat-intelligence-report-september-2026).
+[^2]: Placeholder waiting for Daniel Paleka.
 
 ![|small](ai-safety/danger.jpg)
 
