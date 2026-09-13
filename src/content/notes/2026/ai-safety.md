@@ -1,6 +1,6 @@
 ---
 slug: ai-safety
-title: Getting Into Safety is the Worst Deal I Still Recommend
+title: Getting Into AI Safety is the Worst Deal I Still Recommend
 created: 2026-09-13T16:27:00+00:00
 tags:
   - ai
