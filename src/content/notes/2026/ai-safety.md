@@ -1,6 +1,6 @@
 ---
 slug: ai-safety
-title: ''
+title: Worst Deal I'd Still Recommend
 created: 2026-09-13T16:27:00+00:00
 tags:
   - ai
