@@ -23,7 +23,7 @@ But having worked with “just” Opus 5 and seeing
 - the complexity of the causes, and 
 - how much work is required on actually fixing this,
 
-I now see - or rather, I can now viscerally grasp, as I have heard for a while - how close we are skirting to very treacherous territory on our path to ASI/RSI. GLM 5.3 is almost at the same level and its weights can be downloaded and used without safeguards or oversight. This capability is _irrevocably_ out there. From this point forward it is trivial to extrapolate to very bad things happening. And sooner than later.
+I now see - or rather, I can now viscerally grasp - how close we are skirting to very treacherous territory on our path to ASI/RSI. GLM 5.3 is almost at the same level and its weights can be downloaded and used without safeguards or oversight. This capability is _irrevocably_ out there. From this point forward it is trivial to extrapolate to very bad things happening. And sooner than later.
 
 I think (on expectation) AI is a neutral (perhaps slightly positive if it spreads good values) amplifier. We hear about the one-person billion-dollar company and yes, a single individual equipped with many tokens can run a whole company. You can achieve much more ambitious projects. But this cuts both ways - malicious actors can do the same.
 
