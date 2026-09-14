@@ -14,7 +14,7 @@ As two months of my AI safety fellowship have passed I've come to realize how mu
 [^1]: Today this is all very easy to believe as it is happening [_right now_](https://www.anthropic.com/threat-intelligence-report-september-2026).
 [^2]: Placeholder waiting for Daniel Paleka.
 
-![|small](ai-safety/danger.jpg)
+![|small](ai-safety/danger.jpg "Credits: Nicholas Carlini, Machines of Ruthless Efficiency")
 
 But having worked with “just” Opus 5 and seeing
 
@@ -29,7 +29,7 @@ I think (on expectation) AI is a neutral (perhaps slightly positive if it spread
 
 But besides amplification of human activity, AI is increasingly its own entity: working on agent escapes, the swarm dynamics, and seeing first hand in the environments that I have built, how Opus 5 will try to break parts my host machine for no good reason, is scary. I don't actually know for sure whether it won't find a 0-day and actually break my machine. You don't even have to care what an LLM is or whether it's reasoning or whatnot: some entity that we don't _really_ control or fully understand is taking actions and sending off commands to break barriers we thought would hold up; that have held up against motivated malicious actors. 
 
-When I go to bed at night, there is a thought lurking in the back of my head, a simple question: “Do I know there is no swarm out there right now? What if this time it's a worse one?”
+When I go to bed at night, there is a thought lurking in the back of my head: “Do I know there is no swarm out there right now? What if this time it's a worse one?”
 
 ![|small](ai-safety/3CAD581F-3BC2-4E82-A492-C70A108FB679_1_105_c.jpeg)
 
