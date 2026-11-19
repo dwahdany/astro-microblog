@@ -17,7 +17,7 @@ You can use a Raspberry Pi Nano or some other device where you have full control
 
 Now you have a security key that allows accessing your Apple account without any interaction!
 
-[^1]: Apple's setup is totally reasonable, sessions expire after 30 days. But in the long run I wanted to fully automate it.
+[^1]: Apple's setup is totally reasonable with sessions expiring after 30 days. But in the long run I wanted to fully automate it.
 
 [^2]: Unless [you're handling eMudrah certificates](https://bugzilla.mozilla.org/show_bug.cgi?id=2083449#c82), it seems
 
