@@ -1,0 +1,50 @@
+/*
+ * /write fonts — all self-hosted, no third-party font CDN.
+ *
+ *  - Literata (text serif, optical-size axis) ........ Galley: prose + display
+ *  - Instrument Sans (crisp grotesk) ................. Galley: app chrome
+ *  - Bricolage Grotesque (opsz + width + weight) ..... Riso: everything
+ *  - Roboto Mono ..................................... Console: everything; code in all themes
+ *
+ * The three variable families come from @fontsource-variable/* npm packages
+ * (SIL OFL), bundled by Vite into /_astro. Each @font-face carries a
+ * unicode-range, and a face is only fetched once text actually uses it, so a
+ * visitor on one theme does not download the other themes' fonts.
+ *
+ * Roboto Mono reuses the files the public site already ships in public/fonts
+ * (400/500/600/700, upright only — italics in Console are synthesised, exactly
+ * as on the published blog).
+ */
+@import '@fontsource-variable/literata/opsz.css';
+@import '@fontsource-variable/literata/opsz-italic.css';
+@import '@fontsource-variable/instrument-sans/wght.css';
+@import '@fontsource-variable/bricolage-grotesque/standard.css';
+
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/roboto-mono-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/roboto-mono-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/roboto-mono-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/roboto-mono-700.woff2') format('woff2');
+}

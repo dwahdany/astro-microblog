@@ -1,0 +1,42 @@
+---
+/**
+ * /write — the writing app.
+ *
+ * A static shell (prerendered, no SSR of the app) that mounts the Svelte app
+ * from src/write/. It has its own minimal document: it must NOT import
+ * src/styles/global.css or Tailwind — the public site's CSS only appears
+ * inside the preview frame (./preview-frame.astro).
+ */
+import '../../write/theme/index.css';
+import App from '../../write/ui/App.svelte';
+import { DEFAULT_THEME, THEME_BOOT_SCRIPT, THEME_VARIANTS } from '../../write/theme';
+
+export const prerender = true;
+
+// What a visitor without JavaScript (or before the boot script) gets: the default theme, light.
+const themeColor = THEME_VARIANTS[DEFAULT_THEME].light!;
+---
+
+<!doctype html>
+<html lang="en" data-write-theme={DEFAULT_THEME} data-write-scheme="light">
+  <head>
+    <meta charset="utf-8" />
+    <!-- viewport-fit=cover: safe-area insets for the notch/home bar.
+         interactive-widget=resizes-content: Chrome/Android shrinks the layout
+         viewport for the keyboard (iOS ignores it; see ui/viewport.svelte.ts). -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content={themeColor} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Write</title>
+    <!-- Apply the remembered theme and light/dark scheme before first paint. -->
+    <script is:inline set:html={THEME_BOOT_SCRIPT} />
+  </head>
+  <body>
+    <App client:only="svelte" />
+    <noscript>The writing app needs JavaScript.</noscript>
+  </body>
+</html>

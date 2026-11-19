@@ -1,0 +1,59 @@
+/*
+ * GALLEY, dark scheme — the same proofs under a desk lamp.
+ * Colour and elevation only; type, shape and motion come from ./galley.css.
+ * The pencils lighten (they are text on a dark sheet now) and the highlighter
+ * turns translucent so light ink stays readable on top of it.
+ */
+[data-write-theme='galley'][data-write-scheme='dark'] {
+  color-scheme: dark;
+
+  --w-bg: #14161a;
+  --w-surface: #1c1f24;
+  --w-surface-2: #272b31;
+  --w-scrim: rgb(0 0 0 / 0.56);
+
+  --w-ink: #ecebe6;
+  --w-ink-2: #b4b7be;
+  --w-ink-3: #8b8f98;
+
+  --w-line: #31353c;
+  --w-line-strong: #a9adb5;
+
+  --w-accent: #9db4ff;
+  --w-accent-ink: #0f1a44;
+  --w-accent-soft: rgb(157 180 255 / 0.16);
+  --w-accent-text: #a9bcff;
+
+  --w-selection: rgb(157 180 255 / 0.3);
+  --w-mark: rgb(255 230 109 / 0.22);
+  --w-focus: #a9bcff;
+  --w-ok: #6fd49b;
+  --w-warn: #f2c265;
+  --w-danger: #ff8f7d;
+  --w-add-bg: rgb(111 212 155 / 0.16);
+  --w-add-ink: #a5e6c0;
+  --w-del-bg: rgb(255 143 125 / 0.16);
+  --w-del-ink: #ffb3a6;
+
+  --w-syn-mark: #666b75;
+  --w-syn-heading: #f5f4ef;
+  --w-syn-link: #a9bcff;
+  --w-syn-code: #ecebe6;
+  --w-syn-code-bg: #272b31;
+  --w-syn-quote: #b4b7be;
+  --w-syn-quote-bar: #9db4ff;
+  --w-syn-footnote: #ff8f7d;
+  --w-syn-math: #c7b3ff;
+
+  --w-code-keyword: #a9bcff;
+  --w-code-string: #8fd9ae;
+  --w-code-number: #f0b678;
+  --w-code-comment: #8b8f98;
+  --w-code-fn: #d6a8f0;
+
+  --w-shadow-1: 0 0 0 1px rgb(255 255 255 / 0.05);
+  --w-shadow-2: 0 0 0 1px rgb(255 255 255 / 0.08), 0 16px 48px rgb(0 0 0 / 0.5);
+
+  --wx-flag-bg: #ffe66d;
+  --wx-page-shadow: 0 0 0 1px rgb(255 255 255 / 0.04);
+}

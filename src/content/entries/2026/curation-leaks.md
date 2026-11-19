@@ -24,7 +24,7 @@ The model never sees the private data. Surely that's private?
 
 **It isn't.** We run membership inference attacks against every step of this pipeline and show that each one leaks information about which samples are in $\mathcal{T}$.
 
-![Curation pipeline and attack surfaces|large](curation-leaks/hero.png)
+![Curation pipeline and attack surfaces|full](curation-leaks/hero.png)
 
 ## Three places private information leaks
 

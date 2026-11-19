@@ -7,7 +7,9 @@
   <title>Content Manager</title>
 </head>
 <body>
-  <script type="module" src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
+  <!-- Classic script (not a module): footnotes.js needs the global CMS right away -->
+  <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
+  <script src="/admin/footnotes.js"></script>
   <script>
     // Auto-fill blogmark title and slug from URL
     let lastFetchedUrl = '';

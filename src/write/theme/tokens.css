@@ -1,0 +1,125 @@
+/*
+ * /write design tokens — shared scale + the meaning of every token.
+ *
+ * A theme is nothing but a set of values for these custom properties, selected
+ * by <html data-write-theme="…" data-write-scheme="light|dark">. Components
+ * use ONLY tokens: no literal colours, font names, radii or durations anywhere
+ * else. The authoritative list of contract names is THEME_TOKENS in
+ * src/write/contracts.ts (a test checks that every theme defines every one).
+ *
+ * FILES
+ *   <id>.css        the theme: every --w-* contract token (its native scheme)
+ *                   plus the shell's private --wx-* tokens (below)
+ *   <id>.dark.css   colour + elevation overrides for the theme's dark scheme
+ *                   (Galley, Riso). Type, shape and motion are inherited.
+ *
+ * COLOUR
+ *   --w-bg            app canvas (behind everything)
+ *   --w-surface       raised planes: the writing sheet, toolbars, bottom sheets
+ *   --w-surface-2     inset planes: inputs, chips, hovered rows
+ *   --w-scrim         overlay behind modal sheets
+ *   --w-ink           primary text            (≥ 7:1 on bg and surface)
+ *   --w-ink-2         secondary text          (≥ 4.5:1)
+ *   --w-ink-3         tertiary: placeholders, timestamps (≥ 3:1; never body text)
+ *   --w-line          hairlines and quiet borders
+ *   --w-line-strong   borders that must read as a drawn line
+ *   --w-accent        accent FILL: primary button, active tab, toggles
+ *   --w-accent-ink    text/icons on top of --w-accent
+ *   --w-accent-soft   tinted background for selected/active rows
+ *   --w-accent-text   accent used AS TEXT on bg/surface (≥ 4.5:1)
+ *   --w-selection     text selection background in the editor
+ *   --w-mark          highlighter behind --w-ink text: search hits
+ *   --w-focus         keyboard focus ring colour
+ *   --w-ok/-warn/-danger   status text colours (≥ 4.5:1 on surface)
+ *   --w-add-bg/-ink, --w-del-bg/-ink   diff lines in "Review changes"
+ *   --w-syn-*         markdown as rendered in the writing surface:
+ *                       mark = dimmed syntax characters (#, *, [, ](…))
+ *                       heading, link, code (+ code-bg), quote (+ quote-bar),
+ *                       footnote (superscript refs), math
+ *   --w-code-*        token colours inside fenced code blocks
+ *
+ * TYPE
+ *   --w-font-prose    the writing surface
+ *   --w-font-display  screen titles, post titles in the list, headings in prose
+ *   --w-font-ui       buttons, labels, fields, list metadata
+ *   --w-font-mono     code, slugs, paths
+ *   --w-prose-size/-leading/-measure/-gap/-weight/-strong-weight
+ *                     body copy; measure is a max line length in ch, gap is
+ *                     the space between blocks. Size is never below 16px
+ *                     (iOS zooms the page when a smaller editable is focused).
+ *   --w-h1 … --w-h4   heading sizes in em relative to --w-prose-size
+ *   --w-heading-weight/-leading/-tracking/-stretch
+ *   --w-text-xs … --w-text-2xl   app-chrome type scale
+ *   --w-ui-weight/-strong-weight/-tracking
+ *   --w-display-weight/-tracking/-stretch
+ *
+ * SHAPE / ELEVATION
+ *   --w-radius-xs/-sm/-md/-lg/-pill   xs: chips & inline code · sm: buttons,
+ *                     inputs · md: cards, menus · lg: sheets · pill: toggles
+ *   --w-border        default border width
+ *   --w-shadow-1      resting raise (cards, floating toolbar)
+ *   --w-shadow-2      sheets and menus
+ *
+ * SPACE (shared, not themeable)
+ *   --w-space-1 … -8  4 · 8 · 12 · 16 · 24 · 32 · 48 · 64 px
+ *   --w-gutter        page side padding
+ *   --w-tap           minimum touch target (44px)
+ *   --w-toolbar-h     formatting toolbar height
+ *
+ * MOTION
+ *   --w-ease          standard ease for moves that answer an action
+ *   --w-ease-out      entrances (sheets sliding in)
+ *   --w-dur-1/-2/-3   press feedback · small transitions · sheets
+ *
+ * SHELL-PRIVATE (--wx-*, used only by src/write/ui; not part of the contract)
+ * These are what let one set of components take three different shapes — a
+ * ruled list in Galley, `ls` rows in Console, stacked outlined cards in Riso —
+ * without a single theme-specific selector in a component.
+ *   --wx-canvas / -canvas-size     background image of the app canvas
+ *   --wx-case                      text-transform of chrome labels
+ *   --wx-wordmark-prefix           string set before the "Write" wordmark
+ *   --wx-wordmark-size             its font size (it shares a 272px rail with "Sign in" on desktop)
+ *   --wx-kind-font/-style/-weight/-ink   the type label in a list row
+ *   --wx-row-gap/-pad-x/-pad-y/-bg/-outline/-rule/-radius/-shadow   list rows
+ *   --wx-row-title-size            post title in a list row
+ *   --wx-group-font/-size/-weight/-style/-stretch/-ink/-prefix      list group headings
+ *   --wx-btn-shadow / --wx-btn-press    resting shadow and :active transform of buttons
+ *   --wx-flag-bg/-ink/-rotate      status stickers ("Draft", "Not published")
+ *   --wx-status-bg/-ink            the status line under the writing surface
+ *   --wx-btn-primary-line          border colour of a filled (primary) button
+ *   --wx-page-bg/-margin/-line/-outline/-radius/-shadow   the writing sheet on wide screens
+ *
+ * RUNTIME LAYOUT (written by the UI's viewport helper, not by themes)
+ *   --w-vv-height     visible viewport height (shrinks with the keyboard)
+ *   --w-vv-offset     visualViewport.offsetTop
+ *   --w-kb-inset      layout-viewport px covered by the on-screen keyboard
+ */
+
+:root {
+  --w-space-1: 4px;
+  --w-space-2: 8px;
+  --w-space-3: 12px;
+  --w-space-4: 16px;
+  --w-space-5: 24px;
+  --w-space-6: 32px;
+  --w-space-7: 48px;
+  --w-space-8: 64px;
+  --w-gutter: clamp(16px, 5vw, 40px);
+  --w-tap: 44px;
+  --w-toolbar-h: 48px;
+
+  --w-radius-pill: 999px;
+
+  /* Fallbacks until the viewport helper runs (and for browsers without visualViewport). */
+  --w-vv-height: 100dvh;
+  --w-vv-offset: 0px;
+  --w-kb-inset: 0px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-write-theme] {
+    --w-dur-1: 0.01ms;
+    --w-dur-2: 0.01ms;
+    --w-dur-3: 0.01ms;
+  }
+}

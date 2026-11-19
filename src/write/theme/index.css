@@ -1,0 +1,12 @@
+/* Everything the /write page needs before the app hydrates: fonts, the shared
+   token scale, the three themes (and their dark schemes), the page base and
+   the shell's shared control styles. Imported once by src/pages/write/index.astro. */
+@import './fonts.css';
+@import './tokens.css';
+@import './galley.css';
+@import './galley.dark.css';
+@import './console.css';
+@import './riso.css';
+@import './riso.dark.css';
+@import './base.css';
+@import './controls.css';

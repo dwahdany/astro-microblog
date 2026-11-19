@@ -1,0 +1,152 @@
+/*
+ * GALLEY — page proofs on a desk.
+ *
+ * Quiet. The post is a sheet on a cool grey-green desk and the only colour is
+ * a proofreader's three tools: blue pencil (structure, links, the accent), red
+ * pencil (footnote marks, deletions, "edited" bars in the margin) and a yellow
+ * highlighter (search hits, draft flags). Literata — a screen-first book serif
+ * with an optical-size axis — carries the prose, the titles and, in italic,
+ * the small editorial labels (post types, group headings). Instrument Sans
+ * keeps the controls crisp and out of the way. The post list is a ruled index,
+ * not cards. Tight radii, 1px rules, almost no shadow.
+ *
+ * Dark scheme ("the same proofs under a desk lamp"): ./galley.dark.css
+ */
+[data-write-theme='galley'] {
+  color-scheme: light;
+
+  --w-bg: #f1f3ef;
+  --w-surface: #ffffff;
+  --w-surface-2: #e8ebe5;
+  --w-scrim: rgb(22 24 29 / 0.34);
+
+  --w-ink: #16181d;
+  --w-ink-2: #4a4f5a;
+  --w-ink-3: #767b86;
+
+  --w-line: #d8dbd3;
+  --w-line-strong: #16181d;
+
+  --w-accent: #2348c7;
+  --w-accent-ink: #ffffff;
+  --w-accent-soft: #e3e9fb;
+  --w-accent-text: #2348c7;
+
+  --w-selection: rgb(35 72 199 / 0.2);
+  --w-mark: #ffe66d;
+  --w-focus: #2348c7;
+  --w-ok: #1c7045;
+  --w-warn: #8a5600;
+  --w-danger: #b92d1c;
+  --w-add-bg: #e0f2e6;
+  --w-add-ink: #17603c;
+  --w-del-bg: #fbe3df;
+  --w-del-ink: #9d2717;
+
+  --w-syn-mark: #848b97;
+  --w-syn-heading: #16181d;
+  --w-syn-link: #2348c7;
+  --w-syn-code: #16181d;
+  --w-syn-code-bg: #edefea;
+  --w-syn-quote: #4a4f5a;
+  --w-syn-quote-bar: #2348c7;
+  --w-syn-footnote: #b92d1c;
+  --w-syn-math: #5a3aa8;
+
+  --w-code-keyword: #2348c7;
+  --w-code-string: #1c7045;
+  --w-code-number: #8f4a00;
+  --w-code-comment: #767b86;
+  --w-code-fn: #7a2c9e;
+
+  --w-font-prose: 'Literata Variable', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  --w-font-display: 'Literata Variable', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  --w-font-ui: 'Instrument Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --w-font-mono: 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --w-prose-size: clamp(1.0625rem, 1rem + 0.35vw, 1.1875rem);
+  --w-prose-leading: 1.65;
+  --w-prose-measure: 68ch;
+  --w-prose-gap: 1.1em;
+  --w-prose-weight: 400;
+  --w-prose-strong-weight: 650;
+
+  --w-h1: 1.8em;
+  --w-h2: 1.4em;
+  --w-h3: 1.15em;
+  --w-h4: 1em;
+  --w-heading-weight: 620;
+  --w-heading-leading: 1.2;
+  --w-heading-tracking: -0.012em;
+  --w-heading-stretch: 100%;
+
+  --w-text-xs: 0.75rem;
+  --w-text-sm: 0.875rem;
+  --w-text-md: 1rem;
+  --w-text-lg: 1.125rem;
+  --w-text-xl: 1.5rem;
+  --w-text-2xl: 2.25rem;
+  --w-ui-weight: 450;
+  --w-ui-strong-weight: 600;
+  --w-ui-tracking: 0;
+  --w-display-weight: 560;
+  --w-display-tracking: -0.02em;
+  --w-display-stretch: 100%;
+
+  --w-radius-xs: 2px;
+  --w-radius-sm: 3px;
+  --w-radius-md: 6px;
+  --w-radius-lg: 10px;
+  --w-border: 1px;
+
+  --w-shadow-1: 0 1px 0 rgb(22 24 29 / 0.05), 0 1px 3px rgb(22 24 29 / 0.08);
+  --w-shadow-2: 0 0 0 1px rgb(22 24 29 / 0.06), 0 12px 40px rgb(22 24 29 / 0.14);
+
+  --w-ease: cubic-bezier(0.2, 0, 0, 1);
+  --w-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --w-dur-1: 120ms;
+  --w-dur-2: 200ms;
+  --w-dur-3: 320ms;
+
+  /* Shell: a ruled index. Types and group headings are set like editorial
+     small print — italic Literata — so the sans is left for controls only. */
+  --wx-canvas: none;
+  --wx-canvas-size: auto;
+  --wx-case: none;
+  --wx-wordmark-prefix: '';
+  --wx-wordmark-size: var(--w-text-2xl);
+  --wx-kind-font: var(--w-font-prose);
+  --wx-kind-style: italic;
+  --wx-kind-weight: 400;
+  --wx-kind-ink: var(--w-ink-2);
+  --wx-row-gap: 0px;
+  --wx-row-pad-x: 0px;
+  --wx-row-pad-y: 14px;
+  --wx-row-bg: transparent;
+  --wx-row-outline: 0px;
+  --wx-row-rule: 1px;
+  --wx-row-radius: 0px;
+  --wx-row-shadow: none;
+  --wx-row-title-size: 1.1875rem;
+  --wx-group-font: var(--w-font-prose);
+  --wx-group-size: 0.9375rem;
+  --wx-group-weight: 400;
+  --wx-group-style: italic;
+  --wx-group-stretch: 100%;
+  --wx-group-ink: var(--w-ink-2);
+  --wx-group-prefix: '';
+  --wx-btn-shadow: none;
+  --wx-btn-primary-line: var(--w-accent);
+  --wx-btn-press: translateY(1px);
+  --wx-flag-bg: var(--w-mark);
+  --wx-flag-ink: #16181d;
+  --wx-flag-rotate: 0deg;
+  --wx-status-bg: transparent;
+  --wx-status-ink: var(--w-ink-2);
+  --wx-page-bg: var(--w-surface);
+  --wx-page-margin: 24px;
+  --wx-page-line: var(--w-line);
+  --wx-page-outline: 1px;
+  --wx-page-radius: 2px;
+  --wx-page-shadow: 0 1px 0 rgb(22 24 29 / 0.05), 0 1px 3px rgb(22 24 29 / 0.08);
+}

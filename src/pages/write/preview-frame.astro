@@ -1,0 +1,71 @@
+---
+/**
+ * The document inside the /write Preview tab's iframe.
+ *
+ * It is the published post page reduced to its article: the same stylesheet
+ * (src/styles/global.css — Tailwind, typography, the terminal palette — plus
+ * KaTeX, exactly what BaseLayout loads), the same `<main>` and `<article>`
+ * wrappers as BaseLayout and src/pages/[year]/[month]/[day]/[slug].astro, and
+ * four empty slots. The site header, footer, analytics and comments are left
+ * out on purpose.
+ *
+ * It ships NO JavaScript and forbids any (`script-src 'none'`). The app
+ * (src/write/preview/Preview.svelte → frame.ts) writes the rendered post into
+ * the slots from outside; the iframe is sandboxed without `allow-scripts`, so
+ * nothing in a post can execute. See src/write/preview/frame.ts for the full
+ * reasoning.
+ *
+ * In `astro dev` the dev server injects its own scripts into every page; they
+ * are blocked here (console noise only). The production page has none.
+ */
+import '../../styles/global.css';
+import 'katex/dist/katex.min.css';
+
+export const prerender = true;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Preview</title>
+    <style is:inline>
+      /* The carousel's scoped rule from PhotoCarousel.astro. */
+      .carousel-track {
+        scrollbar-width: none;
+      }
+      .carousel-track::-webkit-scrollbar {
+        display: none;
+      }
+      /* Preview-only marks (not part of the published site): an image that
+         did not load, and a link whose target is not allowed in the preview. */
+      img[data-write-broken],
+      img[data-write-missing] {
+        min-width: 3rem;
+        min-height: 3rem;
+        outline: 1px dashed #fb7185;
+        outline-offset: 2px;
+      }
+      a[data-write-blocked] {
+        text-decoration: line-through;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body class="flex flex-col min-h-screen">
+    <main class="flex-1 max-w-4xl mx-auto w-full px-4 py-8">
+      <article class="max-w-2xl mx-auto">
+        <header class="mb-8" id="write-preview-header"></header>
+        <div id="write-preview-lead"></div>
+        <div class="prose prose-lg max-w-none" id="write-preview-body"></div>
+        <div id="write-preview-after"></div>
+      </article>
+    </main>
+  </body>
+</html>

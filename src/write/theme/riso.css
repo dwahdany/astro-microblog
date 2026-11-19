@@ -1,0 +1,151 @@
+/*
+ * RISO — a two-ink zine.
+ *
+ * Loud. Personal publishing's print vernacular: mint paper with a halftone
+ * screen, text printed in federal-blue ink instead of black, and a second drum
+ * of fluorescent pink that overprints (selection and marks multiply over the
+ * blue). Yellow is the third ink, kept for stickers. One family — Bricolage
+ * Grotesque — doing two jobs through its axes: condensed and heavy for titles,
+ * open and regular for reading. Posts are a stack of outlined cards with hard
+ * offset "misregistration" shadows that buttons press into; flags are stickers
+ * slapped on at a slight angle. Big radii, 2px ink outlines, springy motion.
+ *
+ * Dark scheme ("night shift": the same inks on navy stock): ./riso.dark.css
+ */
+[data-write-theme='riso'] {
+  color-scheme: light;
+
+  --w-bg: #e7f1e6;
+  --w-surface: #f7fbf3;
+  --w-surface-2: #d5e7d7;
+  --w-scrim: rgb(29 43 122 / 0.3);
+
+  --w-ink: #1d2b7a;
+  --w-ink-2: #3f4d99;
+  --w-ink-3: #636fae;
+
+  --w-line: #b4cdbb;
+  --w-line-strong: #1d2b7a;
+
+  --w-accent: #ff6ba7;
+  --w-accent-ink: #1d2b7a;
+  --w-accent-soft: #ffd9e8;
+  --w-accent-text: #b8145a;
+
+  --w-selection: rgb(255 107 167 / 0.34);
+  --w-mark: #ffd23f;
+  --w-focus: #1d2b7a;
+  --w-ok: #0b6b49;
+  --w-warn: #8a5200;
+  --w-danger: #b8123f;
+  --w-add-bg: #c9eed3;
+  --w-add-ink: #0b5f41;
+  --w-del-bg: #ffd3e2;
+  --w-del-ink: #9c1144;
+
+  --w-syn-mark: #7785c0;
+  --w-syn-heading: #1d2b7a;
+  --w-syn-link: #b8145a;
+  --w-syn-code: #1d2b7a;
+  --w-syn-code-bg: #d5e7d7;
+  --w-syn-quote: #3f4d99;
+  --w-syn-quote-bar: #ff6ba7;
+  --w-syn-footnote: #b8145a;
+  --w-syn-math: #6a2fb8;
+
+  --w-code-keyword: #b8145a;
+  --w-code-string: #0b6b49;
+  --w-code-number: #a04300;
+  --w-code-comment: #636fae;
+  --w-code-fn: #3a3fd0;
+
+  --w-font-prose: 'Bricolage Grotesque Variable', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+  --w-font-display: 'Bricolage Grotesque Variable', 'Avenir Next Condensed', 'Segoe UI', system-ui, sans-serif;
+  --w-font-ui: 'Bricolage Grotesque Variable', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+  --w-font-mono: 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --w-prose-size: clamp(1.0625rem, 1rem + 0.35vw, 1.1875rem);
+  --w-prose-leading: 1.55;
+  --w-prose-measure: 62ch;
+  --w-prose-gap: 1em;
+  --w-prose-weight: 400;
+  --w-prose-strong-weight: 700;
+
+  --w-h1: 2.3em;
+  --w-h2: 1.65em;
+  --w-h3: 1.25em;
+  --w-h4: 1.05em;
+  --w-heading-weight: 800;
+  --w-heading-leading: 1.02;
+  --w-heading-tracking: -0.015em;
+  --w-heading-stretch: 75%;
+
+  --w-text-xs: 0.8125rem;
+  --w-text-sm: 0.9375rem;
+  --w-text-md: 1.0625rem;
+  --w-text-lg: 1.25rem;
+  --w-text-xl: 1.75rem;
+  --w-text-2xl: 2.75rem;
+  --w-ui-weight: 500;
+  --w-ui-strong-weight: 700;
+  --w-ui-tracking: 0;
+  --w-display-weight: 800;
+  --w-display-tracking: -0.02em;
+  --w-display-stretch: 75%;
+
+  --w-radius-xs: 6px;
+  --w-radius-sm: 10px;
+  --w-radius-md: 16px;
+  --w-radius-lg: 24px;
+  --w-border: 2px;
+
+  --w-shadow-1: 3px 3px 0 #ff6ba7;
+  --w-shadow-2: 5px 5px 0 #1d2b7a;
+
+  --w-ease: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --w-ease-out: cubic-bezier(0.22, 1.2, 0.36, 1);
+  --w-dur-1: 140ms;
+  --w-dur-2: 220ms;
+  --w-dur-3: 360ms;
+
+  /* Shell: a stack of printed cards. */
+  --wx-canvas: radial-gradient(circle at center, rgb(29 43 122 / 0.1) 1px, transparent 1.4px);
+  --wx-canvas-size: 9px 9px;
+  --wx-case: none;
+  --wx-wordmark-prefix: '';
+  --wx-wordmark-size: var(--w-text-2xl);
+  --wx-kind-font: var(--w-font-ui);
+  --wx-kind-style: normal;
+  --wx-kind-weight: 700;
+  --wx-kind-ink: var(--w-accent-text);
+  --wx-row-gap: 12px;
+  --wx-row-pad-x: 14px;
+  --wx-row-pad-y: 12px;
+  --wx-row-bg: var(--w-surface);
+  --wx-row-outline: 2px;
+  --wx-row-rule: 0px;
+  --wx-row-radius: 16px;
+  --wx-row-shadow: 3px 3px 0 var(--w-ink);
+  --wx-row-title-size: 1.5rem;
+  --wx-group-font: var(--w-font-display);
+  --wx-group-size: 1.375rem;
+  --wx-group-weight: 800;
+  --wx-group-style: normal;
+  --wx-group-stretch: 75%;
+  --wx-group-ink: var(--w-ink);
+  --wx-group-prefix: '';
+  --wx-btn-shadow: 3px 3px 0 var(--w-ink);
+  --wx-btn-primary-line: var(--w-line-strong);
+  --wx-btn-press: translate(3px, 3px);
+  --wx-flag-bg: #ffd23f;
+  --wx-flag-ink: #1d2b7a;
+  --wx-flag-rotate: -2deg;
+  --wx-status-bg: var(--w-ink);
+  --wx-status-ink: var(--w-bg);
+  --wx-page-bg: var(--w-surface);
+  --wx-page-margin: 24px;
+  --wx-page-line: var(--w-line-strong);
+  --wx-page-outline: 2px;
+  --wx-page-radius: 24px;
+  --wx-page-shadow: 6px 6px 0 #ff6ba7;
+}

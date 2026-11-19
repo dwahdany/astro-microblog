@@ -1,0 +1,10 @@
+{
+  // Type-checking scope for the writing app only (used by `bun run check:write`).
+  // The site-wide tsconfig.json still covers these files for editors and Astro.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["vite/client"]
+  },
+  "include": ["src/write/**/*", "tests/write/**/*", "vitest.config.ts", "playwright.config.ts"],
+  "exclude": ["dist", "node_modules"]
+}

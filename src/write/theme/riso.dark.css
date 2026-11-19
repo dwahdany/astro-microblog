@@ -1,0 +1,62 @@
+/*
+ * RISO, dark scheme — night shift: the same inks on navy stock.
+ * Colour and elevation only; type, shape and motion come from ./riso.css.
+ * Mint becomes the ink, pink stays the second drum, yellow the stickers.
+ */
+[data-write-theme='riso'][data-write-scheme='dark'] {
+  color-scheme: dark;
+
+  --w-bg: #12183f;
+  --w-surface: #1a2256;
+  --w-surface-2: #0c1030;
+  --w-scrim: rgb(5 8 30 / 0.62);
+
+  --w-ink: #e4f3e2;
+  --w-ink-2: #bcc8ec;
+  --w-ink-3: #8a96d4;
+
+  --w-line: #34418d;
+  --w-line-strong: #e4f3e2;
+
+  --w-accent: #ff6ba7;
+  --w-accent-ink: #12183f;
+  --w-accent-soft: rgb(255 107 167 / 0.2);
+  --w-accent-text: #ff8fbd;
+
+  --w-selection: rgb(255 107 167 / 0.38);
+  --w-mark: rgb(255 210 63 / 0.22);
+  --w-focus: #ffd23f;
+  --w-ok: #7be0b0;
+  --w-warn: #ffd23f;
+  --w-danger: #ff9bb0;
+  --w-add-bg: rgb(123 224 176 / 0.18);
+  --w-add-ink: #a8ecc9;
+  --w-del-bg: rgb(255 107 167 / 0.2);
+  --w-del-ink: #ffb9d2;
+
+  --w-syn-mark: #6570b8;
+  --w-syn-heading: #e4f3e2;
+  --w-syn-link: #ff8fbd;
+  --w-syn-code: #e4f3e2;
+  --w-syn-code-bg: #0c1030;
+  --w-syn-quote: #bcc8ec;
+  --w-syn-quote-bar: #ff6ba7;
+  --w-syn-footnote: #ff8fbd;
+  --w-syn-math: #c9b0ff;
+
+  --w-code-keyword: #ff8fbd;
+  --w-code-string: #7be0b0;
+  --w-code-number: #ffc56e;
+  --w-code-comment: #8a96d4;
+  --w-code-fn: #9fb4ff;
+
+  --w-shadow-1: 3px 3px 0 #ff6ba7;
+  --w-shadow-2: 5px 5px 0 #05081e;
+
+  --wx-canvas: radial-gradient(circle at center, rgb(228 243 226 / 0.09) 1px, transparent 1.4px);
+  --wx-row-shadow: 3px 3px 0 #ff6ba7;
+  --wx-btn-shadow: 3px 3px 0 #05081e;
+  --wx-flag-ink: #12183f;
+  --wx-status-bg: #ff6ba7;
+  --wx-status-ink: #12183f;
+}

@@ -1,0 +1,151 @@
+/*
+ * CONSOLE — write in the terminal you publish to.
+ *
+ * Dark only. This is the published blog's own identity (slate #0f172a, Roboto
+ * Mono, green prompt, cyan code, blue links) turned into a writing tool, so a
+ * draft already looks like it belongs on the site. One family and nearly one
+ * size throughout — hierarchy comes from weight and colour, the way it does in
+ * a terminal. The post list reads like `ls -l`: tight rows, lowercase labels,
+ * `#` comments for group headings, a `$` before the wordmark, and the status
+ * line under the text is an inverse bar like an editor's. No sheet: you type
+ * straight onto the canvas. Small radii, 1px slate borders, no soft shadows,
+ * quick motion.
+ */
+[data-write-theme='console'] {
+  color-scheme: dark;
+
+  --w-bg: #0f172a;
+  --w-surface: #1e293b;
+  --w-surface-2: #0b1120;
+  --w-scrim: rgb(2 6 23 / 0.62);
+
+  --w-ink: #e2e8f0;
+  --w-ink-2: #a3b1c6;
+  --w-ink-3: #7c8aa1;
+
+  --w-line: #334155;
+  --w-line-strong: #64748b;
+
+  --w-accent: #22c55e;
+  --w-accent-ink: #052e16;
+  --w-accent-soft: rgb(34 197 94 / 0.14);
+  --w-accent-text: #34d373;
+
+  --w-selection: rgb(34 197 94 / 0.3);
+  --w-mark: rgb(234 179 8 / 0.24);
+  --w-focus: #22d3ee;
+  --w-ok: #4ade80;
+  --w-warn: #facc15;
+  --w-danger: #fb7185;
+  --w-add-bg: rgb(34 197 94 / 0.16);
+  --w-add-ink: #86efac;
+  --w-del-bg: rgb(251 113 133 / 0.16);
+  --w-del-ink: #fda4af;
+
+  --w-syn-mark: #61748e;
+  --w-syn-heading: #f8fafc;
+  --w-syn-link: #60a5fa;
+  --w-syn-code: #22d3ee;
+  --w-syn-code-bg: #0b1120;
+  --w-syn-quote: #a3b1c6;
+  --w-syn-quote-bar: #22c55e;
+  --w-syn-footnote: #facc15;
+  --w-syn-math: #c4b5fd;
+
+  --w-code-keyword: #f472b6;
+  --w-code-string: #86efac;
+  --w-code-number: #fdba74;
+  --w-code-comment: #7c8aa1;
+  --w-code-fn: #7dd3fc;
+
+  --w-font-prose: 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --w-font-display: 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --w-font-ui: 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --w-font-mono: 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --w-prose-size: 1rem;
+  --w-prose-leading: 1.7;
+  --w-prose-measure: 76ch;
+  --w-prose-gap: 1.2em;
+  --w-prose-weight: 400;
+  --w-prose-strong-weight: 700;
+
+  --w-h1: 1.45em;
+  --w-h2: 1.2em;
+  --w-h3: 1.05em;
+  --w-h4: 1em;
+  --w-heading-weight: 700;
+  --w-heading-leading: 1.35;
+  --w-heading-tracking: 0;
+  --w-heading-stretch: 100%;
+
+  --w-text-xs: 0.6875rem;
+  --w-text-sm: 0.8125rem;
+  --w-text-md: 0.9375rem;
+  --w-text-lg: 1rem;
+  --w-text-xl: 1.25rem;
+  --w-text-2xl: 1.75rem;
+  --w-ui-weight: 400;
+  --w-ui-strong-weight: 600;
+  --w-ui-tracking: 0;
+  --w-display-weight: 700;
+  --w-display-tracking: -0.01em;
+  --w-display-stretch: 100%;
+
+  --w-radius-xs: 2px;
+  --w-radius-sm: 4px;
+  --w-radius-md: 6px;
+  --w-radius-lg: 8px;
+  --w-border: 1px;
+
+  --w-shadow-1: 0 0 0 1px #334155;
+  --w-shadow-2: 0 0 0 1px #334155, 0 16px 48px rgb(2 6 23 / 0.55);
+
+  --w-ease: cubic-bezier(0.3, 0, 0, 1);
+  --w-ease-out: cubic-bezier(0.2, 0.9, 0.2, 1);
+  --w-dur-1: 80ms;
+  --w-dur-2: 140ms;
+  --w-dur-3: 220ms;
+
+  /* Shell: `ls -l`. */
+  --wx-canvas: none;
+  --wx-canvas-size: auto;
+  --wx-case: lowercase;
+  --wx-wordmark-prefix: '$ ';
+  /* `$ write` is seven monospaced cells: at the display size it does not fit the desktop rail next to "sign in". */
+  --wx-wordmark-size: 1.5rem;
+  --wx-kind-font: var(--w-font-ui);
+  --wx-kind-style: normal;
+  --wx-kind-weight: 500;
+  --wx-kind-ink: #22d3ee;
+  --wx-row-gap: 0px;
+  --wx-row-pad-x: 0px;
+  --wx-row-pad-y: 9px;
+  --wx-row-bg: transparent;
+  --wx-row-outline: 0px;
+  --wx-row-rule: 0px;
+  --wx-row-radius: 0px;
+  --wx-row-shadow: none;
+  --wx-row-title-size: 0.9375rem;
+  --wx-group-font: var(--w-font-ui);
+  --wx-group-size: 0.8125rem;
+  --wx-group-weight: 400;
+  --wx-group-style: normal;
+  --wx-group-stretch: 100%;
+  --wx-group-ink: #7c8aa1;
+  --wx-group-prefix: '# ';
+  --wx-btn-shadow: none;
+  --wx-btn-primary-line: var(--w-accent);
+  --wx-btn-press: translateY(1px);
+  --wx-flag-bg: #facc15;
+  --wx-flag-ink: #0f172a;
+  --wx-flag-rotate: 0deg;
+  --wx-status-bg: #22c55e;
+  --wx-status-ink: #052e16;
+  --wx-page-bg: var(--w-bg);
+  --wx-page-margin: 0px;
+  --wx-page-line: transparent;
+  --wx-page-outline: 0px;
+  --wx-page-radius: 0px;
+  --wx-page-shadow: none;
+}

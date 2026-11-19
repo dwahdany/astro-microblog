@@ -33,6 +33,12 @@
 
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+/* The writing app (/write) has its own stylesheet and uses no Tailwind. Keep its
+   sources and tests out of the class scan, or words in them ("inline", "!prose",
+   "[data-mode]:visible" …) become utilities in the public site's CSS. */
+@source not "../write";
+@source not "../pages/write";
+@source not "../../tests";
 
 @theme {
   --color-terminal-bg: #0f172a;

@@ -1,0 +1,224 @@
+/*
+ * Shared control styles for the shell (src/write/ui). Global on purpose: the
+ * same button, field and chip appear in every screen and sheet, and Svelte's
+ * scoped styles would mean six copies. Everything is prefixed `w-` and built
+ * from tokens only, so the three themes restyle all of it.
+ */
+
+/* ---------------------------------------------------------------- buttons */
+.w-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--w-space-2);
+  min-height: var(--w-tap);
+  padding: 0 var(--w-space-4);
+  border: var(--w-border) solid var(--w-line-strong);
+  border-radius: var(--w-radius-sm);
+  background: var(--w-surface);
+  color: var(--w-ink);
+  font: inherit;
+  font-size: var(--w-text-sm);
+  font-weight: var(--w-ui-strong-weight);
+  letter-spacing: var(--w-ui-tracking);
+  text-transform: var(--wx-case);
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: var(--wx-btn-shadow);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  transition:
+    transform var(--w-dur-1) var(--w-ease),
+    box-shadow var(--w-dur-1) var(--w-ease),
+    background-color var(--w-dur-1) var(--w-ease);
+}
+.w-btn:active:not(:disabled) {
+  transform: var(--wx-btn-press);
+  box-shadow: none;
+}
+.w-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.w-btn.is-primary {
+  background: var(--w-accent);
+  border-color: var(--wx-btn-primary-line);
+  color: var(--w-accent-ink);
+}
+.w-btn.is-quiet {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+.w-btn.is-danger {
+  color: var(--w-danger);
+}
+.w-btn.is-block {
+  display: flex;
+  width: 100%;
+}
+
+/* Square icon button: always a full 44px target. */
+.w-icon {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: var(--w-tap);
+  height: var(--w-tap);
+  padding: 0;
+  border: 0;
+  border-radius: var(--w-radius-sm);
+  background: transparent;
+  color: var(--w-ink);
+  text-decoration: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color var(--w-dur-1) var(--w-ease);
+}
+.w-icon:disabled,
+.w-icon[aria-disabled='true'] {
+  color: var(--w-ink-3);
+  opacity: 0.55;
+  cursor: default;
+}
+.w-icon:active:not(:disabled):not([aria-disabled='true']),
+.w-icon[aria-pressed='true'] {
+  background: var(--w-accent-soft);
+  color: var(--w-accent-text);
+}
+@media (hover: hover) {
+  .w-icon:hover:not(:disabled):not([aria-disabled='true']):not([aria-pressed='true']) {
+    background: var(--w-surface-2);
+  }
+  .w-btn.is-quiet:hover:not(:disabled) {
+    background: var(--w-surface-2);
+  }
+}
+
+/* ----------------------------------------------------------------- fields */
+.w-input {
+  display: block;
+  width: 100%;
+  min-height: var(--w-tap);
+  margin: 0;
+  padding: var(--w-space-2) var(--w-space-3);
+  border: var(--w-border) solid var(--w-line);
+  border-radius: var(--w-radius-sm);
+  background: var(--w-surface-2);
+  color: var(--w-ink);
+  font: inherit;
+  /* Never below 16px: iOS zooms the page when a smaller field takes focus. */
+  font-size: max(1rem, var(--w-text-md));
+  letter-spacing: 0;
+  line-height: 1.4;
+}
+.w-input::placeholder {
+  color: var(--w-ink-3);
+  opacity: 1;
+}
+.w-input:focus-visible {
+  outline: 2px solid var(--w-focus);
+  outline-offset: 1px;
+  border-color: var(--w-focus);
+}
+.w-input.is-mono {
+  font-family: var(--w-font-mono);
+  font-size: max(1rem, var(--w-text-sm));
+}
+.w-input[aria-invalid='true'] {
+  border-color: var(--w-danger);
+}
+textarea.w-input {
+  resize: vertical;
+  min-height: calc(var(--w-tap) * 2);
+}
+/* A one-line value that wraps (a long title): as tall as its text, starting at one line. */
+textarea.w-input.is-wrap {
+  resize: none;
+  min-height: var(--w-tap);
+  field-sizing: content;
+  overflow: hidden;
+}
+/* Where `field-sizing` is not supported the field shows two lines, which most titles fit in. */
+@supports not (field-sizing: content) {
+  textarea.w-input.is-wrap {
+    min-height: calc(1.4em * 2 + 2 * var(--w-space-2) + 2px);
+    overflow: auto;
+  }
+}
+
+/* ------------------------------------------------------------------ chips */
+/* Visually 36px; the ::before stretches the hit area to the 44px target. */
+.w-chip {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--w-space-2);
+  min-height: 36px;
+  padding: 0 var(--w-space-3);
+  border: var(--w-border) solid var(--w-line);
+  border-radius: var(--w-radius-pill);
+  background: transparent;
+  color: var(--w-ink-2);
+  font: inherit;
+  font-size: var(--w-text-sm);
+  text-transform: var(--wx-case);
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.w-chip::before {
+  content: '';
+  position: absolute;
+  inset: -5px 0;
+}
+.w-chip[aria-pressed='true'],
+.w-chip[aria-checked='true'] {
+  background: var(--w-ink);
+  border-color: var(--w-ink);
+  color: var(--w-bg);
+  font-weight: var(--w-ui-strong-weight);
+}
+
+/* --------------------------------------------------------------- stickers */
+.w-flag {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: var(--w-radius-xs);
+  background: var(--wx-flag-bg);
+  color: var(--wx-flag-ink);
+  font-family: var(--w-font-ui);
+  font-size: var(--w-text-xs);
+  font-style: normal;
+  font-weight: var(--w-ui-strong-weight);
+  line-height: 1.5;
+  text-transform: var(--wx-case);
+  white-space: nowrap;
+  transform: rotate(var(--wx-flag-rotate));
+}
+.w-flag.is-local {
+  background: var(--w-accent-soft);
+  color: var(--w-accent-text);
+}
+
+/* ------------------------------------------------------------------- misc */
+.w-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.w-scroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--w-line) transparent;
+}

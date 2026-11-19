@@ -1,0 +1,56 @@
+/*
+ * Page-level base for /write. Deliberately tiny: the app's own components
+ * carry their styles. This page does NOT load the public site's global.css or
+ * Tailwind, so nothing here competes with a reset.
+ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html[data-write-theme] {
+  height: 100%;
+  background-color: var(--w-bg);
+  color: var(--w-ink);
+  font-family: var(--w-font-ui);
+  font-size: 100%;
+  font-weight: var(--w-ui-weight);
+  letter-spacing: var(--w-ui-tracking);
+  line-height: 1.4;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  font-optical-sizing: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-write-theme] body {
+  margin: 0;
+  min-height: 100%;
+  /* The app manages its own scrolling regions; the document itself never scrolls,
+     which keeps iOS from sliding the whole page when the keyboard opens. */
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html[data-write-theme] :focus-visible {
+  outline: 2px solid var(--w-focus);
+  outline-offset: 2px;
+}
+
+/* The writing surface shows a caret, not a ring around the whole text column. */
+html[data-write-theme] [contenteditable]:focus-visible {
+  outline: none;
+}
+
+html[data-write-theme] ::selection {
+  background: var(--w-selection);
+}
+
+/* Dev only: Astro's dev toolbar floats over the bottom-centre of the page —
+   exactly where the formatting toolbar and sheet buttons live — and swallows
+   taps there. It does not exist in production builds. */
+html[data-write-theme] astro-dev-toolbar {
+  display: none !important;
+}
