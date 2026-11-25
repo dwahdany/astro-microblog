@@ -9,6 +9,8 @@ tags:
 is_draft: false
 ---
 
+**Update:** I published the procedure as a [tool on GitHub](https://github.com/dwahdany/apple-piv), and it offers a more secure way, where the private key never leaves the YubiKey.
+
 I wanted to programmatically use my Apple account, but the 2FA was annoying me[^1]. Whenever you log in, a pop-up flashes up on all your trusted Apple devices, and you get a code, which you somehow need to deliver to your program. To stop having to do this manually, I changed my Apple account to using security keys. Not only is this more convenient when I log in, but it can be automated nicely.
 
 Now usually you have to touch the registered security key for it to log you in. This is not an option for me, as the device I want to log in from is not somewhere I can (or want to) physically reach. This setting cannot be changed. Instead, we need a workaround.
