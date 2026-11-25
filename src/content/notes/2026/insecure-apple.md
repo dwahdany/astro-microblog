@@ -9,7 +9,7 @@ tags:
 is_draft: false
 ---
 
-**Update:** I published the procedure as a [tool on GitHub](https://github.com/dwahdany/apple-piv), and it offers a more secure way, where the private key never leaves the YubiKey.
+**Update:** I published the procedure as a [tool on GitHub](https://github.com/dwahdany/apple-piv), and it offers a more secure way, where the private key never leaves the YubiKey.[^4]
 
 I wanted to programmatically use my Apple account, but the 2FA was annoying me[^1]. Whenever you log in, a pop-up flashes up on all your trusted Apple devices, and you get a code, which you somehow need to deliver to your program. To stop having to do this manually, I changed my Apple account to using security keys. Not only is this more convenient when I log in, but it can be automated nicely.
 
@@ -24,3 +24,5 @@ Now you have a security key that allows accessing your Apple account without any
 [^2]: Unless [you're handling eMudrah certificates](https://bugzilla.mozilla.org/show_bug.cgi?id=2083449#c82), it seems
 
 [^3]: Make sure to delete this file afterward, and that it's not in any backups, your trash folder, etc.
+
+[^4]: I will still keep an insecure copy of the security key to prevent a denial of service attack. With access to the YubiKey (e.g., through a process running on your unattended device), an attacker with access to the YubiKey could remove all your other security keys and then erase the YubiKey (by entering the wrong PIV PIN and PUK and consequently resetting the PIV application). This would completely lock you out of your Apple account, unless you have the aforementioned backup.
